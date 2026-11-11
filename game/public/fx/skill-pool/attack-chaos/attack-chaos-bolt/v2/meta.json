@@ -1,0 +1,78 @@
+{
+  "layerId": "crescent-wave",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "chaos",
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "sizePolicy": "body",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "phases": [
+    "Travel",
+    "Impact"
+  ],
+  "opacity": 0.9,
+  "id": "attack.chaos_bolt",
+  "src": "/fx/skill-pool/attack-chaos/attack-chaos-bolt/v2/crescent-wave.png",
+  "additionalLayers": [
+    {
+      "layerId": "void-rift",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.82,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.82,
+      "sizePolicy": "world",
+      "binding": "contact",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 1.4,
+        "depthM": 3
+      },
+      "file": "void-rift.png",
+      "palette": "chaos",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 0.45,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: crescent-wave, void-rift",
+  "componentRecipe": {
+    "shapes": [
+      "crescent-wave",
+      "void-rift"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v4/generation-prompts.json"
+  }
+}

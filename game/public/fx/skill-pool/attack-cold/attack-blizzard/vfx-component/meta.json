@@ -1,0 +1,170 @@
+{
+  "id": "attack.blizzard",
+  "src": "/fx/skill-pool/attack-cold/attack-blizzard/vfx-component/fragment-debris.png",
+  "layerId": "fragment-debris",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "cold",
+  "opacity": 0.8,
+  "sizePolicy": "body",
+  "binding": "area",
+  "orient": false,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "delivery": "ground"
+  },
+  "phases": [
+    "Field"
+  ],
+  "rainDurationSec": 4,
+  "rainPhase": "Field",
+  "rainIntervalSec": 0.12,
+  "rainSizeScale": 0.3,
+  "rainRadiusRatio": 0.98,
+  "additionalLayers": [
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "cold",
+      "opacity": 0.6,
+      "durationSec": 4,
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "file": "cloud-mist.png",
+      "phases": [
+        "Field"
+      ]
+    },
+    {
+      "layerId": "ground-fill",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "cold",
+      "opacity": 0.5,
+      "durationSec": 4,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "file": "ground-fill.png",
+      "phases": [
+        "Field"
+      ]
+    },
+    {
+      "layerId": "ground-edge",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "cold",
+      "opacity": 0.65,
+      "durationSec": 4,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "file": "ground-edge.png",
+      "phases": [
+        "Field"
+      ]
+    },
+    {
+      "layerId": "ground-residue",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "cold",
+      "opacity": 0.7,
+      "delaySec": 0.4,
+      "durationSec": 3.6,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "file": "ground-residue.png",
+      "phases": [
+        "Field"
+      ]
+    }
+  ],
+  "composition": "Independent component recipe: fragment-debris, cloud-mist, ground-fill, ground-edge, ground-residue",
+  "componentRecipe": {
+    "shapes": [
+      "fragment-debris",
+      "cloud-mist",
+      "ground-fill",
+      "ground-edge",
+      "ground-residue"
+    ],
+    "humanReview": false
+  }
+}

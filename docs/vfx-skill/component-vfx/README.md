@@ -1,8 +1,12 @@
 # Reusable VFX components
 
+## Material expansion — 2026-11-10
+
+The user requested more distinct raw/composed masters and a fresh active-only art pass. [Library v4](outputs/library-v4/README.md) adds 24 material silhouettes to the earlier 29 (53 total) and assembles 71 active review versions. [Open its gallery](outputs/library-v4/index.html) for paired originals/masters, ingredient strips and native arena links. Thunder Storm, auras and existing default pointers are preserved. These candidates use `reviewOnly: true`; registration does not promote them. Exact prompts, alpha QA, version mapping and native-review evidence live with the batch. Human visual approval remains pending.
+
 Use one of the 29 registered source shapes, choose any of the seven palettes, then assemble layers through the existing `meta.json` and `additionalLayers` fields. Production `AtlasFrame` desaturates the neutral sources and applies the selected palette without changing alpha, anchors or geometry. Native verification and human approval are tracked separately below.
 
-All component and demonstration versions are non-default until human approval; an approved recipe takes the `default/version.json` pointer (first: `attack.thunder_storm`, 2026-11-10). Mechanical verification and human visual approval are tracked separately below.
+All component and demonstration versions are non-default until human approval; an approved recipe takes the `default/version.json` pointer (first: `attack.thunder_storm`, 2026-11-10). Every live player skill now ships a `vfx-component` recipe (90 total, built by `tools/compose-vfx-all.py`); the rest wait for review in the showcase version selector. Mechanical verification and human visual approval are tracked separately below.
 
 ## Choosing a shape
 
@@ -96,7 +100,7 @@ Every shape supports every row below, including combinations unused by the curre
 | `attack.whirlwind` | [v3](../../../archive/fx/skill-pool/attack-phy/attack-whirlwind/v3/meta.json) | slash-sweep, ground-edge, mote |
 | `buff.enchant_poison` | [v2](../../../archive/fx/skill-pool/buff/buff-enchant-poison/v2/meta.json) | ribbon-beam, mote |
 
-The [139-skill coverage map](coverage.md) separates published component recipes from remaining adoption gaps. A gap does not imply that an existing whole-skill effect is absent.
+The [139-skill coverage map](coverage.md) lists a `vfx-component` recipe for every live player skill; the 49 mob rows remain adoption gaps. A gap does not imply that an existing whole-skill effect is absent.
 
 ## Sources and review
 

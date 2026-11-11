@@ -1,0 +1,130 @@
+{
+  "layerId": "ground-fill",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "fire",
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "projection": "ground",
+  "sizePolicy": "footprint",
+  "binding": "area",
+  "opacity": 1,
+  "phases": [
+    "Impact"
+  ],
+  "durationSec": 1.2,
+  "src": "/fx/skill-pool/attack-fire/attack-firestorm/vfx-component/ground-fill.png",
+  "additionalLayers": [
+    {
+      "layerId": "ground-edge",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "fire",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "opacity": 1,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.2,
+      "file": "ground-edge.png"
+    },
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "fire",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 0.5,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.4,
+      "file": "cloud-mist.png"
+    },
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "fire",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "area",
+      "opacity": 0.9,
+      "scale": 1.2,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 0.6,
+      "file": "impact-burst.png"
+    }
+  ],
+  "composition": "Independent component recipe: ground-fill, ground-edge, cloud-mist, impact-burst",
+  "componentRecipe": {
+    "mode": "nova-magic",
+    "shapes": [
+      "ground-fill",
+      "ground-edge",
+      "cloud-mist",
+      "impact-burst"
+    ],
+    "humanReview": false
+  }
+}

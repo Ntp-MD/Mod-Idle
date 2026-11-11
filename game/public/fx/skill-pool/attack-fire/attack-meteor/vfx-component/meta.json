@@ -1,0 +1,138 @@
+{
+  "id": "attack.meteor",
+  "src": "/fx/skill-pool/attack-fire/attack-meteor/vfx-component/orb-core.png",
+  "layerId": "orb-core",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "fire",
+  "opacity": 1,
+  "sizePolicy": "body",
+  "binding": "area",
+  "orient": false,
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "delivery": "ground"
+  },
+  "phases": [
+    "Field"
+  ],
+  "rainDurationSec": 4,
+  "rainPhase": "Impact",
+  "rainIntervalSec": 0.25,
+  "rainSizeScale": 0.3,
+  "rainRadiusRatio": 0.9,
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "fire",
+      "opacity": 1,
+      "durationSec": 0.6,
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "file": "impact-burst.png",
+      "phases": [
+        "Field"
+      ],
+      "scale": 1.5
+    },
+    {
+      "layerId": "ground-residue",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "fire",
+      "opacity": 1,
+      "durationSec": 4,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "file": "ground-residue.png",
+      "phases": [
+        "Field"
+      ]
+    },
+    {
+      "layerId": "ground-fill",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "fire",
+      "opacity": 0.5,
+      "durationSec": 4,
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "file": "ground-fill.png",
+      "phases": [
+        "Field"
+      ]
+    }
+  ],
+  "composition": "Independent component recipe: orb-core, impact-burst, ground-residue, ground-fill",
+  "componentRecipe": {
+    "shapes": [
+      "orb-core",
+      "impact-burst",
+      "ground-residue",
+      "ground-fill"
+    ],
+    "humanReview": false
+  }
+}

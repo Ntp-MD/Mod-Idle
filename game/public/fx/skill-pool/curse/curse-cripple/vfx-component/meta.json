@@ -1,0 +1,71 @@
+{
+  "layerId": "mark-sigil",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "physical",
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "sizePolicy": "body",
+  "binding": "target",
+  "opacity": 0.85,
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.4,
+  "src": "/fx/skill-pool/curse/curse-cripple/vfx-component/mark-sigil.png",
+  "additionalLayers": [
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "physical",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 0.5,
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.4,
+      "file": "cloud-mist.png"
+    }
+  ],
+  "composition": "Independent component recipe: mark-sigil, cloud-mist",
+  "componentRecipe": {
+    "mode": "curse",
+    "shapes": [
+      "mark-sigil",
+      "cloud-mist"
+    ],
+    "humanReview": false
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "layerId": "shockwave-ring",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "physical",
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "sizePolicy": "footprint",
+  "projection": "ground",
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.5,
+  "opacity": 0.55,
+  "binding": "caster",
+  "placement": {
+    "kind": "expand",
+    "fromScale": 0.12
+  },
+  "id": "heal.cleanse",
+  "src": "/fx/skill-pool/heal/heal-cleanse/v2/shockwave-ring.png",
+  "additionalLayers": [
+    {
+      "layerId": "water-impact-crown",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "caster",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "water-impact-crown.png",
+      "palette": "physical",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.5,
+      "opacity": 0.9,
+      "delaySec": 0.07,
+      "orient": false
+    },
+    {
+      "layerId": "healing-wisps",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "caster",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "healing-wisps.png",
+      "palette": "physical",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.5,
+      "opacity": 0.4,
+      "delaySec": 0.14,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: shockwave-ring, water-impact-crown, healing-wisps",
+  "componentRecipe": {
+    "shapes": [
+      "shockwave-ring",
+      "water-impact-crown",
+      "healing-wisps"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v4/generation-prompts.json"
+  },
+  "orient": false
+}

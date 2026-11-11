@@ -1,0 +1,139 @@
+{
+  "layerId": "fragment-debris",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "earth",
+  "authoringGeometry": {
+    "shape": "circle",
+    "radiusM": 3,
+    "spanM": 6,
+    "depthM": 6,
+    "origin": "target",
+    "delivery": "ground"
+  },
+  "sizePolicy": "body",
+  "binding": "area",
+  "opacity": 0.8,
+  "scale": 0.24,
+  "phases": [
+    "Field"
+  ],
+  "rainDurationSec": 4,
+  "rainPhase": "Field",
+  "rainIntervalSec": 0.12,
+  "rainSizeScale": 0.3,
+  "rainRadiusRatio": 0.95,
+  "src": "/fx/skill-pool/attack-earth/attack-sand-storm/vfx-component/fragment-debris.png",
+  "additionalLayers": [
+    {
+      "layerId": "ground-fill",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "earth",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "opacity": 1,
+      "phases": [
+        "Field"
+      ],
+      "durationSec": 4,
+      "file": "ground-fill.png"
+    },
+    {
+      "layerId": "ground-edge",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "earth",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "projection": "ground",
+      "sizePolicy": "footprint",
+      "binding": "area",
+      "opacity": 1,
+      "phases": [
+        "Field"
+      ],
+      "durationSec": 4,
+      "file": "ground-edge.png"
+    },
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "earth",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 0.5,
+      "phases": [
+        "Field"
+      ],
+      "durationSec": 4,
+      "file": "cloud-mist.png"
+    }
+  ],
+  "composition": "Independent component recipe: fragment-debris, ground-fill, ground-edge, cloud-mist",
+  "componentRecipe": {
+    "mode": "field",
+    "shapes": [
+      "fragment-debris",
+      "ground-fill",
+      "ground-edge",
+      "cloud-mist"
+    ],
+    "humanReview": false
+  }
+}

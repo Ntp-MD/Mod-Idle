@@ -1,0 +1,135 @@
+{
+  "layerId": "ground-spiral",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "chaos",
+  "sizePolicy": "footprint",
+  "projection": "ground",
+  "binding": "area",
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "opacity": 1,
+  "phases": [
+    "Impact"
+  ],
+  "durationSec": 1.2,
+  "src": "/fx/skill-pool/attack-chaos/attack-entropy-well/vfx-component/ground-spiral.png",
+  "additionalLayers": [
+    {
+      "layerId": "vortex",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.8,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.8,
+      "palette": "chaos",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 3,
+        "depthM": 4
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 1,
+      "phases": [
+        "Impact"
+      ],
+      "placement": {
+        "kind": "spin",
+        "cycleSec": 2.4
+      },
+      "durationSec": 1.6,
+      "file": "vortex.png"
+    },
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "chaos",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 0.5,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.4,
+      "file": "cloud-mist.png"
+    },
+    {
+      "layerId": "mote",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "chaos",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "caster",
+      "opacity": 0.9,
+      "scale": 0.18,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.4,
+      "file": "mote.png"
+    }
+  ],
+  "composition": "Independent component recipe: ground-spiral, vortex, cloud-mist, mote",
+  "componentRecipe": {
+    "mode": "nova-magic",
+    "shapes": [
+      "ground-spiral",
+      "vortex",
+      "cloud-mist",
+      "mote"
+    ],
+    "humanReview": false
+  }
+}

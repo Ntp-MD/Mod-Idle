@@ -1,0 +1,1074 @@
+[
+  {
+    "skill": "attack.meteor",
+    "version": "v5",
+    "seen": [
+      "rock-core",
+      "flame-tongue",
+      "rock-shrapnel",
+      "ember-ground-cracks"
+    ],
+    "expected": [
+      "rock-core",
+      "flame-tongue",
+      "rock-shrapnel",
+      "ember-ground-cracks"
+    ],
+    "time": 2710000,
+    "errors": []
+  },
+  {
+    "skill": "attack.cinder_nova",
+    "version": "v4",
+    "seen": [
+      "shockwave-ring",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ],
+    "time": 1850000,
+    "errors": []
+  },
+  {
+    "skill": "attack.ignite",
+    "version": "v2",
+    "seen": [
+      "flame-tongue",
+      "mote"
+    ],
+    "expected": [
+      "flame-tongue",
+      "mote"
+    ],
+    "time": 1530000,
+    "errors": []
+  },
+  {
+    "skill": "attack.ice_lance",
+    "version": "v2",
+    "seen": [
+      "ice-lance",
+      "frost-fracture"
+    ],
+    "expected": [
+      "ice-lance",
+      "frost-fracture"
+    ],
+    "time": 1880000,
+    "errors": []
+  },
+  {
+    "skill": "attack.glacial_spike",
+    "version": "v2",
+    "seen": [
+      "ice-lance",
+      "ice-shard-cluster",
+      "fragment-debris"
+    ],
+    "expected": [
+      "ice-lance",
+      "ice-shard-cluster",
+      "fragment-debris"
+    ],
+    "time": 3080000,
+    "errors": []
+  },
+  {
+    "skill": "attack.frostbite",
+    "version": "v2",
+    "seen": [
+      "ice-shard-cluster",
+      "cloud-mist"
+    ],
+    "expected": [
+      "ice-shard-cluster",
+      "cloud-mist"
+    ],
+    "time": 1530000,
+    "errors": []
+  },
+  {
+    "skill": "attack.frost_nova",
+    "version": "v3",
+    "seen": [
+      "shockwave-ring",
+      "frost-fracture",
+      "fragment-debris"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "frost-fracture",
+      "fragment-debris"
+    ],
+    "time": 1770000,
+    "errors": []
+  },
+  {
+    "skill": "attack.blizzard",
+    "version": "v9",
+    "seen": [
+      "fragment-debris",
+      "cloud-mist",
+      "frost-fracture"
+    ],
+    "expected": [
+      "fragment-debris",
+      "frost-fracture",
+      "cloud-mist"
+    ],
+    "time": 2710000,
+    "errors": []
+  },
+  {
+    "skill": "attack.water_ball",
+    "version": "v4",
+    "seen": [
+      "orb-core",
+      "water-impact-crown",
+      "cloud-mist"
+    ],
+    "expected": [
+      "orb-core",
+      "water-impact-crown",
+      "cloud-mist"
+    ],
+    "time": 1720000,
+    "errors": []
+  },
+  {
+    "skill": "attack.tidal_wave",
+    "version": "v4",
+    "seen": [
+      "wave-crest",
+      "water-jet",
+      "water-impact-crown"
+    ],
+    "expected": [
+      "wave-crest",
+      "water-jet",
+      "water-impact-crown"
+    ],
+    "time": 3590000,
+    "errors": []
+  },
+  {
+    "skill": "attack.shatter",
+    "version": "v3",
+    "seen": [
+      "ice-shard-cluster",
+      "fragment-debris",
+      "frost-fracture"
+    ],
+    "expected": [
+      "ice-shard-cluster",
+      "fragment-debris",
+      "frost-fracture"
+    ],
+    "time": 3510000,
+    "errors": []
+  },
+  {
+    "skill": "attack.spark",
+    "version": "v2",
+    "seen": [
+      "electric-contact",
+      "lightning-arc"
+    ],
+    "expected": [
+      "electric-contact",
+      "lightning-arc"
+    ],
+    "time": 1350000,
+    "errors": []
+  },
+  {
+    "skill": "attack.fireball",
+    "version": "v5",
+    "seen": [
+      "molten-projectile",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ],
+    "expected": [
+      "molten-projectile",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ],
+    "time": 1830000,
+    "errors": []
+  },
+  {
+    "skill": "attack.firestorm",
+    "version": "v6",
+    "seen": [
+      "flame-tongue",
+      "ember-ground-cracks",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "flame-tongue",
+      "ember-ground-cracks",
+      "dust-impact-plume"
+    ],
+    "time": 3510000,
+    "errors": []
+  },
+  {
+    "skill": "attack.chain_lightning",
+    "version": "v3",
+    "seen": [
+      "lightning-arc",
+      "electric-contact"
+    ],
+    "expected": [
+      "lightning-arc",
+      "electric-contact"
+    ],
+    "time": 1720000,
+    "errors": []
+  },
+  {
+    "skill": "attack.thunder_strike",
+    "version": "v4",
+    "seen": [
+      "forked-bolt",
+      "electric-contact",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "forked-bolt",
+      "electric-contact",
+      "dust-impact-plume"
+    ],
+    "time": 2510000,
+    "errors": []
+  },
+  {
+    "skill": "attack.overload",
+    "version": "v3",
+    "seen": [
+      "electric-contact",
+      "shockwave-ring",
+      "lightning-arc"
+    ],
+    "expected": [
+      "electric-contact",
+      "shockwave-ring",
+      "lightning-arc"
+    ],
+    "time": 2980000,
+    "errors": []
+  },
+  {
+    "skill": "attack.poison_bolt",
+    "version": "v2",
+    "seen": [
+      "poison-droplet",
+      "acid-splash"
+    ],
+    "expected": [
+      "poison-droplet",
+      "acid-splash"
+    ],
+    "time": 1580000,
+    "errors": []
+  },
+  {
+    "skill": "attack.acid_arrow",
+    "version": "v2",
+    "seen": [
+      "arrow-core",
+      "acid-splash",
+      "toxic-vapor"
+    ],
+    "expected": [
+      "arrow-core",
+      "acid-splash",
+      "toxic-vapor"
+    ],
+    "time": 1690000,
+    "errors": []
+  },
+  {
+    "skill": "attack.poison_cloud",
+    "version": "v2",
+    "seen": [
+      "toxic-vapor",
+      "ground-residue"
+    ],
+    "expected": [
+      "toxic-vapor",
+      "ground-residue"
+    ],
+    "time": 2430000,
+    "errors": []
+  },
+  {
+    "skill": "attack.hemotoxin",
+    "version": "v2",
+    "seen": [
+      "poison-droplet",
+      "blood-contact",
+      "bind-strand"
+    ],
+    "expected": [
+      "poison-droplet",
+      "blood-contact",
+      "bind-strand"
+    ],
+    "time": 2950000,
+    "errors": []
+  },
+  {
+    "skill": "attack.contagion",
+    "version": "v2",
+    "seen": [
+      "poison-droplet",
+      "toxic-vapor",
+      "acid-splash"
+    ],
+    "expected": [
+      "poison-droplet",
+      "toxic-vapor",
+      "acid-splash"
+    ],
+    "time": 2120000,
+    "errors": []
+  },
+  {
+    "skill": "attack.venom_coffin",
+    "version": "v2",
+    "seen": [
+      "poison-droplet",
+      "root-entangle",
+      "toxic-vapor"
+    ],
+    "expected": [
+      "poison-droplet",
+      "root-entangle",
+      "toxic-vapor"
+    ],
+    "time": 2950000,
+    "errors": []
+  },
+  {
+    "skill": "attack.chaos_bolt",
+    "version": "v2",
+    "seen": [
+      "crescent-wave",
+      "void-rift"
+    ],
+    "expected": [
+      "crescent-wave",
+      "void-rift"
+    ],
+    "time": 1610000,
+    "errors": []
+  },
+  {
+    "skill": "attack.void_blast",
+    "version": "v3",
+    "seen": [
+      "void-rift",
+      "shockwave-ring",
+      "gravitic-lens"
+    ],
+    "expected": [
+      "void-rift",
+      "shockwave-ring",
+      "gravitic-lens"
+    ],
+    "time": 3460000,
+    "errors": []
+  },
+  {
+    "skill": "attack.chaos_wave",
+    "version": "v2",
+    "seen": [
+      "shockwave-ring",
+      "gravitic-lens",
+      "cloud-mist"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "gravitic-lens",
+      "cloud-mist"
+    ],
+    "time": 1750000,
+    "errors": []
+  },
+  {
+    "skill": "attack.void_ray",
+    "version": "v4",
+    "seen": [
+      "ribbon-beam",
+      "void-rift",
+      "electric-contact"
+    ],
+    "expected": [
+      "ribbon-beam",
+      "void-rift",
+      "electric-contact"
+    ],
+    "time": 4448000,
+    "errors": []
+  },
+  {
+    "skill": "attack.void_orb",
+    "version": "v3",
+    "seen": [
+      "gravitic-lens",
+      "void-rift",
+      "orb-core"
+    ],
+    "expected": [
+      "orb-core",
+      "gravitic-lens",
+      "void-rift"
+    ],
+    "time": 1400000,
+    "errors": []
+  },
+  {
+    "skill": "attack.entropy_well",
+    "version": "v4",
+    "seen": [
+      "gravitic-lens",
+      "void-rift",
+      "mote"
+    ],
+    "expected": [
+      "gravitic-lens",
+      "void-rift",
+      "mote"
+    ],
+    "time": 5346000,
+    "errors": []
+  },
+  {
+    "skill": "attack.unravel",
+    "version": "v2",
+    "seen": [
+      "crescent-wave",
+      "tether-strand",
+      "fragment-debris"
+    ],
+    "expected": [
+      "crescent-wave",
+      "tether-strand",
+      "fragment-debris"
+    ],
+    "time": 3080000,
+    "errors": []
+  },
+  {
+    "skill": "attack.sand_storm",
+    "version": "v3",
+    "seen": [
+      "sand-vortex",
+      "dust-impact-plume",
+      "rock-shrapnel"
+    ],
+    "expected": [
+      "sand-vortex",
+      "dust-impact-plume",
+      "rock-shrapnel"
+    ],
+    "time": 1350000,
+    "errors": []
+  },
+  {
+    "skill": "attack.earth_splitter",
+    "version": "v2",
+    "seen": [
+      "crack-strip",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "crack-strip",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "time": 3350000,
+    "errors": []
+  },
+  {
+    "skill": "attack.earth_shock",
+    "version": "v3",
+    "seen": [
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "time": 3510000,
+    "errors": []
+  },
+  {
+    "skill": "attack.aftershock",
+    "version": "v4",
+    "seen": [
+      "crack-strip",
+      "shockwave-ring",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "crack-strip",
+      "shockwave-ring",
+      "dust-impact-plume"
+    ],
+    "time": 3480000,
+    "errors": []
+  },
+  {
+    "skill": "attack.stone_spike",
+    "version": "v4",
+    "seen": [
+      "stone-spike",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "stone-spike",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "time": 3460000,
+    "errors": []
+  },
+  {
+    "skill": "attack.fissure",
+    "version": "v7",
+    "seen": [
+      "crack-strip",
+      "stone-spike",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "crack-strip",
+      "stone-spike",
+      "dust-impact-plume"
+    ],
+    "time": 3560000,
+    "errors": []
+  },
+  {
+    "skill": "attack.backstab",
+    "version": "v2",
+    "seen": [
+      "blade-thrust",
+      "blood-contact"
+    ],
+    "expected": [
+      "blade-thrust",
+      "blood-contact"
+    ],
+    "time": 2120000,
+    "errors": []
+  },
+  {
+    "skill": "attack.impale",
+    "version": "v2",
+    "seen": [
+      "blade-thrust",
+      "blood-contact",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "blade-thrust",
+      "blood-contact",
+      "dust-impact-plume"
+    ],
+    "time": 4360000,
+    "errors": []
+  },
+  {
+    "skill": "attack.skull_crack",
+    "version": "v2",
+    "seen": [
+      "impact-burst",
+      "rock-shrapnel"
+    ],
+    "expected": [
+      "impact-burst",
+      "rock-shrapnel"
+    ],
+    "time": 2040000,
+    "errors": []
+  },
+  {
+    "skill": "attack.ground_slam",
+    "version": "v3",
+    "seen": [
+      "crack-strip",
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "crack-strip",
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ],
+    "time": 1770000,
+    "errors": []
+  },
+  {
+    "skill": "attack.cleave",
+    "version": "v6",
+    "seen": [
+      "heavy-cleave",
+      "blood-contact"
+    ],
+    "expected": [
+      "heavy-cleave",
+      "blood-contact"
+    ],
+    "time": 1770000,
+    "errors": []
+  },
+  {
+    "skill": "attack.elemental_break",
+    "version": "v2",
+    "seen": [
+      "heavy-cleave",
+      "barrier-facets",
+      "electric-contact"
+    ],
+    "expected": [
+      "heavy-cleave",
+      "barrier-facets",
+      "electric-contact"
+    ],
+    "time": 3090000,
+    "errors": []
+  },
+  {
+    "skill": "attack.whirlwind",
+    "version": "v4",
+    "seen": [
+      "heavy-cleave",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "heavy-cleave",
+      "dust-impact-plume"
+    ],
+    "time": 1500000,
+    "errors": []
+  },
+  {
+    "skill": "attack.shield_bash",
+    "version": "v2",
+    "seen": [
+      "barrier-facets",
+      "impact-burst"
+    ],
+    "expected": [
+      "barrier-facets",
+      "impact-burst"
+    ],
+    "time": 2060000,
+    "errors": []
+  },
+  {
+    "skill": "attack.puncture",
+    "version": "v2",
+    "seen": [
+      "blade-thrust",
+      "blood-contact",
+      "mote"
+    ],
+    "expected": [
+      "blade-thrust",
+      "blood-contact",
+      "mote"
+    ],
+    "time": 1740000,
+    "errors": []
+  },
+  {
+    "skill": "attack.reap",
+    "version": "v2",
+    "seen": [
+      "heavy-cleave",
+      "blood-contact",
+      "cloud-mist"
+    ],
+    "expected": [
+      "heavy-cleave",
+      "blood-contact",
+      "cloud-mist"
+    ],
+    "time": 2190000,
+    "errors": []
+  },
+  {
+    "skill": "attack.piercing_shot",
+    "version": "v5",
+    "seen": [
+      "arrow-core",
+      "blade-thrust",
+      "impact-burst"
+    ],
+    "expected": [
+      "arrow-core",
+      "blade-thrust",
+      "impact-burst"
+    ],
+    "time": 2040000,
+    "errors": []
+  },
+  {
+    "skill": "attack.arrow_shower",
+    "version": "v6",
+    "seen": [
+      "arrow-core",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "arrow-core",
+      "dust-impact-plume"
+    ],
+    "time": 5150000,
+    "errors": []
+  },
+  {
+    "skill": "attack.headshot",
+    "version": "v2",
+    "seen": [
+      "arrow-core",
+      "blood-contact"
+    ],
+    "expected": [
+      "arrow-core",
+      "blood-contact"
+    ],
+    "time": 3250000,
+    "errors": []
+  },
+  {
+    "skill": "attack.split_shot",
+    "version": "v3",
+    "seen": [
+      "arrow-core",
+      "impact-burst"
+    ],
+    "expected": [
+      "arrow-core",
+      "impact-burst"
+    ],
+    "time": 2140000,
+    "errors": []
+  },
+  {
+    "skill": "attack.double_strafe",
+    "version": "v3",
+    "seen": [
+      "arrow-core",
+      "blade-thrust"
+    ],
+    "expected": [
+      "arrow-core",
+      "blade-thrust"
+    ],
+    "time": 1960000,
+    "errors": []
+  },
+  {
+    "skill": "attack.double_strike",
+    "version": "v2",
+    "seen": [
+      "slash-sweep",
+      "blade-thrust",
+      "blood-contact"
+    ],
+    "expected": [
+      "slash-sweep",
+      "blade-thrust",
+      "blood-contact"
+    ],
+    "time": 1690000,
+    "errors": []
+  },
+  {
+    "skill": "buff.warcry",
+    "version": "v2",
+    "seen": [
+      "shockwave-ring",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "dust-impact-plume"
+    ],
+    "time": 233000,
+    "errors": []
+  },
+  {
+    "skill": "buff.berserker",
+    "version": "v2",
+    "seen": [
+      "flame-tongue",
+      "healing-wisps"
+    ],
+    "expected": [
+      "flame-tongue",
+      "healing-wisps"
+    ],
+    "time": 267000,
+    "errors": []
+  },
+  {
+    "skill": "buff.iron_will",
+    "version": "v2",
+    "seen": [
+      "barrier-facets",
+      "rock-shrapnel"
+    ],
+    "expected": [
+      "barrier-facets",
+      "rock-shrapnel"
+    ],
+    "time": 267000,
+    "errors": []
+  },
+  {
+    "skill": "buff.holy_veil",
+    "version": "v2",
+    "seen": [
+      "shield-dome",
+      "healing-wisps"
+    ],
+    "expected": [
+      "shield-dome",
+      "healing-wisps"
+    ],
+    "time": 283000,
+    "errors": []
+  },
+  {
+    "skill": "buff.ghost_dance",
+    "version": "v2",
+    "seen": [
+      "healing-wisps",
+      "cloud-mist"
+    ],
+    "expected": [
+      "healing-wisps",
+      "cloud-mist"
+    ],
+    "time": 233000,
+    "errors": []
+  },
+  {
+    "skill": "buff.earth_wall",
+    "version": "v2",
+    "seen": [
+      "wall-segment",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "wall-segment",
+      "dust-impact-plume"
+    ],
+    "time": 283000,
+    "errors": []
+  },
+  {
+    "skill": "buff.magia_drive",
+    "version": "v2",
+    "seen": [
+      "healing-wisps",
+      "electric-contact"
+    ],
+    "expected": [
+      "healing-wisps",
+      "electric-contact"
+    ],
+    "time": 267000,
+    "errors": []
+  },
+  {
+    "skill": "buff.energy_absorb",
+    "version": "v2",
+    "seen": [
+      "gravitic-lens",
+      "healing-wisps"
+    ],
+    "expected": [
+      "gravitic-lens",
+      "healing-wisps"
+    ],
+    "time": 250000,
+    "errors": []
+  },
+  {
+    "skill": "buff.flame_guard",
+    "version": "v5",
+    "seen": [
+      "shield-dome",
+      "flame-tongue"
+    ],
+    "expected": [
+      "shield-dome",
+      "flame-tongue"
+    ],
+    "time": 283000,
+    "errors": []
+  },
+  {
+    "skill": "buff.enchant_poison",
+    "version": "v3",
+    "seen": [
+      "poison-droplet",
+      "toxic-vapor"
+    ],
+    "expected": [
+      "poison-droplet",
+      "toxic-vapor"
+    ],
+    "time": 267000,
+    "errors": []
+  },
+  {
+    "skill": "curse.weaken",
+    "version": "v2",
+    "seen": [
+      "healing-wisps",
+      "cloud-mist"
+    ],
+    "expected": [
+      "healing-wisps",
+      "cloud-mist"
+    ],
+    "time": 1400000,
+    "errors": []
+  },
+  {
+    "skill": "curse.blinding_mark",
+    "version": "v2",
+    "seen": [
+      "toxic-vapor",
+      "mark-sigil"
+    ],
+    "expected": [
+      "toxic-vapor",
+      "mark-sigil"
+    ],
+    "time": 1400000,
+    "errors": []
+  },
+  {
+    "skill": "curse.expose",
+    "version": "v2",
+    "seen": [
+      "barrier-facets",
+      "mark-sigil"
+    ],
+    "expected": [
+      "barrier-facets",
+      "mark-sigil"
+    ],
+    "time": 1740000,
+    "errors": []
+  },
+  {
+    "skill": "curse.cripple",
+    "version": "v2",
+    "seen": [
+      "root-entangle",
+      "dust-impact-plume"
+    ],
+    "expected": [
+      "root-entangle",
+      "dust-impact-plume"
+    ],
+    "time": 1400000,
+    "errors": []
+  },
+  {
+    "skill": "curse.jinx",
+    "version": "v5",
+    "seen": [
+      "tether-strand",
+      "void-rift"
+    ],
+    "expected": [
+      "tether-strand",
+      "void-rift"
+    ],
+    "time": 1530000,
+    "errors": []
+  },
+  {
+    "skill": "curse.venom_bind",
+    "version": "v3",
+    "seen": [
+      "root-entangle",
+      "acid-splash"
+    ],
+    "expected": [
+      "root-entangle",
+      "acid-splash"
+    ],
+    "time": 1720000,
+    "errors": []
+  },
+  {
+    "skill": "heal.heal",
+    "version": "v4",
+    "seen": [
+      "healing-wisps",
+      "mote"
+    ],
+    "expected": [
+      "healing-wisps",
+      "mote"
+    ],
+    "time": 1670000,
+    "errors": []
+  },
+  {
+    "skill": "heal.greater_heal",
+    "version": "v2",
+    "seen": [
+      "ground-edge",
+      "healing-wisps",
+      "column-eruption"
+    ],
+    "expected": [
+      "healing-wisps",
+      "column-eruption",
+      "ground-edge"
+    ],
+    "time": 5150000,
+    "errors": []
+  },
+  {
+    "skill": "heal.cleanse",
+    "version": "v2",
+    "seen": [
+      "shockwave-ring",
+      "water-impact-crown",
+      "healing-wisps"
+    ],
+    "expected": [
+      "shockwave-ring",
+      "water-impact-crown",
+      "healing-wisps"
+    ],
+    "time": 1560000,
+    "errors": []
+  }
+]

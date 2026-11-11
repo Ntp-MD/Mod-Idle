@@ -1,0 +1,82 @@
+{
+  "layerId": "gravitic-lens",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "sizePolicy": "footprint",
+  "binding": "caster",
+  "authoringGeometry": {
+    "shape": "circle"
+  },
+  "projection": "ground",
+  "palette": "physical",
+  "phases": [
+    "Impact",
+    "Field"
+  ],
+  "durationSec": 1.5,
+  "opacity": 0.55,
+  "placement": {
+    "kind": "spin",
+    "cycleSec": 2.7
+  },
+  "id": "buff.energy_absorb",
+  "src": "/fx/skill-pool/buff/buff-energy-absorb/v2/gravitic-lens.png",
+  "additionalLayers": [
+    {
+      "layerId": "healing-wisps",
+      "columns": 1,
+      "rows": 1,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "sizePolicy": "body",
+      "binding": "caster",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "file": "healing-wisps.png",
+      "palette": "physical",
+      "phases": [
+        "Impact",
+        "Field"
+      ],
+      "durationSec": 1.5,
+      "opacity": 0.4,
+      "delaySec": 0.07,
+      "orient": false
+    }
+  ],
+  "composition": "Material study: gravitic-lens, healing-wisps",
+  "componentRecipe": {
+    "shapes": [
+      "gravitic-lens",
+      "healing-wisps"
+    ],
+    "humanReview": false
+  },
+  "reviewOnly": true,
+  "generation": {
+    "tool": "imagegen",
+    "source": "docs/vfx-skill/component-vfx/outputs/library-v4/generation-prompts.json"
+  },
+  "orient": false
+}

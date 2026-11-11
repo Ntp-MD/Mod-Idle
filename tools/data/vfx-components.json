@@ -408,6 +408,270 @@
         "layerId": "bind-strand",
         "content": 0.8
       }
+    },
+    "molten-projectile": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.fireball",
+        "version": "v5",
+        "file": "molten-projectile.png",
+        "layerId": "molten-projectile",
+        "content": 0.8
+      }
+    },
+    "flame-tongue": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.fireball",
+        "version": "v5",
+        "file": "flame-tongue.png",
+        "layerId": "flame-tongue",
+        "content": 0.8
+      }
+    },
+    "ember-ground-cracks": {
+      "family": "ground-residue",
+      "sizePolicy": "footprint",
+      "master": {
+        "skill": "attack.fireball",
+        "version": "v5",
+        "file": "ember-ground-cracks.png",
+        "layerId": "ember-ground-cracks",
+        "content": 0.8
+      }
+    },
+    "dust-impact-plume": {
+      "family": "cloud-mist",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.firestorm",
+        "version": "v6",
+        "file": "dust-impact-plume.png",
+        "layerId": "dust-impact-plume",
+        "content": 0.8
+      }
+    },
+    "rock-shrapnel": {
+      "family": "fragment-debris",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.meteor",
+        "version": "v5",
+        "file": "rock-shrapnel.png",
+        "layerId": "rock-shrapnel",
+        "content": 0.8
+      }
+    },
+    "ice-lance": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.ice_lance",
+        "version": "v2",
+        "file": "ice-lance.png",
+        "layerId": "ice-lance",
+        "content": 0.8
+      }
+    },
+    "frost-fracture": {
+      "family": "ground-residue",
+      "sizePolicy": "footprint",
+      "master": {
+        "skill": "attack.ice_lance",
+        "version": "v2",
+        "file": "frost-fracture.png",
+        "layerId": "frost-fracture",
+        "content": 0.8
+      }
+    },
+    "ice-shard-cluster": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.glacial_spike",
+        "version": "v2",
+        "file": "ice-shard-cluster.png",
+        "layerId": "ice-shard-cluster",
+        "content": 0.8
+      }
+    },
+    "water-impact-crown": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.water_ball",
+        "version": "v4",
+        "file": "water-impact-crown.png",
+        "layerId": "water-impact-crown",
+        "content": 0.8
+      }
+    },
+    "water-jet": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.tidal_wave",
+        "version": "v4",
+        "file": "water-jet.png",
+        "layerId": "water-jet",
+        "content": 0.8
+      }
+    },
+    "electric-contact": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.spark",
+        "version": "v2",
+        "file": "electric-contact.png",
+        "layerId": "electric-contact",
+        "content": 0.8
+      }
+    },
+    "lightning-arc": {
+      "family": "ribbon-beam",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.spark",
+        "version": "v2",
+        "file": "lightning-arc.png",
+        "layerId": "lightning-arc",
+        "content": 0.8
+      }
+    },
+    "poison-droplet": {
+      "family": "projectile-core",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.poison_bolt",
+        "version": "v2",
+        "file": "poison-droplet.png",
+        "layerId": "poison-droplet",
+        "content": 0.8
+      }
+    },
+    "acid-splash": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.poison_bolt",
+        "version": "v2",
+        "file": "acid-splash.png",
+        "layerId": "acid-splash",
+        "content": 0.8
+      }
+    },
+    "toxic-vapor": {
+      "family": "cloud-mist",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.acid_arrow",
+        "version": "v2",
+        "file": "toxic-vapor.png",
+        "layerId": "toxic-vapor",
+        "content": 0.8
+      }
+    },
+    "blood-contact": {
+      "family": "impact-burst",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.hemotoxin",
+        "version": "v2",
+        "file": "blood-contact.png",
+        "layerId": "blood-contact",
+        "content": 0.8
+      }
+    },
+    "root-entangle": {
+      "family": "mark-sigil",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.venom_coffin",
+        "version": "v2",
+        "file": "root-entangle.png",
+        "layerId": "root-entangle",
+        "content": 0.8
+      }
+    },
+    "void-rift": {
+      "family": "column-eruption",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.chaos_bolt",
+        "version": "v2",
+        "file": "void-rift.png",
+        "layerId": "void-rift",
+        "content": 0.8
+      }
+    },
+    "gravitic-lens": {
+      "family": "ground-fill",
+      "sizePolicy": "footprint",
+      "master": {
+        "skill": "attack.void_blast",
+        "version": "v3",
+        "file": "gravitic-lens.png",
+        "layerId": "gravitic-lens",
+        "content": 0.8
+      }
+    },
+    "sand-vortex": {
+      "family": "vortex",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.sand_storm",
+        "version": "v3",
+        "file": "sand-vortex.png",
+        "layerId": "sand-vortex",
+        "content": 0.8
+      }
+    },
+    "blade-thrust": {
+      "family": "slash-sweep",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.backstab",
+        "version": "v2",
+        "file": "blade-thrust.png",
+        "layerId": "blade-thrust",
+        "content": 0.8
+      }
+    },
+    "heavy-cleave": {
+      "family": "slash-sweep",
+      "sizePolicy": "world",
+      "master": {
+        "skill": "attack.cleave",
+        "version": "v6",
+        "file": "heavy-cleave.png",
+        "layerId": "heavy-cleave",
+        "content": 0.8
+      }
+    },
+    "barrier-facets": {
+      "family": "ward-shell",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "attack.elemental_break",
+        "version": "v2",
+        "file": "barrier-facets.png",
+        "layerId": "barrier-facets",
+        "content": 0.8
+      }
+    },
+    "healing-wisps": {
+      "family": "mote",
+      "sizePolicy": "body",
+      "master": {
+        "skill": "buff.berserker",
+        "version": "v2",
+        "file": "healing-wisps.png",
+        "layerId": "healing-wisps",
+        "content": 0.8
+      }
     }
   }
 }

@@ -6,13 +6,11 @@ reads. No exceptions.
 
 ## Current state: fallback active, component recipes land one skill at a time
 
-Every live skill still runs the renderer-only `rimworld` version until its recipe is approved.
-The retired `vN` folders sit in `archive/fx/skill-pool/<group>/<slug>/vN/` (per the archive note) and
-the `default/version.json` pointers went with them. Completed skills are rebuilt from the reusable
-component library as a single `vfx-component/` folder (no `vN` iteration). Without a `default`
-pointer the registry keeps `rimworld` first and the recipe stays a showcase preview; human approval
-sets `default/version.json` to `vfx-component` and the game runs the raster art.
-`attack.thunder_storm` is the first approved recipe (2026-11-10) and runs live.
+Every live skill now carries a single `vfx-component` recipe built from the reusable library
+(90 player skills, 2026-11-10). `rimworld` stays first and active for any skill without a `default`
+pointer, so only `attack.thunder_storm` (approved) renders raster in game; every other recipe is
+review-only until a human points `default/version.json` at `vfx-component`. The retired `vN` folders
+sit in `archive/fx/skill-pool/<group>/<slug>/vN/` and are rollback history, not runtime art.
 
 ## Storage rule
 

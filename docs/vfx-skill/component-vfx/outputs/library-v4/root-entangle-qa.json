@@ -1,0 +1,19 @@
+{
+  "alphaBounds": [
+    114,
+    115,
+    912,
+    921
+  ],
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "humanReview": false,
+  "sourceSha256": "60efecc472aff2819e836ad245fc6b01fcbd8a5e9b7b63bfc239f824548f5d85",
+  "masterSha256": "59cec2f4e4793f8694b3acd5319640df9f86a36295df68900e168494b1eb5da4"
+}

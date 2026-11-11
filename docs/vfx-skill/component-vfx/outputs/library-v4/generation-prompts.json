@@ -1,0 +1,126 @@
+{
+  "tool": "imagegen",
+  "masters": [
+    {
+      "shape": "flame-tongue",
+      "prompt": "Create ONE isolated production VFX raw master texture for a dark fantasy action RPG, square canvas with TRUE TRANSPARENT alpha background. A single turbulent upward flame tongue, long tapered licking tips, thin translucent combustion sheets curling around a dense hot base, sparse sparks, asymmetrical physical fire motion frozen in time. NOT a round explosion. View: upright screen-facing billboard, full effect entirely inside central 75% of canvas, bottom contact at 80% image height. Near-neutral ivory and charcoal values for runtime palette mapping; realistic painterly material definition, excellent small-scale silhouette, controlled highlights, detail concentrated in large readable forms. No scenery, character, weapon, UI, text, borders, checkerboard, ground shadow or decorative magic symbols. This is a reusable material ingredient, not a skill icon or finished scene.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-18ae2172-af60-4760-8d00-32450bf70af4.png"
+    },
+    {
+      "shape": "ice-shard-cluster",
+      "prompt": "Create ONE isolated production VFX raw master texture for a dark fantasy action RPG, square canvas with TRUE TRANSPARENT alpha background. A tight eruption of six angular translucent fractured ice spears growing upward from one tiny base, uneven heights and convincing glass refraction, sharp chipped facets, a little frost powder. No ground disk. View: upright screen-facing billboard, full effect entirely inside central 75% of canvas, bottom contact at 80% image height. Near-neutral ivory and charcoal values for runtime palette mapping; realistic painterly material definition, excellent small-scale silhouette, controlled highlights, detail concentrated in large readable forms. No scenery, character, weapon, UI, text, borders, checkerboard, ground shadow or decorative magic symbols. This is a reusable material ingredient, not a skill icon or finished scene.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-4d8c6c69-1bd3-4d25-ab5c-b2d94ff48567.png"
+    },
+    {
+      "shape": "water-impact-crown",
+      "prompt": "Create ONE isolated production VFX raw master texture for a dark fantasy action RPG, square canvas with TRUE TRANSPARENT alpha background. A water splash crown at impact: thin liquid membrane rises into twelve irregular fingers and scattered round droplets, dense central splash cavity, physically plausible fluid surface tension. No solid pedestal. View: upright screen-facing billboard, full effect entirely inside central 75% of canvas, bottom contact at 80% image height. Near-neutral ivory and charcoal values for runtime palette mapping; realistic painterly material definition, excellent small-scale silhouette, controlled highlights, detail concentrated in large readable forms. No scenery, character, weapon, UI, text, borders, checkerboard, ground shadow or decorative magic symbols. This is a reusable material ingredient, not a skill icon or finished scene.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-e3147549-4e31-4655-8d60-2579cb3bb9e6.png"
+    },
+    {
+      "shape": "dust-impact-plume",
+      "prompt": "Edit this dust sprite into a true transparent PNG cutout for a game. REMOVE THE ENTIRE BACKGROUND including all white, gray vignette, atmosphere, ground and cast shadows. All canvas pixels outside the actual dust curls and flying pebbles MUST have alpha exactly zero. Preserve only the central airborne dust impact plume and stones. Keep detailed soft partially transparent dust edges; clean fully transparent empty margins on every side. No white or black matte and no rectangular fog. Return the isolated airborne dust effect on transparent background.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-a1eb43f2-151b-4400-8d43-17437f7c8da3.png",
+      "revisions": "dust-revisions.json"
+    },
+    {
+      "shape": "molten-projectile",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A compact irregular molten glob flying RIGHT, bright torn flame tail flowing left, dense rough charcoal core partly exposed, viscous combustion rather than a smooth orb. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-8922e70c-5f83-4d51-81c8-14294f178977.png"
+    },
+    {
+      "shape": "ember-ground-cracks",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. Top-down flat square ground decal: irregular branching molten fissures around a broken central crater, small islands of cooled slag, no perspective, no solid floor plane, transparent between cracks. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-b7476413-5edd-4707-8c06-5d62d4724188.png"
+    },
+    {
+      "shape": "ice-lance",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. One long needlelike ice projectile pointing RIGHT, triangular jagged tip, fractured translucent facets, sparse ice grit trailing left. Slim 4:1 silhouette. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-94c1942b-d470-44b4-8967-76b463b86aa0.png"
+    },
+    {
+      "shape": "frost-fracture",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. Top-down flat frost fracture decal, branching crystalline veins and jagged broken ice plates radiating asymmetrically from a central point, empty transparent gaps. No upright spikes. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-5e9426d0-76ab-4f1e-b666-223bf8f3406e.png"
+    },
+    {
+      "shape": "water-jet",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A horizontal twisting high-pressure water jet pointing RIGHT, narrow launch at left and broad breaking foamy leading tip at right, transparent liquid cords and droplets. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-59fe7766-1927-4582-a713-5eb27ba2e88a.png"
+    },
+    {
+      "shape": "lightning-arc",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A horizontal lightning discharge stretching LEFT TO RIGHT, one aggressively crooked main branch with fine secondary forks, thin hot core and tight halo, completely irregular, no circle. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-902feacb-6fed-45cf-ad65-818f152c38c0.png"
+    },
+    {
+      "shape": "electric-contact",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A compact electrical contact burst, sharp branching streamers radiating unevenly, small dense hot central spark with lots of transparent negative space, no long vertical bolt. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-9c014fa8-37e1-49fd-b825-292599aeb975.png"
+    },
+    {
+      "shape": "poison-droplet",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A heavy viscous droplet projectile flying RIGHT with three smaller satellite drops trailing LEFT, suspended bubbles inside, stretched wet teardrop silhouette, no glow orb. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-0477676b-ac71-4fc3-8e45-2305369fed22.png"
+    },
+    {
+      "shape": "toxic-vapor",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A low creeping bank of noxious vapor, semi-transparent rolling pockets and trailing thin tendrils, dense lumpy lower core, irregular asymmetric outline, no ring or face. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-9d3b6560-14eb-40e3-b140-469ed7d411d1.png"
+    },
+    {
+      "shape": "acid-splash",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A corrosive viscous splash crown with stringy liquid bridges, separated round droplets and torn membranes, heavier and more adhesive than water, small contact base. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-05ee88d7-8971-4ae7-8603-ba1fe3ef0071.png"
+    },
+    {
+      "shape": "rock-shrapnel",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. An explosive spray of angular broken stone chunks, three large rough fragments and twelve smaller splinters, convincing weight and chipped stratified surfaces, radial ballistic spread, no smoke. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-fdcfa3d2-df06-4c66-942e-d1ed902af863.png"
+    },
+    {
+      "shape": "sand-vortex",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A tall narrow asymmetric dust devil, spiraling gritty ribbons narrowing to a tiny ground contact, coarse grains near base and thin wispy upper lip, no opaque cone. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-69f0cd15-0a1a-4c8d-b01f-a59da16e4db6.png"
+    },
+    {
+      "shape": "void-rift",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. An upright ragged vertical tear in space, pitch-dark translucent hollow interior bounded by thin torn luminous strands and inward-pulled wisps, no round portal or runes. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-c3d66902-8933-42ae-b2f7-a4f34db6902e.png"
+    },
+    {
+      "shape": "gravitic-lens",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. Top-down flat annular accretion swirl, visibly dark transparent center, three uneven tightly curving streaks spiraling inward, bright sparse gritty fragments, no decorative circle. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-91772653-9ced-4124-ad57-2223dc0b7692.png"
+    },
+    {
+      "shape": "blade-thrust",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A narrow horizontal physical thrust streak pointing RIGHT, sharp triangular tip, two thin parallel wake lines and few small metal sparks; compressed kinetic silver material, no weapon model. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-1965dcc9-7e5e-487f-a150-a7539023beb6.png"
+    },
+    {
+      "shape": "heavy-cleave",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. One broad asymmetrical crescent slash swept diagonally, dense sharp leading edge and layered tapered hairline wake, visible empty space within arc, heavy sword momentum, no full ring. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-71a6b95f-482b-4e00-a1af-3e61ec4612c9.png"
+    },
+    {
+      "shape": "blood-contact",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. A small directional impact spray of viscous fluid, irregular ribbons and tiny drops projecting diagonally, realistic liquid breakup; neutral values suitable for runtime palette. No body or wound. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-300c2bd6-8961-4489-9c27-209a2fec12bd.png"
+    },
+    {
+      "shape": "healing-wisps",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. Three delicate upward spiraling translucent light wisps with small rising motes, open center for character silhouette, gentle buoyant motion, no dome, no circular rune. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-459e4bd4-1c77-4187-a971-94b2befb29d8.png"
+    },
+    {
+      "shape": "root-entangle",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. Three crooked thorny roots winding upward around an empty central body-sized space, rough fibrous bark, hooked tips, irregular negative space, visible ground contact, no character. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-6f4d2bde-050a-45fb-bb1b-5a5e2a369cc9.png"
+    },
+    {
+      "shape": "barrier-facets",
+      "prompt": "Create ONE isolated reusable raw VFX master texture for a grounded dark fantasy action RPG. TRUE TRANSPARENT alpha background, square canvas, entire effect in central 75% with generous clear margins. An upright broken arc of four overlapping translucent mineral armor facets surrounding an empty central space, thin bright seams, restrained chipped edges, no runes or shield emblem. Near-neutral ivory/charcoal values for palette mapping. Realistic painterly materials, strong readable silhouette, controlled luminance, fine detail subordinate to large forms. Billboard frontal view unless explicitly top-down. No scenery, character, text, UI, checkerboard, decorative symbols, floor or cast shadow. Single frozen material ingredient, not a finished scene or icon.",
+      "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-b6d06633-6f70-450f-a453-8659d14e7c5f.png"
+    }
+  ]
+}

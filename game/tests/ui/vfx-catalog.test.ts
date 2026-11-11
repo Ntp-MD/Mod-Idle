@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { sm } from '../../src/engine/client';
 import { activeVfxArt, activeVfxVersionId, setActiveVfxVersion, vfxArtCandidates, vfxVersionsFor } from '../../src/ui/fx/catalog';
@@ -8,6 +9,24 @@ import { POOL_VERSIONS } from '../../src/ui/fx/pool.generated';
 const publicPath = (src: string) => path.join(process.cwd(), 'public', src.replace(/^\//, ''));
 
 describe('skill VFX pool', () => {
+  it('registers active material studies without promoting them or replacing Thunder Storm', () => {
+    const source = path.resolve(process.cwd(), '../docs/vfx-skill/component-vfx/outputs/library-v4');
+    const recipes = JSON.parse(fs.readFileSync(path.join(source, 'recipes.json'), 'utf8'));
+    const active = sm.all().filter((skill: any) => skill.type !== 'aura' && skill.id !== 'attack.thunder_storm');
+    expect(Object.keys(recipes).sort()).toEqual(active.map((skill: any) => skill.id).sort());
+    for (const [skill, recipe] of Object.entries(recipes) as [string, { version: string; shapes: string[] }][]) {
+      const version = vfxVersionsFor(skill).find(v => v.id === `pool-${recipe.version}`);
+      expect(version, skill).toBeDefined();
+      expect(version!.default, skill).toBe(false);
+      expect(version!.layers.map(layer => layer.id), skill).toEqual(recipe.shapes);
+    }
+    const protectedFiles = JSON.parse(fs.readFileSync(path.join(source, 'preserved-defaults.json'), 'utf8'));
+    expect(Object.keys(protectedFiles).some(file => file.includes('attack-thunder-storm'))).toBe(true);
+    for (const [file, digest] of Object.entries(protectedFiles)) {
+      const bytes = fs.readFileSync(path.resolve(process.cwd(), '..', file));
+      expect(createHash('sha256').update(bytes).digest('hex'), file).toBe(digest);
+    }
+  });
   it('keeps the fallback active until a default pointer promotes a component recipe', () => {
     const missing = sm.all().filter((skill: any) => vfxVersionsFor(skill.id).length === 0)
       .map((skill: any) => skill.id).sort();
@@ -16,7 +35,7 @@ describe('skill VFX pool', () => {
       const versions = vfxVersionsFor(skill.id);
       expect(versions.some((version) => version.id === 'pool-rimworld'), skill.id).toBe(true);
       for (const version of versions) {
-        expect(['pool-rimworld', 'pool-vfx-component'], skill.id).toContain(version.id);
+        expect(version.id, skill.id).toMatch(/^pool-(rimworld|vfx-component|v\d+)$/);
       }
       const defaults = versions.filter((version) => version.default);
       expect(defaults.length, skill.id).toBeLessThanOrEqual(1);
@@ -43,7 +62,7 @@ describe('skill VFX pool', () => {
         expect(version.layers, version.id).toEqual([]);
         continue;
       }
-      expect(version.id).toBe('pool-vfx-component');
+      expect(version.id).toMatch(/^pool-(vfx-component|v\d+)$/);
       expect(version.layers.length).toBeGreaterThan(0);
       for (const layer of version.layers) {
         expect(layer.frame.count).toBeGreaterThan(0);

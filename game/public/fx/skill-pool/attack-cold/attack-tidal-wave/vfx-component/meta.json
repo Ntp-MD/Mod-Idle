@@ -1,0 +1,73 @@
+{
+  "layerId": "wave-crest",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.8,
+  "palette": "cold",
+  "sizePolicy": "world",
+  "binding": "area",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.8,
+  "authoringGeometry": {
+    "shape": "line",
+    "lengthM": 10,
+    "widthM": 3,
+    "delivery": "ground"
+  },
+  "opacity": 1,
+  "phases": [
+    "Impact"
+  ],
+  "durationSec": 1.2,
+  "src": "/fx/skill-pool/attack-cold/attack-tidal-wave/vfx-component/wave-crest.png",
+  "additionalLayers": [
+    {
+      "layerId": "cloud-mist",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.65,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.65,
+      "palette": "cold",
+      "authoringGeometry": {
+        "shape": "circle",
+        "spanM": 4,
+        "depthM": 2
+      },
+      "sizePolicy": "world",
+      "binding": "area",
+      "opacity": 0.5,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.4,
+      "file": "cloud-mist.png"
+    }
+  ],
+  "composition": "Independent component recipe: wave-crest, cloud-mist",
+  "componentRecipe": {
+    "mode": "line-ground",
+    "shapes": [
+      "wave-crest",
+      "cloud-mist"
+    ],
+    "humanReview": false
+  }
+}

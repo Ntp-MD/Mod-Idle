@@ -1,0 +1,71 @@
+{
+  "layerId": "forked-bolt",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.85,
+  "palette": "lightning",
+  "sizePolicy": "world",
+  "binding": "area",
+  "orient": false,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.85,
+  "authoringGeometry": {
+    "shape": "circle",
+    "spanM": 0.8,
+    "depthM": 3
+  },
+  "opacity": 1,
+  "phases": [
+    "Impact"
+  ],
+  "durationSec": 0.8,
+  "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/vfx-component/forked-bolt.png",
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "lightning",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "opacity": 0.9,
+      "scale": 1.1,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 0.6,
+      "file": "impact-burst.png"
+    }
+  ],
+  "composition": "Independent component recipe: forked-bolt, impact-burst",
+  "componentRecipe": {
+    "mode": "sigil",
+    "shapes": [
+      "forked-bolt",
+      "impact-burst"
+    ],
+    "humanReview": false
+  }
+}

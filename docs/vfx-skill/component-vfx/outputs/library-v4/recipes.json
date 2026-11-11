@@ -1,0 +1,538 @@
+{
+  "attack.fireball": {
+    "version": "v5",
+    "shapes": [
+      "molten-projectile",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ]
+  },
+  "attack.firestorm": {
+    "version": "v6",
+    "shapes": [
+      "flame-tongue",
+      "ember-ground-cracks",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.meteor": {
+    "version": "v5",
+    "shapes": [
+      "rock-core",
+      "flame-tongue",
+      "rock-shrapnel",
+      "ember-ground-cracks"
+    ]
+  },
+  "attack.cinder_nova": {
+    "version": "v4",
+    "shapes": [
+      "shockwave-ring",
+      "flame-tongue",
+      "ember-ground-cracks"
+    ]
+  },
+  "attack.ignite": {
+    "version": "v2",
+    "shapes": [
+      "flame-tongue",
+      "mote"
+    ]
+  },
+  "attack.ice_lance": {
+    "version": "v2",
+    "shapes": [
+      "ice-lance",
+      "frost-fracture"
+    ]
+  },
+  "attack.glacial_spike": {
+    "version": "v2",
+    "shapes": [
+      "ice-lance",
+      "ice-shard-cluster",
+      "fragment-debris"
+    ]
+  },
+  "attack.frostbite": {
+    "version": "v2",
+    "shapes": [
+      "ice-shard-cluster",
+      "cloud-mist"
+    ]
+  },
+  "attack.frost_nova": {
+    "version": "v3",
+    "shapes": [
+      "shockwave-ring",
+      "frost-fracture",
+      "fragment-debris"
+    ]
+  },
+  "attack.blizzard": {
+    "version": "v9",
+    "shapes": [
+      "fragment-debris",
+      "frost-fracture",
+      "cloud-mist"
+    ]
+  },
+  "attack.water_ball": {
+    "version": "v4",
+    "shapes": [
+      "orb-core",
+      "water-impact-crown",
+      "cloud-mist"
+    ]
+  },
+  "attack.tidal_wave": {
+    "version": "v4",
+    "shapes": [
+      "wave-crest",
+      "water-jet",
+      "water-impact-crown"
+    ]
+  },
+  "attack.shatter": {
+    "version": "v3",
+    "shapes": [
+      "ice-shard-cluster",
+      "fragment-debris",
+      "frost-fracture"
+    ]
+  },
+  "attack.spark": {
+    "version": "v2",
+    "shapes": [
+      "electric-contact",
+      "lightning-arc"
+    ]
+  },
+  "attack.chain_lightning": {
+    "version": "v3",
+    "shapes": [
+      "lightning-arc",
+      "electric-contact"
+    ]
+  },
+  "attack.thunder_strike": {
+    "version": "v4",
+    "shapes": [
+      "forked-bolt",
+      "electric-contact",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.overload": {
+    "version": "v3",
+    "shapes": [
+      "electric-contact",
+      "shockwave-ring",
+      "lightning-arc"
+    ]
+  },
+  "attack.poison_bolt": {
+    "version": "v2",
+    "shapes": [
+      "poison-droplet",
+      "acid-splash"
+    ]
+  },
+  "attack.acid_arrow": {
+    "version": "v2",
+    "shapes": [
+      "arrow-core",
+      "acid-splash",
+      "toxic-vapor"
+    ]
+  },
+  "attack.poison_cloud": {
+    "version": "v2",
+    "shapes": [
+      "toxic-vapor",
+      "ground-residue"
+    ]
+  },
+  "attack.hemotoxin": {
+    "version": "v2",
+    "shapes": [
+      "poison-droplet",
+      "blood-contact",
+      "bind-strand"
+    ]
+  },
+  "attack.contagion": {
+    "version": "v2",
+    "shapes": [
+      "poison-droplet",
+      "toxic-vapor",
+      "acid-splash"
+    ]
+  },
+  "attack.venom_coffin": {
+    "version": "v2",
+    "shapes": [
+      "poison-droplet",
+      "root-entangle",
+      "toxic-vapor"
+    ]
+  },
+  "attack.chaos_bolt": {
+    "version": "v2",
+    "shapes": [
+      "crescent-wave",
+      "void-rift"
+    ]
+  },
+  "attack.void_blast": {
+    "version": "v3",
+    "shapes": [
+      "void-rift",
+      "shockwave-ring",
+      "gravitic-lens"
+    ]
+  },
+  "attack.chaos_wave": {
+    "version": "v2",
+    "shapes": [
+      "shockwave-ring",
+      "gravitic-lens",
+      "cloud-mist"
+    ]
+  },
+  "attack.void_ray": {
+    "version": "v4",
+    "shapes": [
+      "ribbon-beam",
+      "void-rift",
+      "electric-contact"
+    ]
+  },
+  "attack.void_orb": {
+    "version": "v3",
+    "shapes": [
+      "orb-core",
+      "gravitic-lens",
+      "void-rift"
+    ]
+  },
+  "attack.entropy_well": {
+    "version": "v4",
+    "shapes": [
+      "gravitic-lens",
+      "void-rift",
+      "mote"
+    ]
+  },
+  "attack.unravel": {
+    "version": "v2",
+    "shapes": [
+      "crescent-wave",
+      "tether-strand",
+      "fragment-debris"
+    ]
+  },
+  "attack.sand_storm": {
+    "version": "v3",
+    "shapes": [
+      "sand-vortex",
+      "dust-impact-plume",
+      "rock-shrapnel"
+    ]
+  },
+  "attack.earth_splitter": {
+    "version": "v2",
+    "shapes": [
+      "crack-strip",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.earth_shock": {
+    "version": "v3",
+    "shapes": [
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.aftershock": {
+    "version": "v4",
+    "shapes": [
+      "crack-strip",
+      "shockwave-ring",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.stone_spike": {
+    "version": "v4",
+    "shapes": [
+      "stone-spike",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.fissure": {
+    "version": "v7",
+    "shapes": [
+      "crack-strip",
+      "stone-spike",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.backstab": {
+    "version": "v2",
+    "shapes": [
+      "blade-thrust",
+      "blood-contact"
+    ]
+  },
+  "attack.impale": {
+    "version": "v2",
+    "shapes": [
+      "blade-thrust",
+      "blood-contact",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.skull_crack": {
+    "version": "v2",
+    "shapes": [
+      "impact-burst",
+      "rock-shrapnel"
+    ]
+  },
+  "attack.ground_slam": {
+    "version": "v3",
+    "shapes": [
+      "crack-strip",
+      "shockwave-ring",
+      "rock-shrapnel",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.cleave": {
+    "version": "v6",
+    "shapes": [
+      "heavy-cleave",
+      "blood-contact"
+    ]
+  },
+  "attack.elemental_break": {
+    "version": "v2",
+    "shapes": [
+      "heavy-cleave",
+      "barrier-facets",
+      "electric-contact"
+    ]
+  },
+  "attack.whirlwind": {
+    "version": "v4",
+    "shapes": [
+      "heavy-cleave",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.shield_bash": {
+    "version": "v2",
+    "shapes": [
+      "barrier-facets",
+      "impact-burst"
+    ]
+  },
+  "attack.puncture": {
+    "version": "v2",
+    "shapes": [
+      "blade-thrust",
+      "blood-contact",
+      "mote"
+    ]
+  },
+  "attack.reap": {
+    "version": "v2",
+    "shapes": [
+      "heavy-cleave",
+      "blood-contact",
+      "cloud-mist"
+    ]
+  },
+  "attack.piercing_shot": {
+    "version": "v5",
+    "shapes": [
+      "arrow-core",
+      "blade-thrust",
+      "impact-burst"
+    ]
+  },
+  "attack.arrow_shower": {
+    "version": "v6",
+    "shapes": [
+      "arrow-core",
+      "dust-impact-plume"
+    ]
+  },
+  "attack.headshot": {
+    "version": "v2",
+    "shapes": [
+      "arrow-core",
+      "blood-contact"
+    ]
+  },
+  "attack.split_shot": {
+    "version": "v3",
+    "shapes": [
+      "arrow-core",
+      "impact-burst"
+    ]
+  },
+  "attack.double_strafe": {
+    "version": "v3",
+    "shapes": [
+      "arrow-core",
+      "blade-thrust"
+    ]
+  },
+  "attack.double_strike": {
+    "version": "v2",
+    "shapes": [
+      "slash-sweep",
+      "blade-thrust",
+      "blood-contact"
+    ]
+  },
+  "buff.warcry": {
+    "version": "v2",
+    "shapes": [
+      "shockwave-ring",
+      "dust-impact-plume"
+    ]
+  },
+  "buff.berserker": {
+    "version": "v2",
+    "shapes": [
+      "flame-tongue",
+      "healing-wisps"
+    ]
+  },
+  "buff.iron_will": {
+    "version": "v2",
+    "shapes": [
+      "barrier-facets",
+      "rock-shrapnel"
+    ]
+  },
+  "buff.holy_veil": {
+    "version": "v2",
+    "shapes": [
+      "shield-dome",
+      "healing-wisps"
+    ]
+  },
+  "buff.ghost_dance": {
+    "version": "v2",
+    "shapes": [
+      "healing-wisps",
+      "cloud-mist"
+    ]
+  },
+  "buff.earth_wall": {
+    "version": "v2",
+    "shapes": [
+      "wall-segment",
+      "dust-impact-plume"
+    ]
+  },
+  "buff.magia_drive": {
+    "version": "v2",
+    "shapes": [
+      "healing-wisps",
+      "electric-contact"
+    ]
+  },
+  "buff.energy_absorb": {
+    "version": "v2",
+    "shapes": [
+      "gravitic-lens",
+      "healing-wisps"
+    ]
+  },
+  "buff.flame_guard": {
+    "version": "v5",
+    "shapes": [
+      "shield-dome",
+      "flame-tongue"
+    ]
+  },
+  "buff.enchant_poison": {
+    "version": "v3",
+    "shapes": [
+      "poison-droplet",
+      "toxic-vapor"
+    ]
+  },
+  "curse.weaken": {
+    "version": "v2",
+    "shapes": [
+      "healing-wisps",
+      "cloud-mist"
+    ]
+  },
+  "curse.blinding_mark": {
+    "version": "v2",
+    "shapes": [
+      "toxic-vapor",
+      "mark-sigil"
+    ]
+  },
+  "curse.expose": {
+    "version": "v2",
+    "shapes": [
+      "barrier-facets",
+      "mark-sigil"
+    ]
+  },
+  "curse.cripple": {
+    "version": "v2",
+    "shapes": [
+      "root-entangle",
+      "dust-impact-plume"
+    ]
+  },
+  "curse.jinx": {
+    "version": "v5",
+    "shapes": [
+      "tether-strand",
+      "void-rift"
+    ]
+  },
+  "curse.venom_bind": {
+    "version": "v3",
+    "shapes": [
+      "root-entangle",
+      "acid-splash"
+    ]
+  },
+  "heal.heal": {
+    "version": "v4",
+    "shapes": [
+      "healing-wisps",
+      "mote"
+    ]
+  },
+  "heal.greater_heal": {
+    "version": "v2",
+    "shapes": [
+      "healing-wisps",
+      "column-eruption",
+      "ground-edge"
+    ]
+  },
+  "heal.cleanse": {
+    "version": "v2",
+    "shapes": [
+      "shockwave-ring",
+      "water-impact-crown",
+      "healing-wisps"
+    ]
+  }
+}

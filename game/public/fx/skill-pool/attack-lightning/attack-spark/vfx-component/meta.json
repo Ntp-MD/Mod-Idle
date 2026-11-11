@@ -1,0 +1,70 @@
+{
+  "layerId": "projectile-core",
+  "columns": 1,
+  "rows": 1,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "palette": "lightning",
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "sizePolicy": "body",
+  "orient": true,
+  "opacity": 1,
+  "phases": [
+    "Windup",
+    "Travel",
+    "Impact"
+  ],
+  "src": "/fx/skill-pool/attack-lightning/attack-spark/vfx-component/projectile-core.png",
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "lightning",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "opacity": 0.9,
+      "scale": 1.1,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 0.6,
+      "file": "impact-burst.png"
+    }
+  ],
+  "composition": "Independent component recipe: projectile-core, impact-burst",
+  "componentRecipe": {
+    "mode": "bolt",
+    "shapes": [
+      "projectile-core",
+      "impact-burst"
+    ],
+    "humanReview": false
+  }
+}

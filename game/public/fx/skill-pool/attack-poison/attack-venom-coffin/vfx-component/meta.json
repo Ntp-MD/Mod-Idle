@@ -1,0 +1,99 @@
+{
+  "layerId": "orb-core",
+  "columns": 1,
+  "rows": 1,
+  "imageWidth": 1024,
+  "imageHeight": 1024,
+  "cellWidth": 1024,
+  "cellHeight": 1024,
+  "frameMs": 80,
+  "contentWidthRatio": 0.8,
+  "contentHeightRatio": 0.8,
+  "anchorX": 0.5,
+  "anchorY": 0.5,
+  "palette": "poison",
+  "sizePolicy": "body",
+  "orient": true,
+  "impactAnchorX": 0.5,
+  "impactAnchorY": 0.5,
+  "authoringGeometry": {
+    "shape": "single",
+    "delivery": "projectile"
+  },
+  "opacity": 1,
+  "phases": [
+    "Windup",
+    "Travel",
+    "Impact"
+  ],
+  "src": "/fx/skill-pool/attack-poison/attack-venom-coffin/vfx-component/orb-core.png",
+  "additionalLayers": [
+    {
+      "layerId": "impact-burst",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "poison",
+      "authoringGeometry": {
+        "shape": "single"
+      },
+      "sizePolicy": "body",
+      "binding": "contact",
+      "opacity": 0.9,
+      "scale": 1.1,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 0.6,
+      "file": "impact-burst.png"
+    },
+    {
+      "layerId": "mark-sigil",
+      "columns": 1,
+      "rows": 1,
+      "cellWidth": 1024,
+      "cellHeight": 1024,
+      "imageWidth": 1024,
+      "imageHeight": 1024,
+      "frameMs": 80,
+      "contentWidthRatio": 0.8,
+      "contentHeightRatio": 0.8,
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "impactAnchorX": 0.5,
+      "impactAnchorY": 0.5,
+      "palette": "poison",
+      "authoringGeometry": {
+        "shape": "circle"
+      },
+      "sizePolicy": "body",
+      "binding": "target",
+      "opacity": 0.85,
+      "phases": [
+        "Impact"
+      ],
+      "durationSec": 1.4,
+      "file": "mark-sigil.png"
+    }
+  ],
+  "composition": "Independent component recipe: orb-core, impact-burst, mark-sigil",
+  "componentRecipe": {
+    "mode": "bolt",
+    "shapes": [
+      "orb-core",
+      "impact-burst",
+      "mark-sigil"
+    ],
+    "humanReview": false
+  }
+}

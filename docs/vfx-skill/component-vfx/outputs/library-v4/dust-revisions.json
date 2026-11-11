@@ -1,0 +1,17 @@
+[
+  {
+    "prompt": "Create ONE isolated production VFX raw master texture for a dark fantasy action RPG, square canvas with TRUE TRANSPARENT alpha background. A low mushrooming impact dust plume, dense opaque grit near the central foot and transparent rolling dust lobes spreading sideways, sparse ballistic pebbles, heavy dry material. No flame, no ring. View: upright screen-facing billboard, full effect entirely inside central 75% of canvas, bottom contact at 80% image height. Near-neutral ivory and charcoal values for runtime palette mapping; realistic painterly material definition, excellent small-scale silhouette, controlled highlights, detail concentrated in large readable forms. No scenery, character, weapon, UI, text, borders, checkerboard, ground shadow or decorative magic symbols. This is a reusable material ingredient, not a skill icon or finished scene.",
+    "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-f3b61fa4-6b8c-4648-9a9b-8eb44c1c9c54.png",
+    "accepted": false
+  },
+  {
+    "prompt": "ONE isolated dust impact sprite, actual transparent alpha background. A compact low pile of rolling dust curls and a few coarse pebbles thrown upward from a central contact. Earthy realistic painterly particle texture in neutral gray and ivory. ALL empty space around the plume must be fully transparent alpha zero: absolutely NO atmospheric haze, NO rectangular dust field, NO backdrop, NO checkerboard, NO ground plane or shadow. Every outer edge dissolves into transparency. Plume entirely within central 65 percent of a square image. Wide low silhouette, no text, no border, no scenery. This is a reusable dark fantasy game VFX ingredient.",
+    "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-7d93584a-481f-437b-92ef-6c24b87fe97d.png",
+    "accepted": false
+  },
+  {
+    "prompt": "Edit this dust sprite into a true transparent PNG cutout for a game. REMOVE THE ENTIRE BACKGROUND including all white, gray vignette, atmosphere, ground and cast shadows. All canvas pixels outside the actual dust curls and flying pebbles MUST have alpha exactly zero. Preserve only the central airborne dust impact plume and stones. Keep detailed soft partially transparent dust edges; clean fully transparent empty margins on every side. No white or black matte and no rectangular fog. Return the isolated airborne dust effect on transparent background.",
+    "sourceOutput": "C:\\Users\\disda\\.codex-acc1\\generated_images\\01a1c5ed-0033-7cc2-96ac-8cfa3cac0dae\\exec-a1eb43f2-151b-4400-8d43-17437f7c8da3.png",
+    "accepted": true
+  }
+]

@@ -27,13 +27,14 @@ function bytesOf(dir: string): number {
 describe('production art budgets', () => {
   it('keeps per-family source art within budget', () => {
     // Pilot baselines (MiB): src/icon 136.90, fx 163.34, combat 51.80, map 23.49.
-    // Budgets allow ~10% headroom for regeneration metadata, not for new bulk art.
+    // 2026-11-10: budget raised for the full-roster vfx-component rebuild (90 player skills
+    // from library masters, ~4 layers each); user approved ignoring size for the art pass.
     const iconBytes = bytesOf(path.join(process.cwd(), 'src/icon'));
     const fxBytes = bytesOf(path.join(process.cwd(), 'public/fx'));
     const combatBytes = bytesOf(path.join(process.cwd(), 'public/combat'));
     const mapBytes = bytesOf(path.join(process.cwd(), 'public/map'));
     expect(iconBytes / MIB, `src/icon ${iconBytes}`).toBeLessThan(150);
-    expect(fxBytes / MIB, `public/fx ${fxBytes}`).toBeLessThan(180);
+    expect(fxBytes / MIB, `public/fx ${fxBytes}`).toBeLessThan(300);
     expect(combatBytes / MIB, `public/combat ${combatBytes}`).toBeLessThan(60);
     expect(mapBytes / MIB, `public/map ${mapBytes}`).toBeLessThan(30);
   });
@@ -42,6 +43,6 @@ describe('production art budgets', () => {
     const dist = path.join(process.cwd(), 'dist');
     if (!fs.existsSync(dist)) return; // budget applies to fresh build; no build yet in CI unit run
     const total = bytesOf(dist);
-    expect(total / MIB, `dist ${total}`).toBeLessThan(420);
+    expect(total / MIB, `dist ${total}`).toBeLessThan(620);
   });
 });

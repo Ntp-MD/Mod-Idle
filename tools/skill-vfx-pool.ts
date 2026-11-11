@@ -299,6 +299,7 @@ for (const group of groups) {
     const pointer = defaultPointer(skillDir, slug);
     let preferred: string | null = pointer;
     const versions: Version[] = [];
+    const reviewOnly = new Set<string>();
     for (const versionEntry of fs.readdirSync(skillDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       if (!versionEntry.isDirectory() || versionEntry.name === 'default') continue;
       const version = versionEntry.name;
@@ -306,6 +307,7 @@ for (const group of groups) {
       const files = fs.readdirSync(dir);
       const metaFile = files.includes('meta.json') ? path.join(dir, 'meta.json') : null;
       const meta = metaFile ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : null;
+      if (meta?.reviewOnly === true) reviewOnly.add(`pool-${version}`);
       if (files.includes('version.json')) {
         const declared = JSON.parse(fs.readFileSync(path.join(dir, 'version.json'), 'utf8'));
         if (declared?.renderer === 'procedural') {
@@ -382,6 +384,7 @@ for (const group of groups) {
       let best = -1;
       let bestName: string | null = null;
       for (const v of versions) {
+        if (reviewOnly.has(v.id)) continue;
         const m = v.id.match(/^pool-v(\d+)$/);
         const n = m ? Number(m[1]) : -1;
         if (n > best) { best = n; bestName = `v${n}`; }
