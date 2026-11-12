@@ -1,76 +1,94 @@
 {
-  "layerId": "poison-droplet",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "palette": "poison",
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
-  "orient": true,
   "id": "attack.poison_bolt",
-  "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/poison-droplet.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "acid-splash",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "acid-splash.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "url": "https://assetstore.unity.com/packages/package/345212",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "eric-fx-green-hit",
+      "bakedSha256": "3177b6b36efed1d125b9efc8d4bf56ced889707dad997b770290fb5b751d2968"
+    },
+    {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "url": "https://assetstore.unity.com/packages/package/10419",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "gaph-swampball",
+      "bakedSha256": "6d3e45fb4532415858cbd0c7d7f33d3e67065bb9433a6b16cafa80cd89fbb94e"
     }
   ],
-  "composition": "Material study: poison-droplet, acid-splash",
-  "componentRecipe": {
-    "shapes": [
-      "poison-droplet",
-      "acid-splash"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Free Game VFX Collection + 52 Special Effects Pack",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "eric-fx-green-hit",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/eric-fx-green-hit.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "poison"
+      },
+      {
+        "id": "gaph-swampball",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-poison-bolt/gaph-swampball.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.73828125,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "poison"
+      }
+    ]
   }
 }

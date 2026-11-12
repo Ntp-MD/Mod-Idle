@@ -1,114 +1,97 @@
 {
-  "layerId": "ribbon-beam",
-  "columns": 1,
-  "rows": 1,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "palette": "chaos",
-  "authoringGeometry": {
-    "shape": "line",
-    "lengthM": 8,
-    "widthM": 2
-  },
-  "sizePolicy": "world",
-  "orient": true,
-  "phases": [
-    "Channel",
-    "Impact"
-  ],
-  "durationSec": 3.0,
-  "opacity": 0.9,
-  "binding": "area",
   "id": "attack.void_ray",
-  "src": "/fx/skill-pool/attack-chaos/attack-void-ray/ribbon-beam.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "void-rift",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.4,
-        "depthM": 3
-      },
-      "file": "void-rift.png",
-      "palette": "chaos",
-      "phases": [
-        "Channel",
-        "Impact"
-      ],
-      "durationSec": 3.0,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "url": "https://assetstore.unity.com/packages/package/303479",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "zap-vfx-zap-07-black",
+      "bakedSha256": "59fd1c1b7c7526c1503d3c6772d1e662a153a0ffa4c63740f566f59fd151acef"
     },
     {
-      "layerId": "electric-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "electric-contact.png",
-      "palette": "chaos",
-      "phases": [
-        "Channel",
-        "Impact"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "scale": 0.65,
-      "orient": false
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "url": "https://assetstore.unity.com/packages/package/304424",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "quick-vfx-lightning-01",
+      "bakedSha256": "c037f77de00576cd0572459ca117ec2092753e61fdac416ab1aff4185dcdc8ae"
     }
   ],
-  "composition": "Material study: ribbon-beam, void-rift, electric-contact",
-  "componentRecipe": {
-    "shapes": [
-      "ribbon-beam",
-      "void-rift",
-      "electric-contact"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Zap VFX - URP + Free Quick Effects Vol. 1",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "zap-vfx-zap-07-black",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-void-ray/zap-vfx-zap-07-black.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.16796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "chaos"
+      },
+      {
+        "id": "quick-vfx-lightning-01",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-void-ray/quick-vfx-lightning-01.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.64453125
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "chaos",
+        "placement": {
+          "kind": "tether"
+        }
+      }
+    ]
   }
 }

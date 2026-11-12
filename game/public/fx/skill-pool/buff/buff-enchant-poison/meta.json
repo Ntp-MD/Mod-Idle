@@ -1,79 +1,52 @@
 {
-  "layerId": "poison-droplet",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "caster",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.5,
-  "opacity": 0.9,
   "id": "buff.enchant_poison",
-  "src": "/fx/skill-pool/buff/buff-enchant-poison/poison-droplet.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "toxic-vapor",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "caster",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "file": "toxic-vapor.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.5,
-      "opacity": 0.4,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "url": "https://assetstore.unity.com/packages/package/345212",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "eric-fx-weapon-effect",
+      "bakedSha256": "adc6ad719303e144a99ee997d4deb327aa54b9acba793c99c3f26929feae7e56"
     }
   ],
-  "composition": "Material study: poison-droplet, toxic-vapor",
-  "componentRecipe": {
-    "shapes": [
-      "poison-droplet",
-      "toxic-vapor"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Free Game VFX Collection",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "eric-fx-weapon-effect",
+        "role": "upright",
+        "src": "/fx/skill-pool/buff/buff-enchant-poison/eric-fx-weapon-effect.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.58984375
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

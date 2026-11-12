@@ -1,112 +1,94 @@
 {
-  "layerId": "crescent-wave",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "chaos",
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "sizePolicy": "body",
-  "orient": true,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
   "id": "attack.unravel",
-  "src": "/fx/skill-pool/attack-chaos/attack-unravel/crescent-wave.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "tether-strand",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "palette": "chaos",
-      "authoringGeometry": {
-        "shape": "line",
-        "widthM": 0.15
-      },
-      "sizePolicy": "world",
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "file": "tether-strand.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "placement": {
-        "kind": "tether"
-      },
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "url": "https://assetstore.unity.com/packages/package/303479",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "zap-vfx-zap-05-purple",
+      "bakedSha256": "bc64eb4529ae31b6d47f280b10794d9ab7835617e6ac6fa66fde3dfc10f65240"
     },
     {
-      "layerId": "fragment-debris",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "chaos",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "contact",
-      "file": "fragment-debris.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "scale": 0.45,
-      "orient": false
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "url": "https://assetstore.unity.com/packages/package/304424",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "quick-vfx-projectile-02",
+      "bakedSha256": "4cfacd1b9ed5e870560a9ee39992b9c57b363fd9df729e9ed0c9712ee4538126"
     }
   ],
-  "composition": "Material study: crescent-wave, tether-strand, fragment-debris",
-  "componentRecipe": {
-    "shapes": [
-      "crescent-wave",
-      "tether-strand",
-      "fragment-debris"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Zap VFX - URP + Free Quick Effects Vol. 1",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "zap-vfx-zap-05-purple",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-unravel/zap-vfx-zap-05-purple.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.19140625,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "chaos"
+      },
+      {
+        "id": "quick-vfx-projectile-02",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-unravel/quick-vfx-projectile-02.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "chaos"
+      }
+    ]
   }
 }

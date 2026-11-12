@@ -1,121 +1,95 @@
 {
-  "layerId": "shockwave-ring",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "chaos",
-  "authoringGeometry": {
-    "shape": "circle"
-  },
-  "sizePolicy": "footprint",
-  "projection": "ground",
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.5,
-  "opacity": 0.55,
-  "binding": "area",
-  "placement": {
-    "kind": "expand",
-    "fromScale": 0.12
-  },
   "id": "attack.chaos_wave",
-  "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/shockwave-ring.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "gravitic-lens",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "gravitic-lens.png",
-      "palette": "chaos",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4,
-      "opacity": 0.55,
-      "placement": {
-        "kind": "spin",
-        "cycleSec": 2.7
-      },
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "url": "https://assetstore.unity.com/packages/package/247933",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hovl-aoe-slash-green",
+      "bakedSha256": "db1905f58f9607f03ce102eed2657ac863095e270302e7db98cd9cfe9cff566f"
     },
     {
-      "layerId": "cloud-mist",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.65,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.65,
-      "palette": "chaos",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "sizePolicy": "world",
-      "binding": "area",
-      "file": "cloud-mist.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "url": "https://assetstore.unity.com/packages/package/304424",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "quick-vfx-portal-02",
+      "bakedSha256": "21dec09eeb21b4737a1ee14c0e716781391b67b572b5921ef1796a21a4d6453f"
     }
   ],
-  "composition": "Material study: shockwave-ring, gravitic-lens, cloud-mist",
-  "componentRecipe": {
-    "shapes": [
-      "shockwave-ring",
-      "gravitic-lens",
-      "cloud-mist"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Magic Effects FREE + Free Quick Effects Vol. 1",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "hovl-aoe-slash-green",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/hovl-aoe-slash-green.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.578125
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "chaos"
+      },
+      {
+        "id": "quick-vfx-portal-02",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-chaos-wave/quick-vfx-portal-02.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Impact",
+          "Field",
+          "Channel"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.25,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "chaos"
+      }
+    ]
+  }
 }

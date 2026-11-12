@@ -1,109 +1,93 @@
 {
-  "layerId": "slash-sweep",
-  "columns": 1,
-  "rows": 1,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "palette": "physical",
-  "authoringGeometry": {
-    "shape": "cone"
-  },
-  "sizePolicy": "world",
-  "orient": false,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.double_strike",
-  "src": "/fx/skill-pool/attack-phy/attack-double-strike/slash-sweep.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "blade-thrust",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blade-thrust.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 393438,
+      "pack": "Free RPG VFX Sprite Sheet Starter Pack",
+      "url": "https://assetstore.unity.com/packages/package/393438",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "sheet-magic-slash",
+      "bakedSha256": "510cbb37346ed7b3c69058d79558d0ad10c0fb6e6137bc486cd71fa1a068fe70"
     },
     {
-      "layerId": "blood-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blood-contact.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "scale": 0.65,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr4-sword-hit-plain-cross",
+      "bakedSha256": "85d340ff272d2775a4d2a4886a96852d94acd5abbba7ac448d33c4a4f0880fd5"
     }
   ],
-  "composition": "Material study: slash-sweep, blade-thrust, blood-contact",
-  "componentRecipe": {
-    "shapes": [
-      "slash-sweep",
-      "blade-thrust",
-      "blood-contact"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Free RPG VFX Sprite Sheet Starter Pack + Cartoon FX Remaster Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "sheet-magic-slash",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-double-strike/VFX_SpriteSheet_9x9_210818.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 81,
+          "columns": 9,
+          "rows": 9
+        },
+        "fps": 81,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.78515625
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      },
+      {
+        "id": "cartoon-cfxr4-sword-hit-plain-cross",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-double-strike/cartoon-cfxr4-sword-hit-plain-cross.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.6171875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      }
+    ]
   }
 }

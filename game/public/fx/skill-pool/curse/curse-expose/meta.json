@@ -1,77 +1,52 @@
 {
-  "layerId": "barrier-facets",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "target",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "curse.expose",
-  "src": "/fx/skill-pool/curse/curse-expose/barrier-facets.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "mark-sigil",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "sizePolicy": "body",
-      "binding": "target",
-      "file": "mark-sigil.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr3-hit-light-b-air",
+      "bakedSha256": "5d13b0f3ddac5dc09bc1b5f9676931f3c97cd96b2b6d59df704567bb60b80b5a"
     }
   ],
-  "composition": "Material study: barrier-facets, mark-sigil",
-  "componentRecipe": {
-    "shapes": [
-      "barrier-facets",
-      "mark-sigil"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Cartoon FX Remaster Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "cartoon-cfxr3-hit-light-b-air",
+        "role": "upright",
+        "src": "/fx/skill-pool/curse/curse-expose/cartoon-cfxr3-hit-light-b-air.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.71484375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

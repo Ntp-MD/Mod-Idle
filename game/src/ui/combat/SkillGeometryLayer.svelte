@@ -4,7 +4,7 @@
   import { createFieldViewFrame, type FieldViewFrame } from '../../presentation/arena-view-frame';
   import { fieldPointM } from '../../presentation/view-transform';
   import type { SkillAimGeometry, SkillGeometry, BodyModelM } from './skill-geometry';
-  import { directionalAtlasFor, groundDecalMatrixForFrame, resolveVfxPresentation, skillArtFor, vfxPresentationTailSec, type SkillVfxMode } from './arena-skill-art';
+  import { atlasOpacity, directionalAtlasFor, groundDecalMatrixForFrame, resolveVfxPresentation, skillArtFor, vfxPresentationTailSec, type SkillVfxMode } from './arena-skill-art';
   import { matrixAttribute } from '../../presentation/view-transform';
   import { projectSkillGeometry, skillActionGeometry, skillAimGeometry, skillPayloadGeometry } from './skill-geometry';
   import { activeAuraGeometry } from './skill-aura-geometry';
@@ -20,6 +20,7 @@
   const DECAL_PX = 2048;
   type ArtView = {
     atlas?: VfxAtlas;
+    atlases?: VfxAtlas[];
     decal?: string;
     decalTransform?: string;
     decalOpacity?: number;
@@ -31,7 +32,7 @@
     const art = skillArtFor(mark.skillId, vfxMode);
     if (!art) return null;
     if (art.atlas) {
-      return { atlas: art.atlas };
+      return { atlas: art.atlas, atlases: art.atlases };
     }
     if (!frame.renderable) return null;
     const reach = mark.area.lengthM ?? mark.area.radiusM;
@@ -156,6 +157,7 @@
   {#each marks as mark (mark.key)}
     {@const screen = screenOf(mark)}
     {@const art = screen && effectiveFrame.renderable ? artFor(mark, screen, effectiveFrame) : null}
+    {@const phaseArt = (art?.atlases ?? (art?.atlas ? [art.atlas] : [])).some(atlas => atlasOpacity(mark, atlas) > 0)}
     {#if screen}
     <g class="skill-geometry" class:incoming={mark.incoming} class:invalid={!mark.valid}
       class:aim={mark.phase === 'Aim'} class:impact={mark.phase === 'Impact'}
@@ -181,7 +183,7 @@
         </g>
       {/if}
       {#if mark.phase === 'Aim' && screen.rangePath}<path class="skill-range-shadow" d={screen.rangePath} /><path class="skill-range" d={screen.rangePath} />{/if}
-      {#if !art?.atlas || art.atlas.rainDurationSec || inspect || mark.phase === 'Aim' || mark.phase === 'Windup'}
+      {#if !phaseArt || art?.atlas?.rainDurationSec || inspect || mark.phase === 'Aim' || mark.phase === 'Windup'}
         <path class="skill-outline-shadow" d={screen.footprint} />
         <path class="skill-footprint" d={screen.footprint} />
         <path class="skill-inner" d={screen.innerFootprint} />
@@ -196,7 +198,7 @@
         </g>
         <path class="skill-arrival-edge" d={screen.footprint} pathLength="1" stroke-dasharray={`${mark.progress} 1`} />
       {/if}
-      {#if !art?.atlas && effectiveFrame.renderable}<ArenaSkillVfxStage {mark} screen={screen} frame={effectiveFrame} {reducedMotion} />{/if}
+      {#if !phaseArt && effectiveFrame.renderable}<ArenaSkillVfxStage {mark} screen={screen} frame={effectiveFrame} {reducedMotion} />{/if}
       {#if mark.phase === 'Aim' || inspect}
         <line class="skill-direction" x1={screen.direction.from.x} y1={screen.direction.from.y} x2={screen.direction.to.x} y2={screen.direction.to.y} />
         <path class="skill-target" d="M-9 0H9M0-9V9" transform={`translate(${screen.direction.to.x} ${screen.direction.to.y})`} />

@@ -1,78 +1,52 @@
 {
-  "layerId": "healing-wisps",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "caster",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.5,
-  "opacity": 0.4,
   "id": "buff.magia_drive",
-  "src": "/fx/skill-pool/buff/buff-magia-drive/healing-wisps.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "electric-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "caster",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "electric-contact.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "url": "https://assetstore.unity.com/packages/package/200333",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hyper-area-magic-multicolor",
+      "bakedSha256": "a9500348cd238b10e7d7dd21566e88078296bc9196a14483fa9b8c934b53d6f2"
     }
   ],
-  "composition": "Material study: healing-wisps, electric-contact",
-  "componentRecipe": {
-    "shapes": [
-      "healing-wisps",
-      "electric-contact"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Hyper Casual FX",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "hyper-area-magic-multicolor",
+        "role": "upright",
+        "src": "/fx/skill-pool/buff/buff-magia-drive/hyper-area-magic-multicolor.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.62109375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

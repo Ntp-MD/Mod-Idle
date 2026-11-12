@@ -1,109 +1,94 @@
 {
-  "layerId": "poison-droplet",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "palette": "poison",
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
-  "orient": true,
   "id": "attack.hemotoxin",
-  "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/poison-droplet.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "blood-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blood-contact.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr2-blood-directional",
+      "bakedSha256": "2f4303328b9c36b5ca59abea0392651b124843cd95cb1dbc6a12def7d9869932"
     },
     {
-      "layerId": "bind-strand",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "palette": "poison",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "target",
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "file": "bind-strand.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "url": "https://assetstore.unity.com/packages/package/10419",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "gaph-swampball",
+      "bakedSha256": "6d3e45fb4532415858cbd0c7d7f33d3e67065bb9433a6b16cafa80cd89fbb94e"
     }
   ],
-  "composition": "Material study: poison-droplet, blood-contact, bind-strand",
-  "componentRecipe": {
-    "shapes": [
-      "poison-droplet",
-      "blood-contact",
-      "bind-strand"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Cartoon FX Remaster Free + 52 Special Effects Pack",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "cartoon-cfxr2-blood-directional",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/cartoon-cfxr2-blood-directional.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.5859375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "poison"
+      },
+      {
+        "id": "gaph-swampball",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-hemotoxin/gaph-swampball.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.73828125,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "poison"
+      }
+    ]
   }
 }

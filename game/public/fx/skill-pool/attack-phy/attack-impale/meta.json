@@ -1,112 +1,93 @@
 {
-  "layerId": "blade-thrust",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "contact",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.impale",
-  "src": "/fx/skill-pool/attack-phy/attack-impale/blade-thrust.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "blood-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blood-contact.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr2-blood-shape-splash",
+      "bakedSha256": "99ef594a4fdd020ac6ff3c27130d86bd6da27f4afff3456cf8a9ee818911fa2e"
     },
     {
-      "layerId": "dust-impact-plume",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 3,
-        "depthM": 1.5
-      },
-      "file": "dust-impact-plume.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "url": "https://assetstore.unity.com/packages/package/309498",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "slash-slash-projectile-vfx-earth",
+      "bakedSha256": "43f270f176695aafa9652149c0947ebc05a08ff20677103c4a605f759b8d5479"
     }
   ],
-  "composition": "Material study: blade-thrust, blood-contact, dust-impact-plume",
-  "componentRecipe": {
-    "shapes": [
-      "blade-thrust",
-      "blood-contact",
-      "dust-impact-plume"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": true
+  "version": {
+    "id": "pool",
+    "label": "Cartoon FX Remaster Free + Free Slash VFX",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "cartoon-cfxr2-blood-shape-splash",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-impale/cartoon-cfxr2-blood-shape-splash.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.55859375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      },
+      {
+        "id": "slash-slash-projectile-vfx-earth",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-impale/slash-slash-projectile-vfx-earth.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.40234375
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      }
+    ]
+  }
 }

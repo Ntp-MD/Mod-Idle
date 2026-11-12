@@ -1,126 +1,103 @@
 {
-  "layerId": "crack-strip",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "earth",
-  "sizePolicy": "footprint",
-  "projection": "ground",
-  "binding": "area",
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "authoringGeometry": {
-    "shape": "line",
-    "lengthM": 6,
-    "widthM": 1
-  },
-  "orient": true,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.1,
-  "opacity": 0.55,
   "id": "attack.fissure",
-  "src": "/fx/skill-pool/attack-earth/attack-fissure/crack-strip.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "stone-spike",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.85,
-      "palette": "earth",
-      "sizePolicy": "world",
-      "binding": "area",
-      "orient": false,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.85,
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.2,
-        "depthM": 2.2
-      },
-      "file": "stone-spike.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.8,
-      "opacity": 0.9,
-      "placement": {
-        "kind": "line-series",
-        "spacingM": 1.5,
-        "staggerSec": 0.09
-      },
-      "delaySec": 0.07
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "url": "https://assetstore.unity.com/packages/package/309498",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "slash-slash-earth-vfx",
+      "bakedSha256": "d184d4d56f1935260d34877f10ef989cb9dc4c1125f3c9b28209ee66402f9c9c"
     },
     {
-      "layerId": "dust-impact-plume",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 3,
-        "depthM": 1.5
-      },
-      "file": "dust-impact-plume.png",
-      "palette": "earth",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.8,
-      "opacity": 0.4,
-      "placement": {
-        "kind": "line-series",
-        "spacingM": 1.5,
-        "staggerSec": 0.09
-      },
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "url": "https://assetstore.unity.com/packages/package/247933",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hovl-ground-aoe-explosion",
+      "bakedSha256": "ee2ebf8de311484fe5f9fcb7da19c83e22ffee41363db56ac935d67ace429cdd"
     }
   ],
-  "composition": "Material study: crack-strip, stone-spike, dust-impact-plume",
-  "componentRecipe": {
-    "shapes": [
-      "crack-strip",
-      "stone-spike",
-      "dust-impact-plume"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Free Slash VFX + Magic Effects FREE",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "slash-slash-earth-vfx",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-earth/attack-fissure/slash-slash-earth-vfx.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.5703125,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "earth",
+        "placement": {
+          "kind": "line-series",
+          "spacingM": 2,
+          "staggerSec": 0.04
+        }
+      },
+      {
+        "id": "hovl-ground-aoe-explosion",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-earth/attack-fissure/hovl-ground-aoe-explosion.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.6171875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "earth",
+        "placement": {
+          "kind": "line-series",
+          "spacingM": 2,
+          "staggerSec": 0.04
+        }
+      }
+    ]
   }
 }

@@ -1,82 +1,52 @@
 {
-  "layerId": "gravitic-lens",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "footprint",
-  "binding": "caster",
-  "authoringGeometry": {
-    "shape": "circle"
-  },
-  "projection": "ground",
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.5,
-  "opacity": 0.55,
-  "placement": {
-    "kind": "spin",
-    "cycleSec": 2.7
-  },
   "id": "buff.energy_absorb",
-  "src": "/fx/skill-pool/buff/buff-energy-absorb/gravitic-lens.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "healing-wisps",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "caster",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "healing-wisps.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.5,
-      "opacity": 0.4,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "url": "https://assetstore.unity.com/packages/package/345212",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "eric-fx-greenlight-shrink",
+      "bakedSha256": "65149d2229ec000c6e9c4e84fb96e7adfc8d3139f9ee9229328c54bda09960e1"
     }
   ],
-  "composition": "Material study: gravitic-lens, healing-wisps",
-  "componentRecipe": {
-    "shapes": [
-      "gravitic-lens",
-      "healing-wisps"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Free Game VFX Collection",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "eric-fx-greenlight-shrink",
+        "role": "upright",
+        "src": "/fx/skill-pool/buff/buff-energy-absorb/eric-fx-greenlight-shrink.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

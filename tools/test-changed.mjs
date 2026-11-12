@@ -44,9 +44,8 @@ const isHtml = (path) => /^game\/.*\.html$/.test(path);
 const isCss = (path) => path.startsWith('game/src/styles/') && path.endsWith('.css');
 const isGraph = (path) => /^(game\/src\/.*\.(ts|svelte)|game\/tests\/.*\.ts|game\/measurements\/.*\.ts|engine\/.*\.ts|tools\/.*\.(ts|mjs))$/.test(path);
 const isIcon = (path) => path.startsWith('game/src/icon/') && path.endsWith('.png');
-const isFx = (path) => path.startsWith('game/public/fx/');
 const isArenaJson = (path) => path.startsWith('game/src/ui/combat/arena/') && path.endsWith('.json');
-const isOpaque = (path) => isIcon(path) || isFx(path) || isArenaJson(path)
+const isOpaque = (path) => isIcon(path) || isArenaJson(path)
   || (path.startsWith('game/') && /\.(png|json)$/.test(path));
 const isRelevant = (path) => isGraph(path) || isOpaque(path) || isData(path) || isConfig(path)
   || isHtml(path) || isCss(path) || isBrowserSpec(path) || isMeasurement(path);
@@ -83,14 +82,11 @@ const OWNER_EDGES = [
   { match: (path) => /map/.test(path), tests: ['tests/ui/map-scene.test.ts'] },
   { match: (path) => /combat.*scene|combat-actor|public\/combat/.test(path),
     tests: ['tests/ui/combat-actor.test.ts', 'tests/ui/mob-sprite-pool.test.ts'] },
-  { match: (path) => path === 'tools/skill-vfx-pool.ts' || /tools\/(vfx\/|.*(vfx|shader|atlas|gallery|compose|mix|render|bake).*)\.(ts|mjs)$/.test(path),
-    tests: ['tests/ui/vfx-catalog.test.ts', 'tests/ui/arena-skill-vfx.test.ts'] },
   { match: (path) => path === 'tools/map.ts', tests: ['tests/ui/map-scene.test.ts'] },
   { match: (path) => path === 'tools/wiki.ts' || path === 'tools/gallery.ts', tests: ['tests/sim/audit-regressions.test.ts'] },
   { match: (path) => path === 'tools/skills.ts' || path === 'tools/lib/skillmodel.ts' || path === 'tools/lib/roster.ts' || path === 'tools/lib/engine.ts',
     tests: ['tests/sim/skills.test.ts'] },
   { match: (path) => isIcon(path), tests: ['tests/ui/icon-registry.test.ts', 'tests/sim/mob-terrain-drops.test.ts'] },
-  { match: (path) => isFx(path), tests: ['tests/ui/vfx-catalog.test.ts', 'tests/ui/arena-skill-vfx.test.ts'] },
   { match: (path) => isArenaJson(path), tests: ['tests/ui/animation-manifest.test.ts'] },
 ];
 const ownerTests = [...new Set(existing.flatMap((path) =>

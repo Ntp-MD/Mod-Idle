@@ -13,6 +13,7 @@ const MIB = 1_048_576;
 
 function bytesOf(dir: string): number {
   let total = 0;
+  if (!fs.existsSync(dir)) return total;
   const walk = (d: string) => {
     for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
       const full = path.join(d, entry.name);

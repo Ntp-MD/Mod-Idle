@@ -1,112 +1,52 @@
 {
-  "layerId": "healing-wisps",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "caster",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.5,
-  "opacity": 0.4,
   "id": "heal.greater_heal",
-  "src": "/fx/skill-pool/heal/heal-greater-heal/healing-wisps.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "column-eruption",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.8,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.8,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.2,
-        "depthM": 3
-      },
-      "sizePolicy": "world",
-      "binding": "caster",
-      "file": "column-eruption.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.5,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
-    },
-    {
-      "layerId": "ground-edge",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "sizePolicy": "footprint",
-      "binding": "caster",
-      "file": "ground-edge.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.5,
-      "opacity": 0.55,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "url": "https://assetstore.unity.com/packages/package/304424",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "quick-vfx-heal-02",
+      "bakedSha256": "3289ddeb00c441a6b3245994e8e9b6dba1ca038f3f6d053857bcf25db5fe2606"
     }
   ],
-  "composition": "Material study: healing-wisps, column-eruption, ground-edge",
-  "componentRecipe": {
-    "shapes": [
-      "healing-wisps",
-      "column-eruption",
-      "ground-edge"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Free Quick Effects Vol. 1",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "quick-vfx-heal-02",
+        "role": "upright",
+        "src": "/fx/skill-pool/heal/heal-greater-heal/quick-vfx-heal-02.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

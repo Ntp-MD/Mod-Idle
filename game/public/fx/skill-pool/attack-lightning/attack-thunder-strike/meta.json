@@ -1,114 +1,53 @@
 {
-  "layerId": "forked-bolt",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.85,
-  "palette": "lightning",
-  "sizePolicy": "world",
-  "binding": "area",
-  "orient": false,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.85,
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 0.8,
-    "depthM": 3
-  },
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.thunder_strike",
-  "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/forked-bolt.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "electric-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "electric-contact.png",
-      "palette": "lightning",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
-    },
-    {
-      "layerId": "dust-impact-plume",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 3,
-        "depthM": 1.5
-      },
-      "file": "dust-impact-plume.png",
-      "palette": "lightning",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 25210,
+      "pack": "FX Lightning II free",
+      "url": "https://assetstore.unity.com/packages/package/25210",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "bolt-fx-lightning-01",
+      "bakedSha256": "0cbc07c7962fcb7477f73b809cf272b6d68a6fa779024adbff72fdbab7cd327c"
     }
   ],
-  "composition": "Material study: forked-bolt, electric-contact, dust-impact-plume",
-  "componentRecipe": {
-    "shapes": [
-      "forked-bolt",
-      "electric-contact",
-      "dust-impact-plume"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "FX Lightning II free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "bolt-fx-lightning-01",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/fx_lightning_cc.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 4,
+          "columns": 2,
+          "rows": 2
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.203125,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "lightning"
+      }
+    ]
   }
 }

@@ -1,115 +1,94 @@
 {
-  "layerId": "orb-core",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "chaos",
-  "sizePolicy": "body",
-  "orient": true,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
   "id": "attack.void_orb",
-  "src": "/fx/skill-pool/attack-chaos/attack-void-orb/orb-core.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "gravitic-lens",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "gravitic-lens.png",
-      "palette": "chaos",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4,
-      "opacity": 0.55,
-      "placement": {
-        "kind": "spin",
-        "cycleSec": 2.7
-      },
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "url": "https://assetstore.unity.com/packages/package/200333",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hyper-flash-blue-purple",
+      "bakedSha256": "eadb9f813fb6535dc9d85d3d49f8eb09063e0dbc25bf334f03ded34e748ba5ff"
     },
     {
-      "layerId": "void-rift",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.4,
-        "depthM": 3
-      },
-      "file": "void-rift.png",
-      "palette": "chaos",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "url": "https://assetstore.unity.com/packages/package/304424",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "quick-vfx-projectile-01",
+      "bakedSha256": "8c6f012f713d6c51fd34551486ec1dbff950e28564526f6a128cbb5e91f85229"
     }
   ],
-  "composition": "Material study: orb-core, gravitic-lens, void-rift",
-  "componentRecipe": {
-    "shapes": [
-      "orb-core",
-      "gravitic-lens",
-      "void-rift"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Hyper Casual FX + Free Quick Effects Vol. 1",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "hyper-flash-blue-purple",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-void-orb/hyper-flash-blue-purple.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.671875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "chaos"
+      },
+      {
+        "id": "quick-vfx-projectile-01",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-chaos/attack-void-orb/quick-vfx-projectile-01.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.77734375
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "chaos"
+      }
+    ]
   }
 }

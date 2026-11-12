@@ -1,0 +1,2722 @@
+{
+  "schemaVersion": 2,
+  "bake": {
+    "frames": 36,
+    "columns": 6,
+    "fps": 24,
+    "sourceCell": 512,
+    "runtimeCell": 256,
+    "padding": 0.1
+  },
+  "sources": {
+    "hovl-freeze-circle": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/Magic circles/Freeze circle.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hovl-magic-shield-yellow": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/Magic shields/Magic shield yellow.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hovl-stones-hit": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/Hits and explosions/Stones hit.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hovl-crystals-front-attack": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/AoE effects/Crystals front attack.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hovl-aoe-slash-green": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/AoE effects/AoE slash green.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hovl-ground-aoe-explosion": {
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Magic effects pack/Prefabs/AoE effects/Ground AOE explosion.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-skull-head-alt": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Eerie/CFXR2 Skull Head Alt.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-souls-escape": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Eerie/CFXR2 Souls Escape.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr-electrified-3": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Electric/CFXR Electrified 3.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr-fire": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Fire/CFXR Fire.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-firewall-a": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Fire/CFXR2 Firewall A.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-hit-fire-b-air": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Fire/CFXR3 Hit Fire B (Air).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-hit-ice-b-air": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Ice/CFXR3 Hit Ice B (Air).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-ground-hit": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Impacts/CFXR2 Ground Hit.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-hit-light-b-air": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Light/CFXR3 Hit Light B (Air).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr-water-ripples": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Liquids/CFXR Water Ripples.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr-water-splash-smaller": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Liquids/CFXR Water Splash (Smaller).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-blood-directional": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Liquids/CFXR2 Blood (Directional).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-blood-shape-splash": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Liquids/CFXR2 Blood Shape Splash.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-magic-aura-a-runic": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Magic Misc/CFXR3 Magic Aura A (Runic).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr4-bouncing-glows-bubble-blue-purple": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Magic Misc/CFXR4 Bouncing Glows Bubble (Blue Purple).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr-magic-poof": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Misc/CFXR Magic Poof.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-broken-heart": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Misc/CFXR2 Broken Heart.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr2-poison-cloud": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Misc/CFXR2 Poison Cloud.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-hit-leaves-a-lit": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Nature/CFXR3 Hit Leaves A (Lit).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr3-shield-leaves-a-lit": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Nature/CFXR3 Shield Leaves A (Lit).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr4-sword-hit-plain-cross": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Sword Trails/Plain/CFXR4 Sword Hit PLAIN (Cross).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "cartoon-cfxr4-sword-trail-plain-360-spiral": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Sword Trails/Plain/CFXR4 Sword Trail PLAIN (360 Spiral).prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-electricity-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Electricity_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "quick-vfx-heal-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Heal_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-heal-02": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Heal_02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-implosion-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Implosion_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-lightning-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Lightning_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "quick-vfx-lightning-02": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Lightning_02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-portal-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Portal_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-portal-02": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Portal_02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-projectile-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Projectile_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "quick-vfx-projectile-02": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Projectile_02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "quick-vfx-shield-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Shield_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-shockwave-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Shockwave_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "quick-vfx-tornado-01": {
+      "packId": 304424,
+      "pack": "Free Quick Effects Vol. 1",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/GabrielAguiarProductions/FreeQuickEffectsVol1/Prefabs/vfx_Tornado_01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "eric-fx-fireball": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_Fireball.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "eric-fx-greenlight-shrink": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_Greenlight_shrink.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "eric-fx-green-hit": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_Green_Hit.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "eric-fx-pinkcross-up": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_PinkCross_Up.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "eric-fx-purple-hit-02": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_Purple_Hit_02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "eric-fx-weapon-effect": {
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Free Game VFX/Prefab/FX_Weapon Effect.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "circle-fx-magiccircle-icearrow01": {
+      "packId": 344984,
+      "pack": "Free Game VFX - Magic Circle",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Game VFX - Magic Circle(Free)/Prefabs/FX_MagicCircle_Icearrow01.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "circle-fx-magiccircle-icearrow02": {
+      "packId": 344984,
+      "pack": "Free Game VFX - Magic Circle",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Game VFX - Magic Circle(Free)/Prefabs/FX_MagicCircle_Icearrow02.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "circle-fx-magiccircle-icearrow03": {
+      "packId": 344984,
+      "pack": "Free Game VFX - Magic Circle",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Game VFX - Magic Circle(Free)/Prefabs/FX_MagicCircle_Icearrow03.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "circle-fx-magiccircle-icearrow04": {
+      "packId": 344984,
+      "pack": "Free Game VFX - Magic Circle",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Eric VFX Studio/Game VFX - Magic Circle(Free)/Prefabs/FX_MagicCircle_Icearrow04.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "casual-hit-1-normal": {
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Casual_Hit/Prefabs/Hit_1/Hit_1_Normal.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "casual-hit-2-red": {
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Casual_Hit/Prefabs/Hit_2/Hit_2_Red.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "casual-hit-3-blue": {
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Casual_Hit/Prefabs/Hit_3/Hit_3_Blue.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "casual-hit-4-yellow": {
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Casual_Hit/Prefabs/Hit_4/Hit_4_Yellow.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-impact": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Impact.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-multiple-impact": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Multiple Impact.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-multiple-slashes": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Multiple Slashes.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-slash-earth-vfx": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Slash Earth VFX.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-slash-vfx": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Slash VFX.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-slash-water-vfx": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Slash Water VFX.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "slash-slash-projectile-vfx-earth": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Projectiles/Slash Projectile VFX Earth.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "slash-slash-projectile-vfx-water": {
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Free Slash VFX/Prefabs/Projectiles/Slash Projectile VFX Water.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "zap-vfx-zap-02-blue": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_02_Blue.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "zap-vfx-zap-03-yellow": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_03_Yellow.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "zap-vfx-zap-04-green": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_04_Green.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "zap-vfx-zap-05-purple": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_05_Purple.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "zap-vfx-zap-06-white": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_06_White.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "zap-vfx-zap-07-black": {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Vefects/Zap VFX URP/VFX/Zap/Particles/VFX_Zap_07_Black.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-area-circles-blue": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Area/Area_circles_blue.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-area-fire-red": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Area/Area_fire_red.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-area-heal-green": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Area/Area_heal_green.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-area-magic-multicolor": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Area/Area_magic_multicolor.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-area-star-ellow": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Area/Area_star_ellow.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-flash-blue-purple": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Flash/Flash_blue_purple.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-flash-magic-ellow-blue": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Flash/Flash_magic_ellow_blue.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-shine-pink": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Shine/Shine_pink.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-sparkle-ellow": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Sparkle/Sparkle_ellow.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-water-blast-blue": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Water/Water_blast_blue.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "hyper-water-blast-green": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Water/Water_blast_green.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "fire-magic-fire-pro-orange": {
+      "packId": 141496,
+      "pack": "Procedural fire",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Procedural fire/Prefabs/Magic fire pro orange.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "fire-magic-fire-pro-blue": {
+      "packId": 141496,
+      "pack": "Procedural fire",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Procedural fire/Prefabs/Magic fire pro blue.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "fire-magic-fire-pro-red": {
+      "packId": 141496,
+      "pack": "Procedural fire",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Hovl Studio/Procedural fire/Prefabs/Magic fire pro red.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "snow-snow-3": {
+      "packId": 240358,
+      "pack": "FX Snow",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/SandalStudio/Snow FX/Props/Snow 3.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "snow-snow-10": {
+      "packId": 240358,
+      "pack": "FX Snow",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/SandalStudio/Snow FX/Props/Snow 10.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "bolt-fx-lightning-01": {
+      "packId": 25210,
+      "pack": "FX Lightning II free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/FX_Kandol_Pack/FX_lightning_II/Prefabs/fx_lightning_01.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 256,
+        "columns": 2,
+        "count": 4,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_cc.png",
+      "alphaFromRGB": true
+    },
+    "bolt-fx-lightning-04": {
+      "packId": 25210,
+      "pack": "FX Lightning II free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/FX_Kandol_Pack/FX_lightning_II/Prefabs/fx_lightning_04.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 256,
+        "columns": 3,
+        "count": 9,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true,
+      "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_gg_a.png",
+      "alphaFromRGB": true
+    },
+    "bolt-fx-lightning-12": {
+      "packId": 25210,
+      "pack": "FX Lightning II free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/FX_Kandol_Pack/FX_lightning_II/Prefabs/fx_lightning_12.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 3,
+        "count": 9,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_oo.png",
+      "alphaFromRGB": true
+    },
+    "gaph-iceball": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/IceBall.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "gaph-poisonexplode": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/PoisonExplode.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "gaph-swampball": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/SwampBall.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "gaph-deadball": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/DeadBall.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "gaph-magiccube": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/MagicCube.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true,
+      "rotationY": 90,
+      "centerFrames": true
+    },
+    "gaph-runeofmagic": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/RuneOfMagic.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "gaph-hole": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/52SpecialEffectPack/Effect/Effect(Shuriken)/Hole.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "sheet-explosion-one": {
+      "packId": 393438,
+      "pack": "Free RPG VFX Sprite Sheet Starter Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/free-rpg-vfx-sprite-sheet-starter-pack/Assets/Eric VFX Studio/Resource/Textures/VFX_SpriteSheet_8x8_145256.png",
+      "grid": {
+        "cell": 256,
+        "columns": 8,
+        "count": 64,
+        "fps": 64
+      },
+      "premultiplied": false,
+      "orthographicSize": 3
+    },
+    "sheet-magic-slash": {
+      "packId": 393438,
+      "pack": "Free RPG VFX Sprite Sheet Starter Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/free-rpg-vfx-sprite-sheet-starter-pack/Assets/Eric VFX Studio/Resource/Textures/VFX_SpriteSheet_9x9_210818.png",
+      "grid": {
+        "cell": 256,
+        "columns": 9,
+        "count": 81,
+        "fps": 81
+      },
+      "premultiplied": false,
+      "orthographicSize": 3
+    },
+    "sheet-magic-hit": {
+      "packId": 393438,
+      "pack": "Free RPG VFX Sprite Sheet Starter Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/free-rpg-vfx-sprite-sheet-starter-pack/Assets/Eric VFX Studio/Resource/Textures/VFX_SpriteSheet_9x9_212412.png",
+      "grid": {
+        "cell": 256,
+        "columns": 9,
+        "count": 81,
+        "fps": 81
+      },
+      "premultiplied": false,
+      "orthographicSize": 3
+    },
+    "cartoon-cfxr2-sparks-rain": {
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/JMO Assets/Cartoon FX Remaster/CFXR Prefabs/Electric/CFXR2 Sparks Rain.prefab",
+      "pipeline": "urp",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "creepy-meteor-burst": {
+      "packId": 42285,
+      "pack": "3D Games Effects Pack Free",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/3d-games-effects-pack-free/Assets/_Creepy_Cat/3D Games Effects Pack Free/_Materials/Effect_02_8x6-48.png",
+      "grid": {
+        "cell": 512,
+        "columns": 8,
+        "count": 48,
+        "fps": 32
+      },
+      "premultiplied": true,
+      "alphaFromRGB": true
+    },
+    "hyper-shine-blue": {
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "license": "Standard Unity Asset Store EULA",
+      "prefab": "Assets/Lana Studio/Hyper Casual FX/Prefabs/Shine/Shine_blue.prefab",
+      "pipeline": "builtin",
+      "orthographicSize": 3,
+      "grid": {
+        "cell": 512,
+        "columns": 6,
+        "count": 36,
+        "fps": 24
+      },
+      "premultiplied": true
+    },
+    "gaph-arrow": {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/52-special-effects-pack/Assets/52SpecialEffectPack/Texture/Arrow.png",
+      "grid": {
+        "cell": 100,
+        "cellHeight": 29,
+        "columns": 1,
+        "count": 1,
+        "fps": 24
+      },
+      "premultiplied": false,
+      "centerFrames": true
+    },
+    "creepy-nova": {
+      "packId": 42285,
+      "pack": "3D Games Effects Pack Free",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/3d-games-effects-pack-free/Assets/_Creepy_Cat/3D Games Effects Pack Free/_Materials/Effect_08_8x4-32.png",
+      "grid": {
+        "cell": 512,
+        "columns": 8,
+        "count": 32,
+        "fps": 32
+      },
+      "premultiplied": true,
+      "alphaFromRGB": true
+    },
+    "creepy-shatter-ring": {
+      "packId": 42285,
+      "pack": "3D Games Effects Pack Free",
+      "license": "Standard Unity Asset Store EULA",
+      "image": ".cache/unity-pack-sources/3d-games-effects-pack-free/Assets/_Creepy_Cat/3D Games Effects Pack Free/_Materials/Effect_05_8x8-64.png",
+      "grid": {
+        "cell": 512,
+        "columns": 8,
+        "count": 64,
+        "fps": 64
+      },
+      "premultiplied": true,
+      "alphaFromRGB": true
+    }
+  },
+  "recipes": {
+    "attack.fireball": {
+      "layers": [
+        {
+          "effect": "sheet-explosion-one",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "eric-fx-fireball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.firestorm": {
+      "layers": [
+        {
+          "effect": "fire-magic-fire-pro-orange",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "cartoon-cfxr2-firewall-a",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.meteor": {
+      "layers": [
+        {
+          "effect": "creepy-meteor-burst",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.ice_lance": {
+      "layers": [
+        {
+          "effect": "slash-slash-water-vfx",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-iceball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.blizzard": {
+      "layers": [
+        {
+          "effect": "snow-snow-10",
+          "phases": [
+            "Field"
+          ]
+        },
+        {
+          "effect": "hovl-freeze-circle",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.frostbite": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-hit-ice-b-air",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.chain_lightning": {
+      "layers": [
+        {
+          "effect": "bolt-fx-lightning-04",
+          "phases": [
+            "Travel"
+          ]
+        },
+        {
+          "effect": "zap-vfx-zap-02-blue",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.spark": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-03-yellow",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-electricity-01",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.thunder_strike": {
+      "layers": [
+        {
+          "effect": "bolt-fx-lightning-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.poison_bolt": {
+      "layers": [
+        {
+          "effect": "eric-fx-green-hit",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-swampball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.acid_arrow": {
+      "layers": [
+        {
+          "effect": "hyper-water-blast-green",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "slash-slash-projectile-vfx-earth",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.chaos_bolt": {
+      "layers": [
+        {
+          "effect": "eric-fx-purple-hit-02",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-deadball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.void_blast": {
+      "layers": [
+        {
+          "effect": "quick-vfx-implosion-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.sand_storm": {
+      "layers": [
+        {
+          "effect": "quick-vfx-tornado-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.earth_splitter": {
+      "layers": [
+        {
+          "effect": "slash-slash-earth-vfx",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.backstab": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-blood-directional",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.impale": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-blood-shape-splash",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "slash-slash-projectile-vfx-earth",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.skull_crack": {
+      "layers": [
+        {
+          "effect": "casual-hit-2-red",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.ground_slam": {
+      "layers": [
+        {
+          "effect": "creepy-meteor-burst",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "hovl-ground-aoe-explosion",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.cleave": {
+      "layers": [
+        {
+          "effect": "slash-slash-vfx",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.elemental_break": {
+      "layers": [
+        {
+          "effect": "slash-multiple-impact",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.whirlwind": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr4-sword-trail-plain-360-spiral",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.shield_bash": {
+      "layers": [
+        {
+          "effect": "casual-hit-4-yellow",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.puncture": {
+      "layers": [
+        {
+          "effect": "casual-hit-1-normal",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.reap": {
+      "layers": [
+        {
+          "effect": "slash-multiple-slashes",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.piercing_shot": {
+      "layers": [
+        {
+          "effect": "sheet-magic-hit",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-arrow",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.arrow_shower": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-sparks-rain",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-arrow",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.headshot": {
+      "layers": [
+        {
+          "effect": "casual-hit-3-blue",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-arrow",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.earth_shock": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-ground-hit",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.shatter": {
+      "layers": [
+        {
+          "effect": "hovl-crystals-front-attack",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "creepy-shatter-ring",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.overload": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-06-white",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.aftershock": {
+      "layers": [
+        {
+          "effect": "quick-vfx-shockwave-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.water_ball": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr-water-splash-smaller",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "slash-slash-projectile-vfx-water",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.frost_nova": {
+      "layers": [
+        {
+          "effect": "hovl-freeze-circle",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "snow-snow-3",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.glacial_spike": {
+      "layers": [
+        {
+          "effect": "hovl-crystals-front-attack",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-iceball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.split_shot": {
+      "layers": [
+        {
+          "effect": "slash-impact",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-arrow",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.double_strafe": {
+      "layers": [
+        {
+          "effect": "casual-hit-1-normal",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-arrow",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.double_strike": {
+      "layers": [
+        {
+          "effect": "sheet-magic-slash",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "cartoon-cfxr4-sword-hit-plain-cross",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.ignite": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-hit-fire-b-air",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.cinder_nova": {
+      "layers": [
+        {
+          "effect": "creepy-nova",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "cartoon-cfxr2-firewall-a",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.thunder_storm": {
+      "layers": [
+        {
+          "effect": "bolt-fx-lightning-12",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-lightning-02",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.poison_cloud": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-poison-cloud",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.chaos_wave": {
+      "layers": [
+        {
+          "effect": "hovl-aoe-slash-green",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-portal-02",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.stone_spike": {
+      "layers": [
+        {
+          "effect": "hovl-stones-hit",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "slash-slash-earth-vfx",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "attack.fissure": {
+      "layers": [
+        {
+          "effect": "slash-slash-earth-vfx",
+          "phases": [
+            "Impact"
+          ],
+          "placement": {
+            "kind": "line-series",
+            "spacingM": 2,
+            "staggerSec": 0.04
+          }
+        },
+        {
+          "effect": "hovl-ground-aoe-explosion",
+          "phases": [
+            "Impact"
+          ],
+          "placement": {
+            "kind": "line-series",
+            "spacingM": 2,
+            "staggerSec": 0.04
+          }
+        }
+      ]
+    },
+    "attack.void_orb": {
+      "layers": [
+        {
+          "effect": "hyper-flash-blue-purple",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-projectile-01",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.hemotoxin": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-blood-directional",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-swampball",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.unravel": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-05-purple",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-projectile-02",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.contagion": {
+      "layers": [
+        {
+          "effect": "gaph-poisonexplode",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "eric-fx-greenlight-shrink",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.venom_coffin": {
+      "layers": [
+        {
+          "effect": "hyper-water-blast-green",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "gaph-magiccube",
+          "phases": [
+            "Travel"
+          ]
+        }
+      ]
+    },
+    "attack.tidal_wave": {
+      "layers": [
+        {
+          "effect": "hyper-water-blast-blue",
+          "phases": [
+            "Impact"
+          ],
+          "placement": {
+            "kind": "line-front"
+          },
+          "durationSec": 1.5
+        },
+        {
+          "effect": "cartoon-cfxr-water-ripples",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "attack.void_ray": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-07-black",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-lightning-01",
+          "phases": [
+            "Travel"
+          ],
+          "placement": {
+            "kind": "tether"
+          }
+        }
+      ]
+    },
+    "attack.entropy_well": {
+      "layers": [
+        {
+          "effect": "gaph-hole",
+          "phases": [
+            "Impact"
+          ]
+        },
+        {
+          "effect": "quick-vfx-portal-01",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "buff.warcry": {
+      "layers": [
+        {
+          "effect": "hyper-area-star-ellow",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.berserker": {
+      "layers": [
+        {
+          "effect": "hyper-area-fire-red",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.iron_will": {
+      "layers": [
+        {
+          "effect": "hovl-magic-shield-yellow",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.holy_veil": {
+      "layers": [
+        {
+          "effect": "quick-vfx-shield-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.ghost_dance": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-souls-escape",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.earth_wall": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-shield-leaves-a-lit",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.magia_drive": {
+      "layers": [
+        {
+          "effect": "hyper-area-magic-multicolor",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.energy_absorb": {
+      "layers": [
+        {
+          "effect": "eric-fx-greenlight-shrink",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.flame_guard": {
+      "layers": [
+        {
+          "effect": "fire-magic-fire-pro-red",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "buff.enchant_poison": {
+      "layers": [
+        {
+          "effect": "eric-fx-weapon-effect",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.weaken": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-skull-head-alt",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.blinding_mark": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr-magic-poof",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.expose": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-hit-light-b-air",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.cripple": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr2-broken-heart",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.jinx": {
+      "layers": [
+        {
+          "effect": "gaph-runeofmagic",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "curse.venom_bind": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-04-green",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "heal.heal": {
+      "layers": [
+        {
+          "effect": "quick-vfx-heal-01",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "heal.greater_heal": {
+      "layers": [
+        {
+          "effect": "quick-vfx-heal-02",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "heal.cleanse": {
+      "layers": [
+        {
+          "effect": "eric-fx-pinkcross-up",
+          "phases": [
+            "Impact"
+          ]
+        }
+      ]
+    },
+    "aura.wraith_of_fury": {
+      "layers": [
+        {
+          "effect": "hyper-shine-pink",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.clarity": {
+      "layers": [
+        {
+          "effect": "circle-fx-magiccircle-icearrow01",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.haste": {
+      "layers": [
+        {
+          "effect": "hyper-shine-blue",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.vitality": {
+      "layers": [
+        {
+          "effect": "hyper-area-heal-green",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.herald_of_ash": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr-fire",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.herald_of_frost": {
+      "layers": [
+        {
+          "effect": "circle-fx-magiccircle-icearrow02",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.herald_of_lightning": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr-electrified-3",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.ember_conversion": {
+      "layers": [
+        {
+          "effect": "fire-magic-fire-pro-orange",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.rime_conversion": {
+      "layers": [
+        {
+          "effect": "fire-magic-fire-pro-blue",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.storm_conversion": {
+      "layers": [
+        {
+          "effect": "zap-vfx-zap-03-yellow",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.cast_on_crit": {
+      "layers": [
+        {
+          "effect": "hyper-sparkle-ellow",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.cast_on_damage_taken": {
+      "layers": [
+        {
+          "effect": "hyper-flash-magic-ellow-blue",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.rimbo_form": {
+      "layers": [
+        {
+          "effect": "hyper-area-circles-blue",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.elemental_fury": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr4-bouncing-glows-bubble-blue-purple",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.trinity_form": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-magic-aura-a-runic",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.grace": {
+      "layers": [
+        {
+          "effect": "cartoon-cfxr3-hit-leaves-a-lit",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.iron_guard": {
+      "layers": [
+        {
+          "effect": "circle-fx-magiccircle-icearrow03",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    },
+    "aura.energy_guard": {
+      "layers": [
+        {
+          "effect": "circle-fx-magiccircle-icearrow04",
+          "phases": [
+            "Field"
+          ]
+        }
+      ]
+    }
+  }
+}

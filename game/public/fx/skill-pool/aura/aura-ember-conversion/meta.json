@@ -1,101 +1,52 @@
 {
-  "layerId": "ward-shell",
-  "columns": 1,
-  "rows": 1,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "palette": "physical",
-  "authoringGeometry": {
-    "shape": "circle"
-  },
-  "sizePolicy": "body",
-  "binding": "caster",
-  "opacity": 0.85,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.4,
-  "src": "/fx/skill-pool/aura/aura-ember-conversion/ward-shell.png",
-  "additionalLayers": [
+  "id": "aura.ember_conversion",
+  "sources": [
     {
-      "layerId": "ground-edge",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "opacity": 1,
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.2,
-      "file": "ground-edge.png"
-    },
-    {
-      "layerId": "mote",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "caster",
-      "opacity": 0.9,
-      "scale": 0.18,
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "file": "mote.png"
+      "packId": 141496,
+      "pack": "Procedural fire",
+      "url": "https://assetstore.unity.com/packages/package/141496",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "fire-magic-fire-pro-orange",
+      "bakedSha256": "7e68c0422349f274aab0dd905a42a59d42734a919f006e8f0a89b14c88619db1"
     }
   ],
-  "composition": "Independent component recipe: ward-shell, ground-edge, mote",
-  "componentRecipe": {
-    "mode": "ward",
-    "shapes": [
-      "ward-shell",
-      "ground-edge",
-      "mote"
-    ],
-    "humanReview": false
+  "version": {
+    "id": "pool",
+    "label": "Procedural fire",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "fire-magic-fire-pro-orange",
+        "role": "upright",
+        "src": "/fx/skill-pool/aura/aura-ember-conversion/fire-magic-fire-pro-orange.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Field"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.49609375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
   }
 }

@@ -1,114 +1,95 @@
 {
-  "layerId": "flame-tongue",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.82,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.82,
-  "sizePolicy": "world",
-  "binding": "area",
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 1.5,
-    "depthM": 2.8
-  },
-  "palette": "fire",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 4,
-  "opacity": 0.9,
   "id": "attack.firestorm",
-  "src": "/fx/skill-pool/attack-fire/attack-firestorm/flame-tongue.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "ember-ground-cracks",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "ember-ground-cracks.png",
-      "palette": "fire",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4,
-      "opacity": 0.55,
-      "delaySec": 0.15,
-      "orient": false
+      "packId": 141496,
+      "pack": "Procedural fire",
+      "url": "https://assetstore.unity.com/packages/package/141496",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "fire-magic-fire-pro-orange",
+      "bakedSha256": "7e68c0422349f274aab0dd905a42a59d42734a919f006e8f0a89b14c88619db1"
     },
     {
-      "layerId": "dust-impact-plume",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 3,
-        "depthM": 1.5
-      },
-      "file": "dust-impact-plume.png",
-      "palette": "fire",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr2-firewall-a",
+      "bakedSha256": "03fa30301736e56b15590018c69b4c728fe849d0517622791418de8082c25fe0"
     }
   ],
-  "composition": "Material study: flame-tongue, ember-ground-cracks, dust-impact-plume",
-  "componentRecipe": {
-    "shapes": [
-      "flame-tongue",
-      "ember-ground-cracks",
-      "dust-impact-plume"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Procedural fire + Cartoon FX Remaster Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "fire-magic-fire-pro-orange",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-fire/attack-firestorm/fire-magic-fire-pro-orange.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.49609375,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "fire"
+      },
+      {
+        "id": "cartoon-cfxr2-firewall-a",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-fire/attack-firestorm/cartoon-cfxr2-firewall-a.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Impact",
+          "Field",
+          "Channel"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.578125
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "fire"
+      }
+    ]
+  }
 }

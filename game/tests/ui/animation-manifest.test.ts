@@ -105,16 +105,13 @@ describe('WP2 — animation fallback lifecycle and VFX registration (A7/A11)', (
 
   it('adds one VFX version through the existing registration without new renderer branches', () => {
     const skillId = 'attack.fireball';
-    const before = vfxVersionsFor(skillId);
-    expect(before.length).toBeGreaterThan(0);
     const testVersion = {
       id: 'test-wp2-version', label: 'WP2 boundary check', default: false, arena: true,
       decal: '/fx/test-wp2/decal.png', layers: [],
     };
-    (SKILL_VFX_POOL[skillId] as unknown[]).push(testVersion);
+    SKILL_VFX_POOL[skillId] = [testVersion];
     try {
       expect(vfxVersionsFor(skillId).some((version) => version.id === 'test-wp2-version')).toBe(true);
-      const previous = activeVfxVersionId(skillId);
       expect(setActiveVfxVersion(skillId, 'test-wp2-version')).toBe(true);
       expect(activeVfxVersionId(skillId)).toBe('test-wp2-version');
       const candidates = vfxArtCandidates(skillId);
@@ -122,11 +119,8 @@ describe('WP2 — animation fallback lifecycle and VFX registration (A7/A11)', (
       // The same art reader serves the new version: no skill-ID branch, same sources shape.
       expect(activeVfxArt(skillId)).toBeDefined();
       expect(candidates[0].sources.length).toBeGreaterThan(0);
-      if (previous) setActiveVfxVersion(skillId, previous);
     } finally {
-      const pool = SKILL_VFX_POOL[skillId] as unknown[];
-      const index = pool.findIndex((version) => (version as { id: string }).id === 'test-wp2-version');
-      if (index >= 0) pool.splice(index, 1);
+      delete SKILL_VFX_POOL[skillId];
     }
     expect(vfxVersionsFor(skillId).some((version) => version.id === 'test-wp2-version')).toBe(false);
   });

@@ -1,72 +1,53 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { sm } from '../../src/engine/client';
-import { activeVfxArt, activeVfxVersionId, setActiveVfxVersion, vfxVersionsFor } from '../../src/ui/fx/catalog';
+import { activeVfxArt, activeVfxVersionId, setActiveVfxVersion, vfxArtCandidates, vfxVersionsFor } from '../../src/ui/fx/catalog';
 import { POOL_VERSIONS } from '../../src/ui/fx/pool.generated';
-
-const publicPath = (src: string) => path.join(process.cwd(), 'public', src.replace(/^\//, ''));
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 
 describe('skill VFX pool', () => {
-  it('keeps the current material recipes and protected Thunder Storm pixels after flattening', () => {
-    const source = path.resolve(process.cwd(), '../docs/vfx-skill/component-vfx/outputs');
-    const recipes = JSON.parse(fs.readFileSync(path.join(source, 'recipes.json'), 'utf8'));
-    const active = sm.all().filter((skill: any) => skill.type !== 'aura' && skill.id !== 'attack.thunder_storm');
-    expect(Object.keys(recipes).sort()).toEqual(active.map((skill: any) => skill.id).sort());
-    for (const [skill, recipe] of Object.entries(recipes) as [string, { src: string; shapes: string[] }][]) {
-      const version = vfxVersionsFor(skill).find(v => v.id === 'pool');
-      expect(version, skill).toBeDefined();
-      expect(version!.default, skill).toBe(true);
-      expect(version!.layers.map(layer => layer.id), skill).toEqual(recipe.shapes);
-      expect(fs.existsSync(publicPath(recipe.src)), recipe.src).toBe(true);
-    }
-    const protectedFiles = JSON.parse(fs.readFileSync(path.join(source, 'preserved-defaults.json'), 'utf8'));
-    expect(Object.keys(protectedFiles).some(file => file.includes('attack-thunder-storm'))).toBe(true);
-    for (const [file, digest] of Object.entries(protectedFiles)) {
-      expect(file.endsWith('.png'), file).toBe(true);
-      const bytes = fs.readFileSync(path.resolve(process.cwd(), '..', file));
-      expect(createHash('sha256').update(bytes).digest('hex'), file).toBe(digest);
-    }
-  });
-  it('keeps exactly one current raster recipe per skill with a Base fallback', () => {
-    const missing = sm.all().filter((skill: any) => vfxVersionsFor(skill.id).length === 0)
-      .map((skill: any) => skill.id).sort();
-    expect(missing).toEqual([]);
-    for (const skill of sm.all()) {
-      const versions = vfxVersionsFor(skill.id);
-      expect(versions.length, skill.id).toBe(1);
-      for (const version of versions) {
-        expect(version.id, skill.id).toBe('pool');
-      }
-      const defaults = versions.filter((version) => version.default);
-      expect(defaults.length, skill.id).toBe(1);
-      const active = defaults[0] ?? versions[0];
-      expect(activeVfxVersionId(skill.id), skill.id).toBe(active.id);
+  it('registers valid, readable animation sheets for every live skill', () => {
+    const skills = sm.all().filter(skill => !skill.retired);
+    expect(Object.keys(POOL_VERSIONS).sort()).toEqual(skills.map(skill => skill.id).sort());
+    for (const skill of skills) {
+      expect(vfxVersionsFor(skill.id), skill.id).toHaveLength(1);
+      expect(activeVfxVersionId(skill.id), skill.id).toBe('pool');
       expect(activeVfxArt(skill.id), skill.id).toBeDefined();
-    }
-    expect(activeVfxArt('attack.nonexistent')).toBeUndefined();
-  });
-
-  it('keeps every pool row raster-backed', () => {
-    const versions = Object.values(POOL_VERSIONS).flat();
-    expect(versions.length).toBeGreaterThanOrEqual(90);
-    for (const version of versions) {
-      expect(version.id).toBe('pool');
-      expect(version.layers.length).toBeGreaterThan(0);
-      for (const layer of version.layers) {
-        expect(layer.frame.count).toBeGreaterThan(0);
-        expect(layer.src).toMatch(/^\/fx\/skill-pool\/[^/]+\/[^/]+\/[^/]+\.png$/);
-        expect(fs.existsSync(publicPath(layer.src)), layer.src).toBe(true);
-        const folder = path.dirname(publicPath(layer.src));
-        expect(fs.existsSync(path.join(folder, 'meta.json')), folder).toBe(true);
-        expect(fs.readdirSync(folder, { withFileTypes: true }).filter(entry => entry.isDirectory()), folder).toEqual([]);
+      expect(vfxArtCandidates(skill.id), skill.id).toHaveLength(1);
+      for (const layer of POOL_VERSIONS[skill.id][0].layers) {
+        expect(layer.src).toMatch(/^\/fx\/skill-pool\/[a-z-]+\/[a-z-]+\/[a-z0-9-]+\.png$/);
+        const png = readFileSync(path.resolve('public', layer.src.slice(1)));
+        expect(png.subarray(0, 8).toString('hex'), layer.src).toBe('89504e470d0a1a0a');
+        expect(png.readUInt32BE(16), layer.src).toBe(layer.frame.width * layer.frame.columns);
+        expect(png.readUInt32BE(20), layer.src).toBe(layer.frame.height * layer.frame.rows!);
+        expect(layer.frame.count).toBeLessThanOrEqual(layer.frame.columns * layer.frame.rows!);
+        expect(layer.fps).toBeGreaterThan(0);
       }
     }
   });
 
-  it('rejects an unregistered version or skill', () => {
-    expect(setActiveVfxVersion('attack.fireball', 'pool-v2')).toBe(false);
+  it('keeps explicit, distinct recipes and real provenance across the source packs', () => {
+    const config = JSON.parse(readFileSync(path.resolve('../tools/data/external-vfx.json'), 'utf8'));
+    expect(Object.keys(config.recipes).sort()).toEqual(Object.keys(POOL_VERSIONS).sort());
+    const recipes = Object.values(config.recipes).map(recipe => JSON.stringify(recipe));
+    expect(new Set(recipes).size).toBe(recipes.length);
+    const packs = new Set(Object.values(config.sources).map((source: any) => source.packId));
+    expect(packs.size).toBeGreaterThanOrEqual(10);
+    for (const [id, versions] of Object.entries(POOL_VERSIONS)) {
+      const src = versions[0].layers[0].src;
+      const metaPath = path.resolve('public', path.dirname(src).slice(1), 'meta.json');
+      const meta = JSON.parse(readFileSync(metaPath, 'utf8'));
+      expect(meta.id).toBe(id);
+      expect(meta.sources).toHaveLength(versions[0].layers.length);
+      for (const source of meta.sources) {
+        expect(packs.has(source.packId), id).toBe(true);
+        expect(source.bakedSha256, id).toMatch(/^[a-f0-9]{64}$/);
+      }
+    }
+  });
+
+  it('rejects a version selection without a registered rubric', () => {
+    expect(setActiveVfxVersion('attack.fireball', 'missing-version')).toBe(false);
     expect(vfxVersionsFor('attack.nonexistent')).toEqual([]);
     expect(activeVfxVersionId('attack.nonexistent')).toBeNull();
     expect(activeVfxArt('attack.nonexistent')).toBeUndefined();

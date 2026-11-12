@@ -1,80 +1,53 @@
 {
-  "layerId": "toxic-vapor",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.82,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.82,
-  "sizePolicy": "world",
-  "binding": "area",
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 4,
-    "depthM": 2
-  },
-  "palette": "poison",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 4,
-  "opacity": 0.4,
   "id": "attack.poison_cloud",
-  "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/toxic-vapor.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "ground-residue",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "poison",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "file": "ground-residue.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4,
-      "opacity": 0.55,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr2-poison-cloud",
+      "bakedSha256": "628054fd6731df59534dfb42e3fb9296171732e4c90074cb19b6081993c1b56a"
     }
   ],
-  "composition": "Material study: toxic-vapor, ground-residue",
-  "componentRecipe": {
-    "shapes": [
-      "toxic-vapor",
-      "ground-residue"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Cartoon FX Remaster Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "cartoon-cfxr2-poison-cloud",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-poison-cloud/cartoon-cfxr2-poison-cloud.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.765625
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "poison"
+      }
+    ]
+  }
 }

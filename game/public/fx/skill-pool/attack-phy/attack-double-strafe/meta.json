@@ -1,76 +1,94 @@
 {
-  "layerId": "arrow-core",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "physical",
-  "sizePolicy": "body",
-  "orient": true,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
   "id": "attack.double_strafe",
-  "src": "/fx/skill-pool/attack-phy/attack-double-strafe/arrow-core.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "blade-thrust",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blade-thrust.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "url": "https://assetstore.unity.com/packages/package/318002",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "casual-hit-1-normal",
+      "bakedSha256": "417fa960b86fd44a1030cbae7028a23ffd680c998ae9475ba7d94b38ef7144c7"
+    },
+    {
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "url": "https://assetstore.unity.com/packages/package/10419",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "gaph-arrow",
+      "bakedSha256": "d1a12bcdd1594eb22182ab599b69fd4f7c8aab15d3d7d1f91a4e44b90bc4903e"
     }
   ],
-  "composition": "Material study: arrow-core, blade-thrust",
-  "componentRecipe": {
-    "shapes": [
-      "arrow-core",
-      "blade-thrust"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Casual_Hit + 52 Special Effects Pack",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "casual-hit-1-normal",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-double-strafe/casual-hit-1-normal.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.61328125,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      },
+      {
+        "id": "gaph-arrow",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-double-strafe/Arrow.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 1,
+          "columns": 1,
+          "rows": 1
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.2265625
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "physical"
+      }
+    ]
   }
 }

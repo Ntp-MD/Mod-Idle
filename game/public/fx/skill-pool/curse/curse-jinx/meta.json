@@ -1,82 +1,52 @@
 {
-  "layerId": "tether-strand",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "physical",
-  "authoringGeometry": {
-    "shape": "line",
-    "widthM": 0.15
-  },
-  "sizePolicy": "world",
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
-  "placement": {
-    "kind": "tether"
-  },
   "id": "curse.jinx",
-  "src": "/fx/skill-pool/curse/curse-jinx/tether-strand.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "void-rift",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "target",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.4,
-        "depthM": 3
-      },
-      "file": "void-rift.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "url": "https://assetstore.unity.com/packages/package/10419",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "gaph-runeofmagic",
+      "bakedSha256": "6bfc3e2d6e88f0b9a83f3cdf6f7b141e93a19fcf027a12090b0af81a6eb4c007"
     }
   ],
-  "composition": "Material study: tether-strand, void-rift",
-  "componentRecipe": {
-    "shapes": [
-      "tether-strand",
-      "void-rift"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "52 Special Effects Pack",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "gaph-runeofmagic",
+        "role": "upright",
+        "src": "/fx/skill-pool/curse/curse-jinx/gaph-runeofmagic.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.58984375
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
+  }
 }

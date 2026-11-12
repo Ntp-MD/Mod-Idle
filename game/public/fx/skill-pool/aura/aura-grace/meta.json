@@ -1,101 +1,52 @@
 {
-  "layerId": "ward-shell",
-  "columns": 1,
-  "rows": 1,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "palette": "physical",
-  "authoringGeometry": {
-    "shape": "circle"
-  },
-  "sizePolicy": "body",
-  "binding": "caster",
-  "opacity": 0.85,
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 1.4,
-  "src": "/fx/skill-pool/aura/aura-grace/ward-shell.png",
-  "additionalLayers": [
+  "id": "aura.grace",
+  "sources": [
     {
-      "layerId": "ground-edge",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "opacity": 1,
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.2,
-      "file": "ground-edge.png"
-    },
-    {
-      "layerId": "mote",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "caster",
-      "opacity": 0.9,
-      "scale": 0.18,
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "file": "mote.png"
+      "packId": 109565,
+      "pack": "Cartoon FX Remaster Free",
+      "url": "https://assetstore.unity.com/packages/package/109565",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "cartoon-cfxr3-hit-leaves-a-lit",
+      "bakedSha256": "511c338c440e8ac832b4262e1943207c2b46d255a73ad929b4ac4e985f9a91a5"
     }
   ],
-  "composition": "Independent component recipe: ward-shell, ground-edge, mote",
-  "componentRecipe": {
-    "mode": "ward",
-    "shapes": [
-      "ward-shell",
-      "ground-edge",
-      "mote"
-    ],
-    "humanReview": false
+  "version": {
+    "id": "pool",
+    "label": "Cartoon FX Remaster Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "cartoon-cfxr3-hit-leaves-a-lit",
+        "role": "upright",
+        "src": "/fx/skill-pool/aura/aura-grace/cartoon-cfxr3-hit-leaves-a-lit.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Field"
+        ],
+        "sizePolicy": "body",
+        "binding": "caster",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.625,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false
+      }
+    ]
   }
 }

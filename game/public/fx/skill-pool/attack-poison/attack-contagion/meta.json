@@ -1,110 +1,94 @@
 {
-  "layerId": "poison-droplet",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "palette": "poison",
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
-  "orient": true,
   "id": "attack.contagion",
-  "src": "/fx/skill-pool/attack-poison/attack-contagion/poison-droplet.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "toxic-vapor",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "file": "toxic-vapor.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 10419,
+      "pack": "52 Special Effects Pack",
+      "url": "https://assetstore.unity.com/packages/package/10419",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "gaph-poisonexplode",
+      "bakedSha256": "144c6baa8b47862742dded5a21d70c615d18db94b07134c29b9e46a1fce8b02b"
     },
     {
-      "layerId": "acid-splash",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "acid-splash.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 345212,
+      "pack": "Free Game VFX Collection",
+      "url": "https://assetstore.unity.com/packages/package/345212",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "eric-fx-greenlight-shrink",
+      "bakedSha256": "65149d2229ec000c6e9c4e84fb96e7adfc8d3139f9ee9229328c54bda09960e1"
     }
   ],
-  "composition": "Material study: poison-droplet, toxic-vapor, acid-splash",
-  "componentRecipe": {
-    "shapes": [
-      "poison-droplet",
-      "toxic-vapor",
-      "acid-splash"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "52 Special Effects Pack + Free Game VFX Collection",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "gaph-poisonexplode",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-contagion/gaph-poisonexplode.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.41796875
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "poison"
+      },
+      {
+        "id": "eric-fx-greenlight-shrink",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-contagion/eric-fx-greenlight-shrink.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "poison"
+      }
+    ]
   }
 }

@@ -1,153 +1,53 @@
 {
-  "layerId": "rock-core",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "fire",
-  "sizePolicy": "body",
-  "orient": false,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "authoringGeometry": {
-    "shape": "circle",
-    "radiusM": 3,
-    "spanM": 6,
-    "depthM": 6
-  },
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "opacity": 0.9,
-  "rainDurationSec": 4.0,
-  "rainPhase": "Impact",
-  "rainIntervalSec": 10,
-  "rainSizeScale": 0.32,
-  "rainRadiusRatio": 0.9,
-  "binding": "area",
-  "durationSec": 4.0,
   "id": "attack.meteor",
-  "src": "/fx/skill-pool/attack-fire/attack-meteor/rock-core.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "flame-tongue",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 1.5,
-        "depthM": 2.8
-      },
-      "file": "flame-tongue.png",
-      "palette": "fire",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4.0,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
-    },
-    {
-      "layerId": "rock-shrapnel",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "rock-shrapnel.png",
-      "palette": "fire",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4.0,
-      "opacity": 0.9,
-      "delaySec": 0.14,
-      "scale": 0.45,
-      "orient": false
-    },
-    {
-      "layerId": "ember-ground-cracks",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "ember-ground-cracks.png",
-      "palette": "fire",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4.0,
-      "opacity": 0.55,
-      "delaySec": 0.15,
-      "orient": false
+      "packId": 42285,
+      "pack": "3D Games Effects Pack Free",
+      "url": "https://assetstore.unity.com/packages/package/42285",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "creepy-meteor-burst",
+      "bakedSha256": "6b159abc9578c206efb74c62f40f914aecc2f14d0e168b13ed3ea1eed1c23fa6"
     }
   ],
-  "composition": "Material study: rock-core, flame-tongue, rock-shrapnel, ember-ground-cracks",
-  "componentRecipe": {
-    "shapes": [
-      "rock-core",
-      "flame-tongue",
-      "rock-shrapnel",
-      "ember-ground-cracks"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "3D Games Effects Pack Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "creepy-meteor-burst",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-fire/attack-meteor/Effect_02_8x6-48.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 48,
+          "columns": 8,
+          "rows": 6
+        },
+        "fps": 32,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "fire"
+      }
+    ]
   }
 }

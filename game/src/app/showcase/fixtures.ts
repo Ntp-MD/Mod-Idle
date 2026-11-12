@@ -11,13 +11,12 @@ import { fieldwork, eng, sm, TOWN, trade, BASES, loot, E } from '../../engine/cl
 import { mulberry32 } from '../../engine/client-helpers';
 import { slotsUsed, slotsAvailable } from '@sim/gear/slots';
 import { ACTIVE_SLOTS } from '@sim/combat/skills';
-import { showcaseFieldSkill, showcaseVfxComponent } from './samples';
+import { showcaseFieldSkill } from './samples';
 import type { GameState, Item, Mob, FxEvent } from '@sim/core/types';
 import type { FxEvent as FxEventType } from '@sim/core/types';
 
 export interface ArenaVariantLike { speciesId: string }
 export interface ShowcaseGameOpts {
-  selectVfxReview?: (component: string, skillId: string) => void;
   activeArenaVariant: ArenaVariantLike | null;
   ArenaPreviewSpawn: Record<string, string>;
   arenaSpecies: string;
@@ -39,11 +38,6 @@ export function buildShowcaseGame(opts: ShowcaseGameOpts, scenario: string = 'de
     sample.junk[(E.mob.variant_drops as Record<string, { item: string }>)[(E.mob.variants as any[]).find((row) => row.species === 'goblin').id].item] = 20;
     sample.hunting = true;
     if (showcaseFieldSkill(scenario)) {
-      const component = showcaseVfxComponent(scenario);
-      if (import.meta.env.DEV && component) {
-        if (!opts.selectVfxReview) throw new Error('Procedural VFX review needs the catalog adapter');
-        opts.selectVfxReview(component, showcaseFieldSkill(scenario)!);
-      }
       const speciesId = opts.activeArenaVariant?.speciesId ?? opts.ArenaPreviewSpawn[opts.arenaSpecies] ?? opts.arenaSpecies;
       const species = eng.speciesById(speciesId);
       const spawnBody = opts.spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';

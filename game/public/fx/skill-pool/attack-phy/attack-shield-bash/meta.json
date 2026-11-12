@@ -1,77 +1,53 @@
 {
-  "layerId": "barrier-facets",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "body",
-  "binding": "contact",
-  "authoringGeometry": {
-    "shape": "single"
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.shield_bash",
-  "src": "/fx/skill-pool/attack-phy/attack-shield-bash/barrier-facets.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "impact-burst",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "contact",
-      "file": "impact-burst.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 318002,
+      "pack": "Casual_Hit",
+      "url": "https://assetstore.unity.com/packages/package/318002",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "casual-hit-4-yellow",
+      "bakedSha256": "c447ea899ddc12ae583224959a2dd1e6edcc14b5f3fa903f08221dbbffac6444"
     }
   ],
-  "composition": "Material study: barrier-facets, impact-burst",
-  "componentRecipe": {
-    "shapes": [
-      "barrier-facets",
-      "impact-burst"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Casual_Hit",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "casual-hit-4-yellow",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-shield-bash/casual-hit-4-yellow.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.79296875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "physical"
+      }
+    ]
+  }
 }

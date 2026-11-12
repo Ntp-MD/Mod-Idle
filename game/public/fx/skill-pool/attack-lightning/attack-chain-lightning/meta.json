@@ -1,80 +1,94 @@
 {
-  "layerId": "lightning-arc",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "world",
-  "binding": "contact",
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 4,
-    "depthM": 0.5
-  },
-  "palette": "lightning",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.chain_lightning",
-  "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/lightning-arc.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "electric-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "electric-contact.png",
-      "palette": "lightning",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
+      "packId": 25210,
+      "pack": "FX Lightning II free",
+      "url": "https://assetstore.unity.com/packages/package/25210",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "bolt-fx-lightning-04",
+      "bakedSha256": "503f0c127cc383e1ae6db3b0fe018db66de90e00c104de5569c6d572c215dad6"
+    },
+    {
+      "packId": 303479,
+      "pack": "Zap VFX - URP",
+      "url": "https://assetstore.unity.com/packages/package/303479",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "zap-vfx-zap-02-blue",
+      "bakedSha256": "d8f814dd9dd8451681ad8a5ed9dbcf6cc00c1d6279eef2ed9c6eaf9b64301c53"
     }
   ],
-  "composition": "Material study: lightning-arc, electric-contact",
-  "componentRecipe": {
-    "shapes": [
-      "lightning-arc",
-      "electric-contact"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "FX Lightning II free + Zap VFX - URP",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "bolt-fx-lightning-04",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/fx_lightning_gg_a.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 9,
+          "columns": 3,
+          "rows": 3
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.19140625,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "lightning"
+      },
+      {
+        "id": "zap-vfx-zap-02-blue",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/zap-vfx-zap-02-blue.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.19140625,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "lightning"
+      }
+    ]
+  }
 }

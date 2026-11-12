@@ -1,120 +1,95 @@
 {
-  "layerId": "fragment-debris",
-  "columns": 1,
-  "rows": 1,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "palette": "cold",
-  "authoringGeometry": {
-    "shape": "circle",
-    "radiusM": 3,
-    "spanM": 6,
-    "depthM": 6
-  },
-  "sizePolicy": "body",
-  "binding": "area",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "opacity": 0.9,
-  "rainDurationSec": 4.0,
-  "rainPhase": "Field",
-  "rainIntervalSec": 0.16,
-  "rainSizeScale": 0.32,
-  "rainRadiusRatio": 0.9,
-  "durationSec": 4.0,
   "id": "attack.blizzard",
-  "src": "/fx/skill-pool/attack-cold/attack-blizzard/fragment-debris.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "frost-fracture",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "frost-fracture.png",
-      "palette": "cold",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4.0,
-      "opacity": 0.55,
-      "delaySec": 0.15,
-      "orient": false
+      "packId": 240358,
+      "pack": "FX Snow",
+      "url": "https://assetstore.unity.com/packages/package/240358",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "snow-snow-10",
+      "bakedSha256": "aa22dc3eb272bf64e9b26df10f9f604cb53e79da732c1afcc1d5d63b4bc53245"
     },
     {
-      "layerId": "cloud-mist",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.65,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.65,
-      "palette": "cold",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "sizePolicy": "world",
-      "binding": "area",
-      "file": "cloud-mist.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 4.0,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "url": "https://assetstore.unity.com/packages/package/247933",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hovl-freeze-circle",
+      "bakedSha256": "f8836a6018220717dd64127155f3900eae15dc363d8ffa78f5682aad758e8c8c"
     }
   ],
-  "composition": "Material study: fragment-debris, frost-fracture, cloud-mist",
-  "componentRecipe": {
-    "shapes": [
-      "fragment-debris",
-      "frost-fracture",
-      "cloud-mist"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "FX Snow + Magic Effects FREE",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "snow-snow-10",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-cold/attack-blizzard/snow-snow-10.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Impact",
+          "Field",
+          "Channel"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.46484375
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "cold"
+      },
+      {
+        "id": "hovl-freeze-circle",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-cold/attack-blizzard/hovl-freeze-circle.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.5859375
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "cold"
+      }
+    ]
+  }
 }

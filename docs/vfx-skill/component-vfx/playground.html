@@ -1,9 +1,0 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VFX playground</title>
-<style>:root{color-scheme:dark}body{margin:32px;background:#10151b;color:#e2e8ee;font:15px/1.5 system-ui}a{color:#8bd9ff}label{display:block;margin:12px 0 4px}input{font:inherit;padding:10px;width:min(480px,90%)}p{color:#a7b6c5}</style>
-<h1>VFX playground</h1>
-<p>Renders live in the game showcase at 1920 × 1080. Start the dev server, pick a skill, then open the arena link. Source art lives in the <a href="outputs/index.html">shared component shelf</a>.</p>
-<label for="skill">Skill id (e.g. attack.fissure)</label>
-<input id="skill" value="attack.fissure">
-<p><a id="open" href="http://localhost:5173/__showcase?sample=combat-field&amp;skill=attack.fissure#showcase-field">Open live arena</a></p>
-<p>The arena uses its current recipe selection. Human visual approval remains separate.</p>
-<script>const s=document.querySelector('#skill'),a=document.querySelector('#open');function u(){a.href=`http://localhost:5173/__showcase?sample=combat-field&skill=${encodeURIComponent(s.value)}#showcase-field`}s.addEventListener('input',u);const q=new URLSearchParams(location.search);if(q.get('skill'))s.value=q.get('skill');u()</script></html>

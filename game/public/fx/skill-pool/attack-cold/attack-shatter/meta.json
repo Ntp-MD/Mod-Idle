@@ -1,113 +1,93 @@
 {
-  "layerId": "ice-shard-cluster",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.82,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.82,
-  "sizePolicy": "world",
-  "binding": "contact",
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 1.8,
-    "depthM": 2.5
-  },
-  "palette": "cold",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.shatter",
-  "src": "/fx/skill-pool/attack-cold/attack-shatter/ice-shard-cluster.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "fragment-debris",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "palette": "cold",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "sizePolicy": "body",
-      "binding": "contact",
-      "file": "fragment-debris.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.45,
-      "orient": false
+      "packId": 247933,
+      "pack": "Magic Effects FREE",
+      "url": "https://assetstore.unity.com/packages/package/247933",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hovl-crystals-front-attack",
+      "bakedSha256": "fbda60a85da02a9729c48d671df9b1e2c660b58d7681fbf0b3b9cd9bee0c518c"
     },
     {
-      "layerId": "frost-fracture",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "footprint",
-      "binding": "area",
-      "authoringGeometry": {
-        "shape": "circle"
-      },
-      "projection": "ground",
-      "file": "frost-fracture.png",
-      "palette": "cold",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.4,
-      "opacity": 0.55,
-      "delaySec": 0.15,
-      "orient": false
+      "packId": 42285,
+      "pack": "3D Games Effects Pack Free",
+      "url": "https://assetstore.unity.com/packages/package/42285",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "creepy-shatter-ring",
+      "bakedSha256": "e0c8fae91959286e3080247309434ba3940422ae6e59882fb8e59229b749aecd"
     }
   ],
-  "composition": "Material study: ice-shard-cluster, fragment-debris, frost-fracture",
-  "componentRecipe": {
-    "shapes": [
-      "ice-shard-cluster",
-      "fragment-debris",
-      "frost-fracture"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Magic Effects FREE + 3D Games Effects Pack Free",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "hovl-crystals-front-attack",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-cold/attack-shatter/hovl-crystals-front-attack.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.5234375
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "cold"
+      },
+      {
+        "id": "creepy-shatter-ring",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-cold/attack-shatter/Effect_05_8x8-64.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 64,
+          "columns": 8,
+          "rows": 8
+        },
+        "fps": 64,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.78515625
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "cold"
+      }
+    ]
+  }
 }

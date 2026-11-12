@@ -11,11 +11,8 @@ const files = [
   'game/tests/sim/clock.test.ts',
   'game/tests/fixtures/example.ts',
   'tools/data/example.json',
-  'tools/skill-vfx-pool.ts',
   'game/vitest.config.ts',
   'game/src/icon/currency/currency-strongbox.png',
-  'game/public/fx/skill-pool/attack-fire/attack-fireball/v1/meta.json',
-  'game/public/fx/skill-pool/attack-fire/attack-fireball/v1/atlas.png',
   'game/src/ui/combat/arena/arena-art-pixel-v2/human-animation-v1.json',
   'game/src/assets/unknown.png',
   'game/tests/app/boot-recovery.test.ts',
@@ -96,15 +93,6 @@ it('selects changed sources and tests together without excluding a changed slow 
   expect(calls[0].filter(arg => arg === 'tests/sim/clock.test.ts')).toHaveLength(1);
 });
 
-it('covers opaque tool dependencies through their owner tests', () => {
-  const calls = run(['tools/skill-vfx-pool.ts']);
-  expect(calls).toHaveLength(1);
-  expect(calls[0].slice(0, 2)).toEqual(['related', '--run']);
-  expect(calls[0].some((arg) => arg.endsWith('tools/skill-vfx-pool.ts'))).toBe(true);
-  expect(calls[0]).toContain('tests/ui/vfx-catalog.test.ts');
-  expect(calls[0]).toContain('tests/ui/arena-skill-vfx.test.ts');
-});
-
 it('covers the runner itself through its own regression test', () => {
   // Append: overwriting the runner under test would destroy the script being run.
   const calls = run(['tools/test-changed.mjs'], [], [], 0, true);
@@ -136,22 +124,6 @@ it('supports full runs, dry runs, no changes and failing test exits', () => {
   expect(run(['tools/data/example.json'], ['--dry-run'])).toEqual([]);
   expect(run([])).toEqual([]);
   expect(run(['game/tests/example.test.ts'], [], [], 1)).toHaveLength(1);
-});
-
-it('selects owner for public FX metadata and PNG changes', () => {
-  for (const file of [
-    'game/public/fx/skill-pool/attack-fire/attack-fireball/v1/meta.json',
-    'game/public/fx/skill-pool/attack-fire/attack-fireball/v1/atlas.png',
-  ]) {
-    const calls = run([file]);
-    expect(calls, file).toHaveLength(1);
-    expect(calls[0].slice(0, 2), file).toEqual(['related', '--run']);
-    expect(calls[0], file).toContain('tests/ui/vfx-catalog.test.ts');
-    expect(calls[0], file).toContain('tests/ui/arena-skill-vfx.test.ts');
-    // binary/public files must not be sent to vitest related
-    expect(calls[0].some((arg) => arg.includes('public/fx')), file).toBe(false);
-    expect(calls[0].some((arg) => arg.endsWith('.png')), file).toBe(false);
-  }
 });
 
 it('selects animation manifest for runtime arena JSON and falls back on deletion', () => {

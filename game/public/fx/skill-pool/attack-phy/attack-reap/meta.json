@@ -1,114 +1,53 @@
 {
-  "layerId": "heavy-cleave",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "sizePolicy": "world",
-  "binding": "contact",
-  "authoringGeometry": {
-    "shape": "circle",
-    "spanM": 3,
-    "depthM": 2
-  },
-  "palette": "physical",
-  "phases": [
-    "Impact",
-    "Field"
-  ],
-  "durationSec": 0.45,
-  "opacity": 0.9,
   "id": "attack.reap",
-  "src": "/fx/skill-pool/attack-phy/attack-reap/heavy-cleave.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "blood-contact",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "blood-contact.png",
-      "palette": "physical",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.25,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "scale": 0.65,
-      "orient": false
-    },
-    {
-      "layerId": "cloud-mist",
-      "columns": 1,
-      "rows": 1,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.65,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.65,
-      "palette": "physical",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "sizePolicy": "world",
-      "binding": "area",
-      "file": "cloud-mist.png",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "url": "https://assetstore.unity.com/packages/package/309498",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "slash-multiple-slashes",
+      "bakedSha256": "96608a555af8de0420ee770b2ad12448d2563d32cfbe2f096b4f32d7a5f86377"
     }
   ],
-  "composition": "Material study: heavy-cleave, blood-contact, cloud-mist",
-  "componentRecipe": {
-    "shapes": [
-      "heavy-cleave",
-      "blood-contact",
-      "cloud-mist"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
-  },
-  "orient": false
+  "version": {
+    "id": "pool",
+    "label": "Free Slash VFX",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "slash-multiple-slashes",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-phy/attack-reap/slash-multiple-slashes.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "footprint",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.55859375
+        },
+        "authoring": {
+          "shape": "circle"
+        },
+        "orient": false,
+        "palette": "physical"
+      }
+    ]
+  }
 }

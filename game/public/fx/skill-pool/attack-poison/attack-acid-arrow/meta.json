@@ -1,110 +1,94 @@
 {
-  "layerId": "arrow-core",
-  "columns": 1,
-  "rows": 1,
-  "imageWidth": 1024,
-  "imageHeight": 1024,
-  "cellWidth": 1024,
-  "cellHeight": 1024,
-  "frameMs": 80,
-  "contentWidthRatio": 0.8,
-  "contentHeightRatio": 0.8,
-  "anchorX": 0.5,
-  "anchorY": 0.5,
-  "palette": "poison",
-  "sizePolicy": "body",
-  "orient": true,
-  "impactAnchorX": 0.5,
-  "impactAnchorY": 0.5,
-  "authoringGeometry": {
-    "shape": "single",
-    "delivery": "projectile"
-  },
-  "phases": [
-    "Travel",
-    "Impact"
-  ],
-  "opacity": 0.9,
   "id": "attack.acid_arrow",
-  "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/arrow-core.png",
-  "additionalLayers": [
+  "sources": [
     {
-      "layerId": "acid-splash",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.5,
-      "sizePolicy": "body",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "single"
-      },
-      "file": "acid-splash.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 0.45,
-      "opacity": 0.9,
-      "delaySec": 0.07,
-      "orient": false
+      "packId": 200333,
+      "pack": "Hyper Casual FX",
+      "url": "https://assetstore.unity.com/packages/package/200333",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "hyper-water-blast-green",
+      "bakedSha256": "016420c21a1734b7a8292feabfd0745a4ce00544b114854530a60025af830491"
     },
     {
-      "layerId": "toxic-vapor",
-      "columns": 1,
-      "rows": 1,
-      "imageWidth": 1024,
-      "imageHeight": 1024,
-      "cellWidth": 1024,
-      "cellHeight": 1024,
-      "frameMs": 80,
-      "contentWidthRatio": 0.8,
-      "contentHeightRatio": 0.8,
-      "anchorX": 0.5,
-      "anchorY": 0.82,
-      "impactAnchorX": 0.5,
-      "impactAnchorY": 0.82,
-      "sizePolicy": "world",
-      "binding": "contact",
-      "authoringGeometry": {
-        "shape": "circle",
-        "spanM": 4,
-        "depthM": 2
-      },
-      "file": "toxic-vapor.png",
-      "palette": "poison",
-      "phases": [
-        "Impact",
-        "Field"
-      ],
-      "durationSec": 1.3,
-      "opacity": 0.4,
-      "delaySec": 0.14,
-      "orient": false
+      "packId": 309498,
+      "pack": "Free Slash VFX",
+      "url": "https://assetstore.unity.com/packages/package/309498",
+      "license": "Standard Unity Asset Store EULA",
+      "effect": "slash-slash-projectile-vfx-earth",
+      "bakedSha256": "43f270f176695aafa9652149c0947ebc05a08ff20677103c4a605f759b8d5479"
     }
   ],
-  "composition": "Material study: arrow-core, acid-splash, toxic-vapor",
-  "componentRecipe": {
-    "shapes": [
-      "arrow-core",
-      "acid-splash",
-      "toxic-vapor"
-    ],
-    "humanReview": false
-  },
-  "reviewOnly": true,
-  "generation": {
-    "tool": "imagegen",
-    "source": "docs/vfx-skill/component-vfx/outputs/generation-prompts.json"
+  "version": {
+    "id": "pool",
+    "label": "Hyper Casual FX + Free Slash VFX",
+    "default": true,
+    "arena": true,
+    "layers": [
+      {
+        "id": "hyper-water-blast-green",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/hyper-water-blast-green.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": false,
+        "phases": [
+          "Impact"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.73046875,
+          "heightRatio": 0.796875
+        },
+        "authoring": {
+          "shape": "single"
+        },
+        "orient": false,
+        "palette": "poison"
+      },
+      {
+        "id": "slash-slash-projectile-vfx-earth",
+        "role": "upright",
+        "src": "/fx/skill-pool/attack-poison/attack-acid-arrow/slash-slash-projectile-vfx-earth.png",
+        "frame": {
+          "width": 256,
+          "height": 256,
+          "count": 36,
+          "columns": 6,
+          "rows": 6
+        },
+        "fps": 24,
+        "loop": true,
+        "phases": [
+          "Travel"
+        ],
+        "sizePolicy": "body",
+        "binding": "area",
+        "anchor": [
+          0.5,
+          0.5
+        ],
+        "content": {
+          "widthRatio": 0.796875,
+          "heightRatio": 0.40234375
+        },
+        "authoring": {
+          "shape": "single",
+          "delivery": "projectile"
+        },
+        "orient": true,
+        "palette": "poison"
+      }
+    ]
   }
 }
