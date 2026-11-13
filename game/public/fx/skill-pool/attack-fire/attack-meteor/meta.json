@@ -19,7 +19,7 @@
       {
         "id": "creepy-meteor-burst",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-fire/attack-meteor/Effect_02_8x6-48.png",
+        "src": "/fx/skill-pool/attack-fire/attack-meteor/creepy-meteor-burst.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -36,7 +36,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.4629
         ],
         "content": {
           "widthRatio": 0.796875,

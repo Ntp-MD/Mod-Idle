@@ -22,7 +22,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hovl-magic-shield-yellow": {
       "packId": 247933,
@@ -37,7 +38,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hovl-stones-hit": {
       "packId": 247933,
@@ -52,7 +54,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hovl-crystals-front-attack": {
       "packId": 247933,
@@ -67,7 +70,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hovl-aoe-slash-green": {
       "packId": 247933,
@@ -82,7 +86,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "hovl-ground-aoe-explosion": {
       "packId": 247933,
@@ -97,7 +102,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "cartoon-cfxr2-skull-head-alt": {
       "packId": 109565,
@@ -112,7 +118,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-souls-escape": {
       "packId": 109565,
@@ -127,7 +134,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr-electrified-3": {
       "packId": 109565,
@@ -142,7 +150,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr-fire": {
       "packId": 109565,
@@ -157,7 +166,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-firewall-a": {
       "packId": 109565,
@@ -172,7 +182,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr3-hit-fire-b-air": {
       "packId": 109565,
@@ -187,7 +198,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr3-hit-ice-b-air": {
       "packId": 109565,
@@ -202,7 +214,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-ground-hit": {
       "packId": 109565,
@@ -217,7 +230,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "cartoon-cfxr3-hit-light-b-air": {
       "packId": 109565,
@@ -232,7 +246,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "cartoon-cfxr-water-ripples": {
       "packId": 109565,
@@ -247,7 +262,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "cartoon-cfxr-water-splash-smaller": {
       "packId": 109565,
@@ -262,7 +278,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-blood-directional": {
       "packId": 109565,
@@ -277,7 +294,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "cartoon-cfxr2-blood-shape-splash": {
       "packId": 109565,
@@ -292,7 +310,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr3-magic-aura-a-runic": {
       "packId": 109565,
@@ -307,7 +326,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "cartoon-cfxr4-bouncing-glows-bubble-blue-purple": {
       "packId": 109565,
@@ -322,7 +342,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr-magic-poof": {
       "packId": 109565,
@@ -337,7 +358,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-broken-heart": {
       "packId": 109565,
@@ -352,7 +374,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr2-poison-cloud": {
       "packId": 109565,
@@ -367,7 +390,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr3-hit-leaves-a-lit": {
       "packId": 109565,
@@ -382,7 +406,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr3-shield-leaves-a-lit": {
       "packId": 109565,
@@ -397,7 +422,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "cartoon-cfxr4-sword-hit-plain-cross": {
       "packId": 109565,
@@ -412,7 +438,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "cartoon-cfxr4-sword-trail-plain-360-spiral": {
       "packId": 109565,
@@ -427,7 +454,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "quick-vfx-electricity-01": {
       "packId": 304424,
@@ -444,7 +472,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "quick-vfx-heal-01": {
       "packId": 304424,
@@ -459,7 +488,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "quick-vfx-heal-02": {
       "packId": 304424,
@@ -474,7 +504,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "quick-vfx-implosion-01": {
       "packId": 304424,
@@ -489,7 +520,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "quick-vfx-lightning-01": {
       "packId": 304424,
@@ -506,7 +538,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "quick-vfx-lightning-02": {
       "packId": 304424,
@@ -521,7 +554,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "quick-vfx-portal-01": {
       "packId": 304424,
@@ -536,7 +570,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "quick-vfx-portal-02": {
       "packId": 304424,
@@ -551,7 +586,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "quick-vfx-projectile-01": {
       "packId": 304424,
@@ -568,7 +604,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "quick-vfx-projectile-02": {
       "packId": 304424,
@@ -585,7 +622,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "quick-vfx-shield-01": {
       "packId": 304424,
@@ -600,7 +638,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "quick-vfx-shockwave-01": {
       "packId": 304424,
@@ -615,7 +654,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "quick-vfx-tornado-01": {
       "packId": 304424,
@@ -630,7 +670,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "eric-fx-fireball": {
       "packId": 345212,
@@ -647,7 +688,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "eric-fx-greenlight-shrink": {
       "packId": 345212,
@@ -664,7 +706,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "eric-fx-green-hit": {
       "packId": 345212,
@@ -679,7 +722,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "eric-fx-pinkcross-up": {
       "packId": 345212,
@@ -694,7 +738,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "eric-fx-purple-hit-02": {
       "packId": 345212,
@@ -709,7 +754,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "eric-fx-weapon-effect": {
       "packId": 345212,
@@ -724,7 +770,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "circle-fx-magiccircle-icearrow01": {
       "packId": 344984,
@@ -739,7 +786,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "circle-fx-magiccircle-icearrow02": {
       "packId": 344984,
@@ -754,7 +802,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "circle-fx-magiccircle-icearrow03": {
       "packId": 344984,
@@ -769,7 +818,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "circle-fx-magiccircle-icearrow04": {
       "packId": 344984,
@@ -784,7 +834,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "casual-hit-1-normal": {
       "packId": 318002,
@@ -799,7 +850,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "casual-hit-2-red": {
       "packId": 318002,
@@ -814,7 +866,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "casual-hit-3-blue": {
       "packId": 318002,
@@ -829,7 +882,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "casual-hit-4-yellow": {
       "packId": 318002,
@@ -844,7 +898,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "slash-impact": {
       "packId": 309498,
@@ -859,7 +914,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-multiple-impact": {
       "packId": 309498,
@@ -874,7 +930,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-multiple-slashes": {
       "packId": 309498,
@@ -889,7 +946,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-slash-earth-vfx": {
       "packId": 309498,
@@ -904,7 +962,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-slash-vfx": {
       "packId": 309498,
@@ -919,7 +978,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-slash-water-vfx": {
       "packId": 309498,
@@ -934,7 +994,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "directional"
     },
     "slash-slash-projectile-vfx-earth": {
       "packId": 309498,
@@ -951,7 +1012,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "directional"
     },
     "slash-slash-projectile-vfx-water": {
       "packId": 309498,
@@ -968,7 +1030,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "directional"
     },
     "zap-vfx-zap-02-blue": {
       "packId": 303479,
@@ -983,7 +1046,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "zap-vfx-zap-03-yellow": {
       "packId": 303479,
@@ -998,7 +1062,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "zap-vfx-zap-04-green": {
       "packId": 303479,
@@ -1013,7 +1078,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "zap-vfx-zap-05-purple": {
       "packId": 303479,
@@ -1028,7 +1094,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "zap-vfx-zap-06-white": {
       "packId": 303479,
@@ -1043,7 +1110,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "zap-vfx-zap-07-black": {
       "packId": 303479,
@@ -1058,7 +1126,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-area-circles-blue": {
       "packId": 200333,
@@ -1073,7 +1142,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hyper-area-fire-red": {
       "packId": 200333,
@@ -1088,7 +1158,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hyper-area-heal-green": {
       "packId": 200333,
@@ -1103,7 +1174,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hyper-area-magic-multicolor": {
       "packId": 200333,
@@ -1118,7 +1190,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hyper-area-star-ellow": {
       "packId": 200333,
@@ -1133,7 +1206,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "hyper-flash-blue-purple": {
       "packId": 200333,
@@ -1148,7 +1222,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-flash-magic-ellow-blue": {
       "packId": 200333,
@@ -1163,7 +1238,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-shine-pink": {
       "packId": 200333,
@@ -1178,7 +1254,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-sparkle-ellow": {
       "packId": 200333,
@@ -1193,7 +1270,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-water-blast-blue": {
       "packId": 200333,
@@ -1208,7 +1286,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "hyper-water-blast-green": {
       "packId": 200333,
@@ -1223,7 +1302,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "fire-magic-fire-pro-orange": {
       "packId": 141496,
@@ -1238,7 +1318,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "fire-magic-fire-pro-blue": {
       "packId": 141496,
@@ -1253,7 +1334,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "fire-magic-fire-pro-red": {
       "packId": 141496,
@@ -1268,7 +1350,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "snow-snow-3": {
       "packId": 240358,
@@ -1283,7 +1366,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "snow-snow-10": {
       "packId": 240358,
@@ -1298,7 +1382,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "bolt-fx-lightning-01": {
       "packId": 25210,
@@ -1315,7 +1400,8 @@
       },
       "premultiplied": true,
       "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_cc.png",
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "upright"
     },
     "bolt-fx-lightning-04": {
       "packId": 25210,
@@ -1334,7 +1420,8 @@
       "rotationY": 90,
       "centerFrames": true,
       "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_gg_a.png",
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "upright"
     },
     "bolt-fx-lightning-12": {
       "packId": 25210,
@@ -1351,7 +1438,8 @@
       },
       "premultiplied": true,
       "image": ".cache/unity-pack-sources/fx-lightning-ii-free/Assets/FX_Kandol_Pack/FX_lightning_II/Textures/fx_lightning_oo.png",
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "upright"
     },
     "gaph-iceball": {
       "packId": 10419,
@@ -1368,7 +1456,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "gaph-poisonexplode": {
       "packId": 10419,
@@ -1383,7 +1472,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "gaph-swampball": {
       "packId": 10419,
@@ -1400,7 +1490,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "gaph-deadball": {
       "packId": 10419,
@@ -1417,7 +1508,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "gaph-magiccube": {
       "packId": 10419,
@@ -1434,7 +1526,8 @@
       },
       "premultiplied": true,
       "rotationY": 90,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "upright"
     },
     "gaph-runeofmagic": {
       "packId": 10419,
@@ -1449,7 +1542,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "gaph-hole": {
       "packId": 10419,
@@ -1464,7 +1558,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "ground"
     },
     "sheet-explosion-one": {
       "packId": 393438,
@@ -1478,7 +1573,8 @@
         "fps": 64
       },
       "premultiplied": false,
-      "orthographicSize": 3
+      "orthographicSize": 3,
+      "rig": "upright"
     },
     "sheet-magic-slash": {
       "packId": 393438,
@@ -1492,7 +1588,8 @@
         "fps": 81
       },
       "premultiplied": false,
-      "orthographicSize": 3
+      "orthographicSize": 3,
+      "rig": "directional"
     },
     "sheet-magic-hit": {
       "packId": 393438,
@@ -1506,7 +1603,8 @@
         "fps": 81
       },
       "premultiplied": false,
-      "orthographicSize": 3
+      "orthographicSize": 3,
+      "rig": "upright"
     },
     "cartoon-cfxr2-sparks-rain": {
       "packId": 109565,
@@ -1521,7 +1619,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "creepy-meteor-burst": {
       "packId": 42285,
@@ -1535,7 +1634,8 @@
         "fps": 32
       },
       "premultiplied": true,
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "ground"
     },
     "hyper-shine-blue": {
       "packId": 200333,
@@ -1550,7 +1650,8 @@
         "count": 36,
         "fps": 24
       },
-      "premultiplied": true
+      "premultiplied": true,
+      "rig": "upright"
     },
     "gaph-arrow": {
       "packId": 10419,
@@ -1565,7 +1666,8 @@
         "fps": 24
       },
       "premultiplied": false,
-      "centerFrames": true
+      "centerFrames": true,
+      "rig": "directional"
     },
     "creepy-nova": {
       "packId": 42285,
@@ -1579,7 +1681,8 @@
         "fps": 32
       },
       "premultiplied": true,
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "ground"
     },
     "creepy-shatter-ring": {
       "packId": 42285,
@@ -1593,7 +1696,8 @@
         "fps": 64
       },
       "premultiplied": true,
-      "alphaFromRGB": true
+      "alphaFromRGB": true,
+      "rig": "ground"
     }
   },
   "recipes": {

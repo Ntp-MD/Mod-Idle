@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ModWorld · Unity pack library</title>
+<style>
+  :root { color-scheme: dark; --bg:#12140f; --panel:#1b1e17; --line:#2f342a; --ink:#e8e6d8; --dim:#98a08c; --hot:#f0a13c; --ok:#7fbf5a; --warn:#c9a227; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:13px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  header { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center;
+    padding:12px 18px; background:#12140fee; backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--hot); }
+  .stat { color:var(--dim); font-variant-numeric:tabular-nums; }
+  .stat b { color:var(--ink); }
+  input[type=search], select { background:#0d0f0b; border:1px solid var(--line); color:var(--ink); border-radius:6px; padding:5px 9px; }
+  input[type=search] { min-width:220px; }
+  button { background:#0d0f0b; border:1px solid var(--line); color:var(--ink); border-radius:6px; padding:5px 9px; cursor:pointer; }
+  button[aria-pressed=true] { border-color:var(--hot); color:var(--hot); }
+  main { padding:16px 18px 60px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; display:flex; flex-direction:column; }
+  .card.bridge { opacity:.62; }
+  .shot { aspect-ratio:16/9; background:#0d0f0b center/cover no-repeat; border-bottom:1px solid var(--line); }
+  .meta { padding:8px 10px 10px; display:grid; gap:3px; }
+  .name { font-weight:600; line-height:1.25; }
+  .sub { color:var(--dim); font-size:11px; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .pill { font-size:10px; padding:1px 6px; border-radius:99px; border:1px solid var(--line); color:var(--dim); }
+  .pill.runtime { color:var(--ok); border-color:#3d5a2c; }
+  .pill.downloaded { color:var(--warn); border-color:#5a4a1c; }
+  .pill.bridge { color:#8d8d8d; }
+  .empty { color:var(--dim); padding:40px 0; text-align:center; }
+  section { margin:0 0 22px; }
+  h2 { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin:0 0 10px; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  a { color:var(--hot); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .note { color:var(--dim); font-size:11px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Unity pack library</h1>
+  <span class="stat" id="stats">loading…</span>
+  <input id="q" type="search" placeholder="filter: pack, publisher…" autocomplete="off" />
+  <select id="publisher"><option value="">All publishers</option></select>
+  <span style="display:flex;gap:6px">
+    <button data-status="all" aria-pressed="true">All</button>
+    <button data-status="runtime" aria-pressed="false">In runtime</button>
+    <button data-status="downloaded" aria-pressed="false">Source only</button>
+    <button data-status="library" aria-pressed="false">Untouched</button>
+  </span>
+  <span class="note" id="hint"></span>
+</header>
+<main id="out"></main>
+
+<script type="module">
+const state = { q: '', publisher: '', status: 'all' };
+const out = document.getElementById('out');
+
+const data = await fetch('/.cache/packs/index.json').then((r) => (r.ok ? r.json() : null)).catch(() => null);
+if (!data) {
+  out.innerHTML = '<div class="empty">No pack index yet — run <code>node game/.cache/build-pack-index.mjs</code>.</div>';
+} else {
+  const publisherSelect = document.getElementById('publisher');
+  for (const publisher of [...new Set(data.packs.map((p) => p.publisher))].sort()) {
+    const option = document.createElement('option');
+    option.value = publisher;
+    option.textContent = publisher;
+    publisherSelect.append(option);
+  }
+
+  const matches = (pack) => {
+    if (state.status !== 'all' && pack.status !== state.status) return false;
+    if (state.publisher && pack.publisher !== state.publisher) return false;
+    if (!state.q) return true;
+    return `${pack.name} ${pack.publisher} ${pack.size}`.toLowerCase().includes(state.q);
+  };
+
+  function card(pack) {
+    const element = document.createElement('article');
+    element.className = `card${pack.bridge ? ' bridge' : ''}`;
+    const shot = document.createElement('div');
+    shot.className = 'shot';
+    shot.style.backgroundImage = `url("${pack.thumb}")`;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = pack.name;
+    const publisher = document.createElement('div');
+    publisher.className = 'sub';
+    const link = document.createElement('a');
+    link.href = `https://assetstore.unity.com${pack.publisherUrl}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.textContent = pack.publisher;
+    publisher.append(link, document.createTextNode(` · ${pack.size}`));
+    const dates = document.createElement('div');
+    dates.className = 'sub';
+    dates.textContent = `bought ${pack.purchased} · ${(pack.lastUpdated || '').replace(/^Last updated: /, 'updated ')}`;
+    const row = document.createElement('div');
+    row.className = 'row';
+    for (const [text, cls] of [
+      [pack.status === 'runtime' ? `runtime · ${pack.effects} effects` : pack.status === 'downloaded' ? 'source extracted' : 'owned only', pack.status],
+      ...(pack.bridge ? [['bridge · no art', 'bridge']] : []),
+      [`#${pack.id}`, ''],
+    ]) {
+      const pill = document.createElement('span');
+      pill.className = `pill ${cls}`.trim();
+      pill.textContent = text;
+      row.append(pill);
+    }
+    meta.append(name, publisher, dates, row);
+    element.append(shot, meta);
+    return element;
+  }
+
+  function render() {
+    out.textContent = '';
+    const list = data.packs.filter(matches).sort((a, b) => a.name.localeCompare(b.name));
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    for (const pack of list) grid.append(card(pack));
+    const section = document.createElement('section');
+    const heading = document.createElement('h2');
+    heading.textContent = `${list.length} of ${data.counts.total} packs`;
+    section.append(heading, grid);
+    out.append(section);
+    if (!list.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No pack matches this filter.';
+      out.append(empty);
+    }
+  }
+
+  const counts = data.counts;
+  document.getElementById('stats').innerHTML =
+    `<b>${counts.total}</b> packs · <b>${counts.runtime}</b> in runtime · <b>${counts.downloaded}</b> source only · ` +
+    `<b>${counts.library}</b> untouched · <b>${counts.bridges}</b> adapters`;
+  document.getElementById('hint').textContent = `${location.host} · dev only`;
+
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => { state.q = q.value.trim().toLowerCase(); render(); });
+  publisherSelect.addEventListener('change', () => { state.publisher = publisherSelect.value; render(); });
+  for (const button of document.querySelectorAll('[data-status]')) {
+    button.addEventListener('click', () => {
+      state.status = button.dataset.status;
+      for (const peer of document.querySelectorAll('[data-status]')) peer.setAttribute('aria-pressed', String(peer === button));
+      render();
+    });
+  }
+  render();
+}
+</script>
+</body>
+</html>

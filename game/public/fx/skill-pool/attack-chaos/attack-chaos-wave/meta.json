@@ -53,7 +53,7 @@
         "authoring": {
           "shape": "circle"
         },
-        "orient": false,
+        "orient": true,
         "palette": "chaos"
       },
       {
@@ -78,7 +78,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8945
         ],
         "content": {
           "widthRatio": 0.25,

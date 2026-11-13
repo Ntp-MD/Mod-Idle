@@ -27,7 +27,7 @@
       {
         "id": "sheet-magic-hit",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/VFX_SpriteSheet_9x9_212412.png",
+        "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/sheet-magic-hit.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.4453
         ],
         "content": {
           "widthRatio": 0.70703125,
@@ -59,7 +59,7 @@
       {
         "id": "gaph-arrow",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/Arrow.png",
+        "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/gaph-arrow.png",
         "frame": {
           "width": 256,
           "height": 256,

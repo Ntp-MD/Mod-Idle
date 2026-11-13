@@ -45,7 +45,7 @@
         "authoring": {
           "shape": "single"
         },
-        "orient": false,
+        "orient": true,
         "palette": "physical"
       }
     ]

@@ -36,7 +36,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8984
         ],
         "content": {
           "widthRatio": 0.5,

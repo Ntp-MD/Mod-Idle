@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ModWorld · Unity VFX review</title>
+<style>
+  :root { color-scheme: dark; --bg:#12140f; --panel:#1b1e17; --line:#2f342a; --ink:#e8e6d8; --dim:#98a08c; --hot:#f0a13c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:13px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  header { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center;
+    padding:12px 18px; background:#12140fee; backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:14px; letter-spacing:.06em; text-transform:uppercase; color:var(--hot); }
+  .stat { color:var(--dim); font-variant-numeric:tabular-nums; }
+  .stat b { color:var(--ink); }
+  input[type=search] { background:#0d0f0b; border:1px solid var(--line); color:var(--ink); border-radius:6px; padding:5px 9px; min-width:220px; }
+  select, button { background:#0d0f0b; border:1px solid var(--line); color:var(--ink); border-radius:6px; padding:5px 9px; }
+  button { cursor:pointer; }
+  button[aria-pressed=true] { border-color:var(--hot); color:var(--hot); }
+  main { padding:16px 18px 60px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(196px, 1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .stage { display:grid; place-items:center; background:
+      conic-gradient(from 90deg at 25% 25%, #1d2019 25%, #22261d 0 50%, #1d2019 0 75%, #22261d 0) 0 0/16px 16px;
+    aspect-ratio:1/1; }
+  canvas { width:100%; height:100%; display:block; image-rendering:auto; }
+  .meta { padding:7px 9px 9px; display:grid; gap:2px; }
+  .id { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .sub { color:var(--dim); font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .packs { display:flex; flex-wrap:wrap; gap:4px; margin-top:3px; }
+  .pack { font-size:10px; padding:1px 5px; border:1px solid var(--line); border-radius:99px; color:var(--dim); }
+  .badges { display:flex; gap:4px; margin-top:3px; }
+  .badge { font-size:10px; padding:1px 5px; border-radius:4px; background:#0d0f0b; color:var(--dim); }
+  .badge.on { color:var(--hot); }
+  section { margin:0 0 26px; }
+  h2 { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin:0 0 10px;
+    border-bottom:1px solid var(--line); padding-bottom:6px; }
+  .empty { color:var(--dim); padding:40px 0; text-align:center; }
+  .note { color:var(--dim); font-size:11px; }
+  a { color:var(--hot); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Unity VFX review</h1>
+  <span class="stat" id="stats">loading…</span>
+  <input id="q" type="search" placeholder="filter: skill, effect, pack…" autocomplete="off" />
+  <select id="pack"><option value="">All packs</option></select>
+  <span style="display:flex;gap:6px">
+    <button id="mode-effects" aria-pressed="true">Effects</button>
+    <button id="mode-skills" aria-pressed="false">Per skill</button>
+  </span>
+  <span style="display:flex;gap:6px">
+    <button id="play" aria-pressed="true">Pause</button>
+    <button data-speed="0.5">0.5×</button>
+    <button data-speed="1" aria-pressed="true">1×</button>
+    <button data-speed="2">2×</button>
+    <button id="palette" aria-pressed="true">Palette</button>
+  </span>
+  <span class="note" id="hint"></span>
+</header>
+<main id="out"></main>
+
+<script type="module">
+import { POOL_VERSIONS } from '/src/ui/fx/pool.generated.ts';
+import { vfxPaletteTables } from '/src/ui/fx/palettes.ts';
+
+const state = { mode: 'effects', q: '', pack: '', speed: 1, playing: true, palette: true };
+const metaCache = new Map();
+const cells = [];
+let clock = performance.now();
+let epoch = 0;
+
+const skillIds = Object.keys(POOL_VERSIONS).sort();
+
+/** One flat layer list; the skill owns the folder, so its meta.json names the packs. */
+const layers = [];
+for (const skillId of skillIds) {
+  for (const version of POOL_VERSIONS[skillId] ?? []) {
+    const atlas = (version.layers ?? []).find((layer) => layer.role) ?? (version.layers ?? [])[0];
+    for (const layer of version.layers ?? []) {
+      if (!layer.src) continue;
+      layers.push({ skillId, version, layer, dir: layer.src.replace(/\/[^/]+$/, '') });
+    }
+    void atlas;
+  }
+}
+
+function metaFor(dir) {
+  if (!metaCache.has(dir)) {
+    metaCache.set(dir, fetch(`${dir}/meta.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  }
+  return metaCache.get(dir);
+}
+
+/** Unique source effects: one entry per PNG, with every skill layer that plays it. */
+const effects = new Map();
+for (const entry of layers) {
+  const key = entry.layer.src;
+  if (!effects.has(key)) effects.set(key, { src: key, dir: entry.dir, uses: [], layer: entry.layer });
+  effects.get(key).uses.push(entry);
+}
+
+const packs = new Set();
+await Promise.all([...effects.values()].map(async (effect) => {
+  const meta = await metaFor(effect.dir);
+  const sources = meta?.sources ?? [];
+  const own = sources.find((source) => source.effect === effect.layer.id) ?? sources[0];
+  effect.pack = own?.pack ?? 'unrecorded';
+  effect.packId = own?.packId ?? null;
+  packs.add(effect.pack);
+}));
+
+const packSelect = document.getElementById('pack');
+for (const pack of [...packs].sort()) {
+  const option = document.createElement('option');
+  option.value = pack; option.textContent = pack;
+  packSelect.append(option);
+}
+
+const frameCount = (layer) => Math.max(1, layer.frame?.count ?? 1);
+const cellSize = (layer, image) => ({
+  w: image.naturalWidth / (layer.frame?.columns ?? 1),
+  h: image.naturalHeight / (layer.frame?.rows ?? 1),
+});
+
+/**
+ * The arena runs every sheet through `AtlasFrame`'s saturate-0 + palette table
+ * filter, so a raw sheet is not what ships. Same 4-stop ramp, baked to a LUT.
+ */
+const paletteLuts = new Map();
+function paletteLut(name) {
+  if (!paletteLuts.has(name)) {
+    const tables = vfxPaletteTables(name).map((table) => table.split(' ').map(Number));
+    const lut = new Uint32Array(256);
+    const at = (values, t) => {
+      const last = values.length - 1;
+      const x = Math.min(1, Math.max(0, t)) * last;
+      const i = Math.min(last - 1, Math.floor(x));
+      return Math.round((values[i] + (values[i + 1] - values[i]) * (x - i)) * 255);
+    };
+    for (let lum = 0; lum < 256; lum++) {
+      lut[lum] = (at(tables[0], lum / 255) << 16) | (at(tables[1], lum / 255) << 8) | at(tables[2], lum / 255);
+    }
+    paletteLuts.set(name, lut);
+  }
+  return paletteLuts.get(name);
+}
+
+function draw(cell, now) {
+  const { layer, canvas, image } = cell;
+  const count = frameCount(layer);
+  const columns = layer.frame?.columns ?? 1;
+  const fps = layer.fps || 24;
+  const elapsed = (now - clock) / 1000 * state.speed;
+  const frame = Math.floor(elapsed * fps) % count;
+  const palette = state.palette ? layer.palette : null;
+  const key = `${epoch}|${frame}|${palette ?? ''}`;
+  if (cell.key === key) return;
+  cell.key = key;
+  const { w, h } = cellSize(layer, image);
+  const sx = (frame % columns) * w;
+  const sy = Math.floor(frame / columns) * h;
+  const ctx = cell.ctx;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, sx, sy, w, h, 0, 0, canvas.width, canvas.height);
+  if (!palette || !paletteLut(palette)) return;
+  const lut = paletteLut(palette);
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = pixels.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (!data[i + 3]) continue;
+    const lum = (0.213 * data[i] + 0.715 * data[i + 1] + 0.072 * data[i + 2]) | 0;
+    const packed = lut[lum];
+    data[i] = (packed >> 16) & 255;
+    data[i + 1] = (packed >> 8) & 255;
+    data[i + 2] = packed & 255;
+  }
+  ctx.putImageData(pixels, 0, 0);
+}
+
+/** Sheets are large (~58 MB total); a cell only fetches once it scrolls into view. */
+function makeCanvas(layer, src, label) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 160; canvas.height = 160;
+  const image = new Image();
+  image.decoding = 'async';
+  image.alt = label;
+  cells.push({ layer, canvas, ctx: canvas.getContext('2d', { willReadFrequently: true }), image, src, started: false, key: '' });
+  return canvas;
+}
+
+function card({ title, sub, badges, packs: cardPacks, canvas, href }) {
+  const el = document.createElement('article');
+  el.className = 'card';
+  const stage = document.createElement('div');
+  stage.className = 'stage';
+  stage.append(canvas);
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  const id = document.createElement('div');
+  id.className = 'id'; id.textContent = title; id.title = title;
+  const subEl = document.createElement('div');
+  subEl.className = 'sub'; subEl.textContent = sub; subEl.title = sub;
+  meta.append(id, subEl);
+  if (href) {
+    const link = document.createElement('a');
+    link.className = 'sub';
+    link.href = href;
+    link.textContent = 'arena preview ▸';
+    meta.append(link);
+  }
+  if (badges?.length) {
+    const row = document.createElement('div');
+    row.className = 'badges';
+    for (const badge of badges) {
+      const b = document.createElement('span');
+      b.className = `badge${badge.on ? ' on' : ''}`;
+      b.textContent = badge.text;
+      row.append(b);
+    }
+    meta.append(row);
+  }
+  if (cardPacks?.length) {
+    const row = document.createElement('div');
+    row.className = 'packs';
+    for (const pack of cardPacks) {
+      const p = document.createElement('span');
+      p.className = 'pack'; p.textContent = pack;
+      row.append(p);
+    }
+    meta.append(row);
+  }
+  el.append(stage, meta);
+  return el;
+}
+
+function matches(text) {
+  if (!text) return true;
+  const hay = [text.title, text.sub, ...(text.packs ?? [])].join(' ').toLowerCase();
+  if (state.q && !hay.includes(state.q)) return false;
+  if (state.pack && !(text.packs ?? []).includes(state.pack)) return false;
+  return true;
+}
+
+function render() {
+  for (const cell of cells) cell.image.src = '';
+  cells.length = 0;
+  const out = document.getElementById('out');
+  out.textContent = '';
+  const query = state.q.trim().toLowerCase();
+
+  if (state.mode === 'effects') {
+    const list = [...effects.values()]
+      .map((effect) => ({ effect, text: { title: effect.layer.id ?? effect.src.split('/').pop(), sub: plurality(effect.uses.length, 'skill'), packs: [effect.pack] } }))
+      .filter((row) => matches({ ...row.text, title: `${row.text.title} ${row.effect.uses.map((u) => u.skillId).join(' ')}`, packs: row.text.packs }))
+      .sort((a, b) => a.text.title.localeCompare(b.text.title));
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    for (const { effect, text } of list) {
+      grid.append(card({
+        title: text.title,
+        sub: `${plurality(effect.uses.length, 'skill')} · ${frameCount(effect.layer)}f @ ${effect.layer.fps || 24}fps`,
+        badges: [{ text: effect.layer.role ?? 'layer', on: true },
+          ...(effect.layer.palette ? [{ text: effect.layer.palette, on: true }] : []),
+          ...(effect.layer.loop ? [{ text: 'loop' }] : [])],
+        packs: text.packs,
+        canvas: makeCanvas(effect.layer, effect.src, text.title),
+      }));
+    }
+    out.append(section(`Effects · ${list.length}`, grid));
+  } else {
+    for (const skillId of skillIds) {
+      const entries = layers.filter((entry) => entry.skillId === skillId);
+      if (!entries.length) continue;
+      const packsUsed = [...new Set(entries.map((entry) => effects.get(entry.layer.src)?.pack ?? 'unrecorded'))];
+      const visible = entries.filter((entry) => matches({
+        title: skillId, sub: entry.layer.id ?? '', packs: packsUsed,
+      }));
+      if (query && !visible.length) continue;
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      for (const entry of entries) {
+        const effect = effects.get(entry.layer.src);
+        grid.append(card({
+          title: entry.layer.id ?? entry.layer.src.split('/').pop(),
+          sub: `${(entry.layer.phases ?? []).join(' · ') || 'all phases'} · ${entry.layer.role ?? 'layer'}`,
+          badges: [
+            { text: entry.layer.sizePolicy ?? 'size', on: true },
+            { text: entry.layer.binding ?? 'bind', on: true },
+            ...(entry.layer.palette ? [{ text: entry.layer.palette, on: true }] : []),
+            ...(entry.layer.loop ? [{ text: 'loop' }] : []),
+          ],
+          packs: [effect?.pack ?? 'unrecorded'],
+          canvas: makeCanvas(entry.layer, entry.layer.src, entry.layer.id ?? skillId),
+          href: `?sample=combat-field&skill=${encodeURIComponent(skillId)}&vfx=auto`,
+        }));
+      }
+      if (!grid.children.length) continue;
+      out.append(section(skillId, grid));
+    }
+  }
+
+  if (!out.children.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = 'No VFX matches this filter.';
+    out.append(empty);
+  }
+  refreshStats();
+}
+
+function plurality(count, noun) { return `${count} ${noun}${count === 1 ? '' : 's'}`; }
+
+function section(title, grid) {
+  const el = document.createElement('section');
+  const h = document.createElement('h2');
+  h.textContent = title;
+  el.append(h, grid);
+  return el;
+}
+
+function refreshStats() {
+  const shown = state.mode === 'effects'
+    ? document.querySelectorAll('#out .card').length
+    : document.querySelectorAll('#out .card').length;
+  document.getElementById('stats').innerHTML =
+    `<b>${skillIds.length}</b> skills · <b>${layers.length}</b> layers · <b>${effects.size}</b> sheets · showing <b>${shown}</b>`;
+}
+
+let last = 0;
+window.__vfxCells = cells;
+function tick(now) {
+  requestAnimationFrame(tick);
+  if (!state.playing || now - last < 16) return;
+  last = now;
+  const height = document.documentElement.clientHeight;
+  for (const cell of cells) {
+    const box = cell.canvas.getBoundingClientRect();
+    const visible = box.bottom > -200 && box.top < height + 200;
+    if (!cell.started) {
+      if (!visible) continue;
+      cell.started = true;
+      cell.image.src = cell.src;
+    }
+    if (!visible || !cell.image.complete || !cell.image.naturalWidth) continue;
+    draw(cell, now);
+  }
+}
+requestAnimationFrame(tick);
+
+const q = document.getElementById('q');
+q.addEventListener('input', () => { state.q = q.value; render(); });
+packSelect.addEventListener('change', () => { state.pack = packSelect.value; render(); });
+document.getElementById('mode-effects').addEventListener('click', () => setMode('effects'));
+document.getElementById('mode-skills').addEventListener('click', () => setMode('skills'));
+function setMode(mode) {
+  state.mode = mode;
+  document.getElementById('mode-effects').setAttribute('aria-pressed', String(mode === 'effects'));
+  document.getElementById('mode-skills').setAttribute('aria-pressed', String(mode === 'skills'));
+  render();
+}
+const play = document.getElementById('play');
+play.addEventListener('click', () => {
+  state.playing = !state.playing;
+  play.setAttribute('aria-pressed', String(state.playing));
+  play.textContent = state.playing ? 'Pause' : 'Play';
+});
+const paletteToggle = document.getElementById('palette');
+paletteToggle.addEventListener('click', () => {
+  state.palette = !state.palette;
+  paletteToggle.setAttribute('aria-pressed', String(state.palette));
+  epoch++;
+});
+for (const button of document.querySelectorAll('[data-speed]')) {
+  button.addEventListener('click', () => {
+    state.speed = Number(button.dataset.speed);
+    for (const peer of document.querySelectorAll('[data-speed]')) peer.setAttribute('aria-pressed', String(peer === button));
+  });
+}
+
+document.getElementById('hint').textContent = `${location.host} · dev only`;
+render();
+</script>
+</body>
+</html>

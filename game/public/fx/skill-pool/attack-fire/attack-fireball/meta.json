@@ -27,7 +27,7 @@
       {
         "id": "sheet-explosion-one",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-fire/attack-fireball/VFX_SpriteSheet_8x8_145256.png",
+        "src": "/fx/skill-pool/attack-fire/attack-fireball/sheet-explosion-one.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8164
         ],
         "content": {
           "widthRatio": 0.71484375,
@@ -76,7 +76,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.7422
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -86,7 +86,7 @@
           "shape": "single",
           "delivery": "projectile"
         },
-        "orient": true,
+        "orient": false,
         "palette": "fire"
       }
     ]

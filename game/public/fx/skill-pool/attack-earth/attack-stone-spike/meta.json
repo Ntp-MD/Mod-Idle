@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8477
         ],
         "content": {
           "widthRatio": 0.734375,
@@ -85,7 +85,7 @@
         "authoring": {
           "shape": "single"
         },
-        "orient": false,
+        "orient": true,
         "palette": "earth"
       }
     ]

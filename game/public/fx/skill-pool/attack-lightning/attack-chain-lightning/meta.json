@@ -27,7 +27,7 @@
       {
         "id": "bolt-fx-lightning-04",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/fx_lightning_gg_a.png",
+        "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/bolt-fx-lightning-04.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8984
         ],
         "content": {
           "widthRatio": 0.19140625,
@@ -54,7 +54,7 @@
           "shape": "single",
           "delivery": "projectile"
         },
-        "orient": true,
+        "orient": false,
         "palette": "lightning"
       },
       {
@@ -77,7 +77,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8945
         ],
         "content": {
           "widthRatio": 0.19140625,

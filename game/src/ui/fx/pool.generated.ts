@@ -12,7 +12,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-explosion-one",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/VFX_SpriteSheet_8x8_145256.png",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/sheet-explosion-one.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -29,7 +29,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8164
           ],
           "content": {
             "widthRatio": 0.71484375,
@@ -61,7 +61,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7422
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -71,7 +71,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "fire"
         }
       ]
@@ -104,7 +104,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8633
           ],
           "content": {
             "widthRatio": 0.49609375,
@@ -138,7 +138,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7891
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -163,7 +163,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-meteor-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/Effect_02_8x6-48.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/creepy-meteor-burst.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -180,7 +180,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4629
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -231,7 +231,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "cold"
         },
         {
@@ -254,7 +254,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.78515625,
@@ -264,7 +264,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "cold"
         }
       ]
@@ -299,7 +299,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7305
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -331,7 +331,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5645
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -373,7 +373,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.875
           ],
           "content": {
             "widthRatio": 0.75,
@@ -398,7 +398,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-04",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/fx_lightning_gg_a.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/bolt-fx-lightning-04.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -415,7 +415,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -425,7 +425,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "lightning"
         },
         {
@@ -448,7 +448,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -490,7 +490,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -522,7 +522,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8711
           ],
           "content": {
             "widthRatio": 0.69921875,
@@ -532,7 +532,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "lightning"
         }
       ]
@@ -548,7 +548,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-01",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/fx_lightning_cc.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/bolt-fx-lightning-01.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -565,7 +565,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.203125,
@@ -607,7 +607,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5117
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -639,7 +639,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.73828125,
@@ -649,7 +649,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "poison"
         }
       ]
@@ -682,7 +682,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.73046875,
@@ -757,7 +757,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.6367
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -789,7 +789,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8828
           ],
           "content": {
             "widthRatio": 0.7421875,
@@ -799,7 +799,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "chaos"
         }
       ]
@@ -832,7 +832,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.6992
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -874,7 +874,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8867
           ],
           "content": {
             "widthRatio": 0.77734375,
@@ -925,7 +925,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "earth"
         }
       ]
@@ -967,7 +967,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -1000,7 +1000,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.55859375,
@@ -1041,7 +1041,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -1074,7 +1074,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4375
           ],
           "content": {
             "widthRatio": 0.68359375,
@@ -1099,7 +1099,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-meteor-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/Effect_02_8x6-48.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/creepy-meteor-burst.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1116,7 +1116,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4629
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1148,7 +1148,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.334
           ],
           "content": {
             "widthRatio": 0.6171875,
@@ -1199,7 +1199,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -1241,7 +1241,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -1274,7 +1274,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4648
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1316,7 +1316,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.79296875,
@@ -1358,7 +1358,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.61328125,
@@ -1409,7 +1409,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "circle"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -1425,7 +1425,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-magic-hit",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/VFX_SpriteSheet_9x9_212412.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/sheet-magic-hit.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1442,7 +1442,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4453
           ],
           "content": {
             "widthRatio": 0.70703125,
@@ -1457,7 +1457,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1517,7 +1517,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.6171875,
@@ -1532,7 +1532,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1592,7 +1592,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.625,
@@ -1607,7 +1607,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-headshot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1667,7 +1667,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5215
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1709,7 +1709,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5312
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1724,7 +1724,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-shatter-ring",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/Effect_05_8x8-64.png",
+          "src": "/fx/skill-pool/attack-cold/attack-shatter/creepy-shatter-ring.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1741,7 +1741,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4629
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1783,7 +1783,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -1825,7 +1825,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4941
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1867,7 +1867,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.6699
           ],
           "content": {
             "widthRatio": 0.78515625,
@@ -1908,7 +1908,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.7051
           ],
           "content": {
             "widthRatio": 0.6484375,
@@ -1949,7 +1949,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -1990,7 +1990,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.498
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2031,7 +2031,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.6796875,
@@ -2072,7 +2072,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.53125,
@@ -2113,7 +2113,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.7168
           ],
           "content": {
             "widthRatio": 0.62109375,
@@ -2154,7 +2154,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8594
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2195,7 +2195,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8672
           ],
           "content": {
             "widthRatio": 0.484375,
@@ -2237,7 +2237,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.5,
@@ -2278,7 +2278,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7461
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2319,7 +2319,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4785
           ],
           "content": {
             "widthRatio": 0.71484375,
@@ -2360,7 +2360,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.6562
           ],
           "content": {
             "widthRatio": 0.359375,
@@ -2401,7 +2401,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.6641
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2442,7 +2442,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -2483,7 +2483,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.4707
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2524,7 +2524,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.5605
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2565,7 +2565,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.69921875,
@@ -2606,7 +2606,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2647,7 +2647,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.5566
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2688,7 +2688,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8789
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2729,7 +2729,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.6309
           ],
           "content": {
             "widthRatio": 0.74609375,
@@ -2770,7 +2770,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.37890625,
@@ -2811,7 +2811,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.4941
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -2852,7 +2852,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.79296875,
@@ -2893,7 +2893,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8633
           ],
           "content": {
             "widthRatio": 0.49609375,
@@ -2934,7 +2934,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8555
           ],
           "content": {
             "widthRatio": 0.640625,
@@ -2975,7 +2975,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -3016,7 +3016,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8242
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3057,7 +3057,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.832
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3098,7 +3098,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.6035
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3139,7 +3139,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8867
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3180,7 +3180,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.6777
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3221,7 +3221,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.625,
@@ -3262,7 +3262,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.5566
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3303,7 +3303,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.5684
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3344,7 +3344,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8281
           ],
           "content": {
             "widthRatio": 0.6953125,
@@ -3419,7 +3419,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5645
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3453,7 +3453,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7344
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3495,7 +3495,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.5312
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3527,7 +3527,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.78515625,
@@ -3537,7 +3537,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "cold"
         }
       ]
@@ -3579,13 +3579,13 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         },
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-split-shot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3645,7 +3645,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.61328125,
@@ -3660,7 +3660,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3703,7 +3703,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-magic-slash",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/VFX_SpriteSheet_9x9_210818.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strike/sheet-magic-slash.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3729,7 +3729,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         },
         {
@@ -3761,7 +3761,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "physical"
         }
       ]
@@ -3794,7 +3794,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.75,
@@ -3819,7 +3819,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-nova",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/Effect_08_8x4-32.png",
+          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/creepy-nova.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3836,7 +3836,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4863
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3870,7 +3870,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7891
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3895,7 +3895,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-12",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/fx_lightning_oo.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/bolt-fx-lightning-12.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3912,7 +3912,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -3946,7 +3946,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.35546875,
@@ -3988,7 +3988,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8828
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4039,7 +4039,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "circle"
           },
-          "orient": false,
+          "orient": true,
           "palette": "chaos"
         },
         {
@@ -4064,7 +4064,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.25,
@@ -4106,7 +4106,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8477
           ],
           "content": {
             "widthRatio": 0.734375,
@@ -4147,7 +4147,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "earth"
         }
       ]
@@ -4189,7 +4189,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "earth",
           "placement": {
             "kind": "line-series",
@@ -4217,7 +4217,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.334
           ],
           "content": {
             "widthRatio": 0.6171875,
@@ -4264,7 +4264,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.7461
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4296,7 +4296,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8516
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4306,7 +4306,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "chaos"
         }
       ]
@@ -4348,7 +4348,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "authoring": {
             "shape": "single"
           },
-          "orient": false,
+          "orient": true,
           "palette": "poison"
         },
         {
@@ -4371,7 +4371,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.73828125,
@@ -4381,7 +4381,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "poison"
         }
       ]
@@ -4414,7 +4414,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8945
           ],
           "content": {
             "widthRatio": 0.19140625,
@@ -4446,7 +4446,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4456,7 +4456,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "chaos"
         }
       ]
@@ -4489,7 +4489,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.707
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4521,7 +4521,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8594
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4531,7 +4531,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "poison"
         }
       ]
@@ -4564,7 +4564,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.73046875,
@@ -4596,7 +4596,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8555
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4606,7 +4606,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "poison"
         }
       ]
@@ -4639,7 +4639,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.73046875,
@@ -4677,7 +4677,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4473
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4719,7 +4719,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8984
           ],
           "content": {
             "widthRatio": 0.16796875,
@@ -4751,7 +4751,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8203
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4761,7 +4761,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
             "shape": "single",
             "delivery": "projectile"
           },
-          "orient": true,
+          "orient": false,
           "palette": "chaos",
           "placement": {
             "kind": "tether"
@@ -4797,7 +4797,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.4941
           ],
           "content": {
             "widthRatio": 0.796875,
@@ -4831,7 +4831,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "area",
           "anchor": [
             0.5,
-            0.5
+            0.8828
           ],
           "content": {
             "widthRatio": 0.24609375,
@@ -4873,7 +4873,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
           "binding": "caster",
           "anchor": [
             0.5,
-            0.5
+            0.793
           ],
           "content": {
             "widthRatio": 0.796875,

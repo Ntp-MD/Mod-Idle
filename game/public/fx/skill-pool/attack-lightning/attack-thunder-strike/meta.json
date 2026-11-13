@@ -19,7 +19,7 @@
       {
         "id": "bolt-fx-lightning-01",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/fx_lightning_cc.png",
+        "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/bolt-fx-lightning-01.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -36,7 +36,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8984
         ],
         "content": {
           "widthRatio": 0.203125,

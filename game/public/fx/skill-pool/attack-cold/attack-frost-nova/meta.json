@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.5645
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -78,7 +78,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.7344
         ],
         "content": {
           "widthRatio": 0.796875,

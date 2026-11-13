@@ -70,7 +70,21 @@ def prepare(effect):
         atlas.paste(cell, ((i % columns) * runtime, (i // columns) * runtime))
     destination = CACHE / path.name
     atlas.save(destination, optimize=True)
-    return destination, {'widthRatio': width / runtime, 'heightRatio': height / runtime}, hashlib.sha256(path.read_bytes()).hexdigest()
+    # Placement registration, in cell-normalised coordinates:
+    #   base    — union bottom of the animation, the point an upright effect stands on
+    #   equator — widest row of the animation, the ground contact of a flat disc/ring
+    alpha = np.asarray(atlas)[:, :, 3] > 3
+    rows = np.where(alpha.any(axis=1))[0]
+    base = float(rows.max() % runtime + 1) / runtime if len(rows) else 1.0
+    widths = np.zeros(runtime)
+    for index in range(count):
+        block = alpha[(index // columns) * runtime:(index // columns + 1) * runtime]
+        for row in range(runtime):
+            span = np.where(block[row])[0]
+            if len(span):
+                widths[row] += span.max() - span.min()
+    equator = float(int(np.argmax(widths)) + .5) / runtime
+    return destination, {'widthRatio': width / runtime, 'heightRatio': height / runtime}, {'base': base, 'equator': equator}, hashlib.sha256(path.read_bytes()).hexdigest()
 
 live = [skill for skill in SKILLS if not skill.get('retired')]
 assert set(CONFIG['recipes']) == {skill['id'] for skill in live}, 'Every live skill needs an explicit recipe'
@@ -80,6 +94,7 @@ assert used == set(CONFIG['sources']), 'Unregistered or unused source'
 prepared = {}
 for effect in used:
     spec = CONFIG['sources'][effect]
+    assert spec.get('rig') in ('ground', 'upright', 'directional'), f'Missing placement rig: {effect}'
     image = ROOT / spec['image'] if 'image' in spec else SOURCE / (effect + '.png')
     assert image.is_file(), f'Missing source: {effect}'
 for index, effect in enumerate(sorted(used), 1):
@@ -100,21 +115,35 @@ for skill in live:
     for recipe in CONFIG['recipes'][skill_id]['layers']:
         effect = recipe['effect']
         spec = CONFIG['sources'][effect]
-        image, content, source_hash = prepared[effect]
-        shutil.copyfile(image, folder / image.name)
+        image, content, registration, source_hash = prepared[effect]
+        # Runtime files carry the effect id: always lowercase-hyphen, never a pack's own
+        # mixed-case sheet name (the catalog test enforces the pool naming rule).
+        published = folder / f'{effect}.png'
+        shutil.copyfile(image, published)
         grid = spec['grid']
         travel = 'Travel' in recipe['phases']
         phases = ['Impact', 'Field', 'Channel'] if 'Field' in recipe['phases'] and kind != 'aura' else recipe['phases']
+        # One decision per source, taken from the artwork itself (tools/data/external-vfx.json):
+        # ground art plants its widest row on the point, upright art stands its base there,
+        # directional art turns to the aim. The renderer reads only anchor/orient, and the
+        # baked 33-degree camera already holds the arena's ellipse.
+        rig = spec['rig']
+        if rig == 'ground':
+            anchor, orient = [0.5, round(registration['equator'], 4)], False
+        elif rig == 'directional':
+            anchor, orient = [0.5, 0.5], True
+        else:
+            anchor, orient = [0.5, round(registration['base'], 4)], False
         layer = {
             'id': effect, 'role': 'upright',
-            'src': f'/fx/skill-pool/{group}/{slug}/{image.name}',
+            'src': f'/fx/skill-pool/{group}/{slug}/{published.name}',
             'frame': {'width': BAKE['runtimeCell'], 'height': BAKE['runtimeCell'], 'count': grid['count'], 'columns': grid['columns'], 'rows': (grid['count'] + grid['columns'] - 1) // grid['columns']},
             'fps': grid['fps'], 'loop': kind == 'aura' or travel or 'Field' in phases,
             'phases': phases, 'sizePolicy': 'body' if travel else size_policy,
             'binding': 'caster' if kind in ('buff', 'heal', 'aura') else 'area',
-            'anchor': [0.5, 0.5], 'content': content,
+            'anchor': anchor, 'content': content,
             'authoring': {'shape': 'single' if travel else 'circle' if size_policy == 'footprint' else 'single', **({'delivery': 'projectile'} if travel else {})},
-            'orient': travel
+            'orient': orient
         }
         if skill.get('element'):
             layer['palette'] = skill['element']

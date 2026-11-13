@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.707
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -76,7 +76,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8594
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -86,7 +86,7 @@
           "shape": "single",
           "delivery": "projectile"
         },
-        "orient": true,
+        "orient": false,
         "palette": "poison"
       }
     ]

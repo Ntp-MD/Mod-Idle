@@ -27,7 +27,7 @@
       {
         "id": "creepy-nova",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/Effect_08_8x4-32.png",
+        "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/creepy-nova.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.4863
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -78,7 +78,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.7891
         ],
         "content": {
           "widthRatio": 0.796875,

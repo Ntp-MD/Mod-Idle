@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.8984
         ],
         "content": {
           "widthRatio": 0.625,
@@ -59,7 +59,7 @@
       {
         "id": "gaph-arrow",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-phy/attack-headshot/Arrow.png",
+        "src": "/fx/skill-pool/attack-phy/attack-headshot/gaph-arrow.png",
         "frame": {
           "width": 256,
           "height": 256,

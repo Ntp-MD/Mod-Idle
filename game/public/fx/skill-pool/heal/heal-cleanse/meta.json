@@ -36,7 +36,7 @@
         "binding": "caster",
         "anchor": [
           0.5,
-          0.5
+          0.8984
         ],
         "content": {
           "widthRatio": 0.69921875,

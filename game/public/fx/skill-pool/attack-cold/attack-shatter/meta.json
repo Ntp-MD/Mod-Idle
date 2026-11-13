@@ -44,7 +44,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.5312
         ],
         "content": {
           "widthRatio": 0.796875,
@@ -59,7 +59,7 @@
       {
         "id": "creepy-shatter-ring",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-cold/attack-shatter/Effect_05_8x8-64.png",
+        "src": "/fx/skill-pool/attack-cold/attack-shatter/creepy-shatter-ring.png",
         "frame": {
           "width": 256,
           "height": 256,
@@ -76,7 +76,7 @@
         "binding": "area",
         "anchor": [
           0.5,
-          0.5
+          0.4629
         ],
         "content": {
           "widthRatio": 0.796875,
