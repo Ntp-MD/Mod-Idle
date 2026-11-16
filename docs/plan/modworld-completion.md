@@ -2,11 +2,11 @@
 
 Merged from the former code-health and live-card-combat plans on 2026-11-16. Branch: master. English only.
 
-<p id="plan-current" class="meta">Current: closeout (blocked by an unrelated VFX test failure). d2 and p7-4 done 2026-11-16.</p>
+<p id="plan-current" class="meta">Current: none — every agent checkbox is green as of 2026-11-16. Manual sign-off stays open for the owner.</p>
 
 > **Direction.** Present the existing real-time fight through player and enemy cards, supported by a small, local map. The simulation keeps ownership of movement, targeting, skill timing, damage and rewards. Cards use simple, readable feedback so every skill does not need a new field VFX asset.
 
-> **Status.** Check an item only after its requirement and checks pass. Checkbox state lives in this file; clicking a rendered box alone does not save progress. Earlier closeout evidence: full suite 2565 passed / 1 explicit skip / 0 failed; 12/12 cages; 9/9 map gates; svelte-check/tsc/lint clean; build OK. Evidence logs are in `.cache/`; completed-item history is in git.
+> **Status.** Check an item only after its requirement and checks pass. Checkbox state lives in this file; clicking a rendered box alone does not save progress. Earlier closeout evidence: full suite 2565 passed / 1 explicit skip / 0 failed; 12/12 cages; 9/9 map gates; svelte-check/tsc/lint clean; build OK. Evidence logs are in `.cache/`; completed-item history is in git. Final closeout re-run after the VFX asset swap landed: full suite 2570 passed / 1 explicit skip / 0 failed (262 files: 261 passed, 1 skipped), `verify` 12/12 cages PASS, `map:check` 9/9 PASS, `css:audit` 63 duplicate bodies / 107 collisions against the 66 / 108 baseline.
 
 ## Owner decisions — code health
 
@@ -124,17 +124,25 @@ Starting points: [live loop](../../game/src/app/loop.ts), [arena state and targe
 ## P7 — Verification
 
 - [x] `tests/ui/nearby-field.test.ts` covers strict `< 10 m`, 9.999 m rounding, group-order identity, dead/absent actors and off-view cues; 5/5 passed.
-- [ ] Fast suite blocked by the unrelated VFX failure described under Closeout; `npm --prefix game run check` is green. Map files and command ownership were not changed, so map gates were not triggered.
+- [x] Fast suite green after the VFX asset swap landed: full run 2026-11-16 → 262 files (261 passed, 1 skipped), 2571 tests (2570 passed, 1 skipped), 0 failed, 461.28 s. `tests/ui/vfx-catalog.test.ts` 3/3 passed without changing the assertion. `npm --prefix game run check` 0 errors / 0 warnings. Map files and command ownership were not changed; map gates were run anyway at closeout and passed.
 - [x] Headless 1920×1080 showcase check: three nearby cards, arena, target bar, skill bar, HUD studio; 0 console errors. Live-game check: cards empty-state and nearby-map shell render in the Journey dock; 0 console errors. Browser closed after each check.
 - [x] Busy-encounter check recorded 2026-11-16: headless 1920×1080 DEV field sample reached 10 nearby cards and 10 markers; repeated local casts ran for 5 s. Evaluate round-trip latency over 43 samples: avg 3.1 ms, p50 3 ms, p95 4 ms, max 10 ms. Body MutationObserver over 4 s: 97 mutations (24.3/s). Console 0 errors. One `onFrame` sample fed both views; no duplicate cards or markers. **Limitation:** the headless page reports `document.hidden = true`, so `requestAnimationFrame` and CDP sessions are unavailable; latency and mutation counts are proxies, not a frame-time profile.
 
 ## Closeout
 
-Stopped 2026-11-16 at stop condition 3: `npm --prefix game run test:fast` failed one unrelated test, `tests/ui/vfx-catalog.test.ts` (`attack.fireball: expected [] to have a length of 1`). The working tree has an in-flight VFX asset swap (deleted sheet PNGs / rewritten meta.json / new untracked sheets); no VFX input was changed by this plan. Do not weaken the assertion.
+Earlier stop (2026-11-16, stop condition 3): `tests/ui/vfx-catalog.test.ts` failed with `attack.fireball: expected [] to have a length of 1` while an unrelated VFX asset swap was in flight. The swap landed, the test was re-run unchanged (3/3 passed), and the assertion was never weakened.
 
-- [ ] Full suite once (`npm --prefix game run test`), `npm run check`, `npm run verify`, `npm run map:check`, build, `git diff --check`.
-- [ ] Record final css:audit numbers against the baseline (66 duplicates / 108 collisions / raw-literal counts).
-- [ ] Record actual commands and results in this file; stop on any unexplained failure instead of weakening a check.
+Commands and results, 2026-11-16 (logs in `.cache/`):
+
+- [x] `npm --prefix game run test` → 262 files: 261 passed, 1 skipped; 2571 tests: 2570 passed, 1 skipped, 0 failed; 461.28 s. Exit 0.
+- [x] `npm --prefix game run check` → `svelte-check found 0 errors and 0 warnings`. Exit 0.
+- [x] `npm run verify` → 12/12 cages PASS (engine 74/74 gates, skills 28/28, loot 5/5, bases 13/13, forge 4/4, tree 19/22 with 3 PENDING, imprint 9/9, map 9/9, trade 11/11, delivery 5/5, catalog 1/1, icon 1/1). Exit 0.
+- [x] `npm run map:check` → 9/9 map gates PASS, 0 PENDING, 0 FAIL. Exit 0.
+- [x] `npm --prefix game run build` → built in 17.24 s, main JS 3,109.51 kB, main CSS 243.66 kB. Exit 0.
+- [x] `git diff --check` → no whitespace errors. Exit 0.
+- [x] `npm run css:audit` → 69 sources / 2027 rules, **63** exact duplicate rule bodies, **107** component classes also named in `skins.css`. Exit 0.
+- [x] Final css:audit against baseline (66 duplicates / 108 collisions): d1 took duplicates 64 → 63, d2 took collisions 109 → 107. Both end below baseline; no raw-literal regression was introduced by this plan.
+- [x] Actual commands and results are recorded above; no check was weakened or skipped silently. The only remaining open items are the human visual reviews under Manual sign-off.
 
 ## Manual sign-off (human eyes — not agent checkboxes)
 
