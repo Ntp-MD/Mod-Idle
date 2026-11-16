@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "smoke-tendrils",
+  "family": "cloud-mist",
+  "file": "smoke-tendrils.png",
+  "rawFile": "raw/smoke-tendrils.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    110,
+    910,
+    921
+  ],
+  "sourceSha256": "c533ca80e55c83c8685c342ef92680d15398dc0f2281d39bdd02811f8303adbb",
+  "masterSha256": "9f3148d32ad3f359df2c3523f1d1db14e635eadc9879c1db7b50f930f7e112da",
+  "rawVisibleAlphaBounds": [
+    203,
+    88,
+    1069,
+    1171
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

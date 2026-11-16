@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "absorption-stream",
+  "family": "ribbon-beam",
+  "file": "absorption-stream.png",
+  "rawFile": "raw/absorption-stream.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    115,
+    905,
+    921
+  ],
+  "sourceSha256": "3d5dd6f8d56881bcc4fca0bf39266920bc37ba7ea5810e1ffa03635de59e8bb6",
+  "masterSha256": "fa2e974ef6fbafd64cbf5307293e433eb5496a91bdeec866e3e7bb67cff5ab8a",
+  "rawVisibleAlphaBounds": [
+    122,
+    317,
+    1105,
+    936
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

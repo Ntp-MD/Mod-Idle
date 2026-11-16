@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "release-plume",
+  "family": "column-eruption",
+  "file": "release-plume.png",
+  "rawFile": "raw/release-plume.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    122,
+    908,
+    890
+  ],
+  "sourceSha256": "6da747b78534203a23007791906f214aae609575292f8078b112ee1ac21f1530",
+  "masterSha256": "73d5139be71fbaacde27f13363c98475e9e38b186693caf746c4a7696c266cb8",
+  "rawVisibleAlphaBounds": [
+    113,
+    322,
+    1147,
+    913
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

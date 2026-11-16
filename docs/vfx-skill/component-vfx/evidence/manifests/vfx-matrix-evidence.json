@@ -1,0 +1,466 @@
+[
+  {
+    "skill": "attack.void_ray",
+    "version": "v3",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 4650000,
+    "layers": [
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.void_ray",
+    "version": "v3",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 33,
+    "time": 4500000,
+    "layers": [
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.void_ray",
+    "version": "v3",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 45,
+    "time": 4550000,
+    "layers": [
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.void_ray",
+    "version": "v3",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 60,
+    "time": 4700000,
+    "layers": [
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.void_ray",
+    "version": "v3",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 90,
+    "time": 4650000,
+    "layers": [
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.firestorm",
+    "version": "v5",
+    "parts": [
+      "ground-fill",
+      "vortex",
+      "mote"
+    ],
+    "elevation": 30,
+    "time": 2500000,
+    "layers": [
+      "ground-fill",
+      "animated-base",
+      "vortex",
+      "mote"
+    ],
+    "seen": [
+      "animated-base",
+      "ground-fill",
+      "vortex",
+      "mote"
+    ]
+  },
+  {
+    "skill": "attack.fireball",
+    "version": "v4",
+    "parts": [
+      "projectile-core",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 1700000,
+    "layers": [
+      "animated-base",
+      "projectile-core",
+      "ribbon-beam"
+    ],
+    "seen": [
+      "animated-base",
+      "projectile-core",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.cinder_nova",
+    "version": "v3",
+    "parts": [
+      "ground-fill",
+      "ground-edge",
+      "mote",
+      "ground-residue"
+    ],
+    "elevation": 30,
+    "time": 2000000,
+    "layers": [
+      "ground-fill",
+      "ground-edge",
+      "ground-residue",
+      "animated-base",
+      "mote"
+    ],
+    "seen": [
+      "ground-fill",
+      "ground-edge",
+      "animated-base",
+      "mote",
+      "ground-residue"
+    ]
+  },
+  {
+    "skill": "attack.blizzard",
+    "version": "v8",
+    "parts": [
+      "cloud-mist",
+      "fragment-debris",
+      "ground-edge"
+    ],
+    "elevation": 30,
+    "time": 2500000,
+    "layers": [
+      "ground-edge",
+      "animated-base",
+      "animated-extra-0",
+      "cloud-mist",
+      "fragment-debris"
+    ],
+    "seen": [
+      "ground-edge",
+      "animated-base",
+      "animated-extra-0",
+      "cloud-mist",
+      "fragment-debris"
+    ]
+  },
+  {
+    "skill": "attack.cleave",
+    "version": "v4",
+    "parts": [
+      "slash-sweep",
+      "ground-edge",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 2150000,
+    "layers": [
+      "ground-edge",
+      "animated-base",
+      "slash-sweep",
+      "impact-burst"
+    ],
+    "seen": [
+      "ground-edge",
+      "animated-base",
+      "slash-sweep",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.fissure",
+    "version": "v3",
+    "parts": [
+      "ground-fill",
+      "column-eruption",
+      "fragment-debris"
+    ],
+    "elevation": 30,
+    "time": 2500000,
+    "layers": [
+      "ground-fill",
+      "animated-base",
+      "column-eruption",
+      "fragment-debris"
+    ],
+    "seen": [
+      "animated-base",
+      "ground-fill",
+      "column-eruption",
+      "fragment-debris"
+    ]
+  },
+  {
+    "skill": "attack.chain_lightning",
+    "version": "v2",
+    "parts": [
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 1750000,
+    "layers": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ],
+    "seen": [
+      "animated-base",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "heal.heal",
+    "version": "v3",
+    "parts": [
+      "mote",
+      "ground-edge"
+    ],
+    "elevation": 30,
+    "time": 2150000,
+    "layers": [
+      "ground-edge",
+      "animated-base",
+      "mote"
+    ],
+    "seen": [
+      "ground-edge",
+      "animated-base",
+      "mote"
+    ]
+  },
+  {
+    "skill": "buff.flame_guard",
+    "version": "v3",
+    "parts": [
+      "ward-shell",
+      "mote"
+    ],
+    "elevation": 30,
+    "time": 783000,
+    "layers": [
+      "animated-base",
+      "ward-shell",
+      "mote"
+    ],
+    "seen": [
+      "animated-base",
+      "ward-shell",
+      "mote"
+    ]
+  },
+  {
+    "skill": "curse.jinx",
+    "version": "v3",
+    "parts": [
+      "mark-sigil",
+      "cloud-mist"
+    ],
+    "elevation": 30,
+    "time": 1550000,
+    "layers": [
+      "animated-base",
+      "mark-sigil",
+      "cloud-mist"
+    ],
+    "seen": [
+      "animated-base",
+      "mark-sigil",
+      "cloud-mist"
+    ]
+  },
+  {
+    "skill": "aura.grace",
+    "version": "v2",
+    "parts": [
+      "ground-edge",
+      "mote"
+    ],
+    "elevation": 30,
+    "time": 1300000,
+    "layers": [
+      "ground-edge",
+      "animated-base",
+      "mote"
+    ],
+    "seen": [
+      "ground-edge",
+      "animated-base",
+      "mote"
+    ]
+  },
+  {
+    "skill": "attack.fissure",
+    "version": "v5",
+    "parts": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ],
+    "elevation": 30,
+    "time": 2500000,
+    "layers": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ],
+    "seen": [
+      "crack-strip",
+      "stone-spike",
+      "fragment-debris",
+      "cloud-mist"
+    ]
+  },
+  {
+    "skill": "attack.stone_spike",
+    "version": "v3",
+    "parts": [
+      "stone-spike",
+      "impact-burst",
+      "fragment-debris"
+    ],
+    "elevation": 30,
+    "time": 2450000,
+    "layers": [
+      "stone-spike",
+      "impact-burst",
+      "fragment-debris"
+    ],
+    "seen": [
+      "stone-spike",
+      "impact-burst",
+      "fragment-debris"
+    ]
+  },
+  {
+    "skill": "attack.tidal_wave",
+    "version": "v3",
+    "parts": [
+      "wave-crest",
+      "cloud-mist"
+    ],
+    "elevation": 30,
+    "time": 1150000,
+    "layers": [
+      "wave-crest",
+      "cloud-mist"
+    ],
+    "seen": [
+      "wave-crest",
+      "cloud-mist"
+    ]
+  },
+  {
+    "skill": "attack.piercing_shot",
+    "version": "v3",
+    "parts": [
+      "arrow-core",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 1400000,
+    "layers": [
+      "arrow-core"
+    ],
+    "seen": [
+      "arrow-core",
+      "impact-burst"
+    ]
+  },
+  {
+    "skill": "attack.water_ball",
+    "version": "v3",
+    "parts": [
+      "orb-core",
+      "impact-burst"
+    ],
+    "elevation": 30,
+    "time": 1300000,
+    "layers": [
+      "orb-core"
+    ],
+    "seen": [
+      "orb-core",
+      "impact-burst"
+    ]
+  }
+]

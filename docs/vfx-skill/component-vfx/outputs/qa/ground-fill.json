@@ -1,0 +1,23 @@
+{
+  "shape": "ground-fill",
+  "family": "ground-fill",
+  "file": "ground-fill.png",
+  "rawFile": "raw/ground-fill.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    113,
+    918,
+    921
+  ],
+  "sourceSha256": "14d46b2df0b9a84f66878739503abf5d930de8690728e11a70f1f6dc6dcb27d8",
+  "masterSha256": "11b3c9df62d5994bfde543256cefefc14e16868b6d44a5c75cdf09bf03c24d1d",
+  "humanReview": false
+}

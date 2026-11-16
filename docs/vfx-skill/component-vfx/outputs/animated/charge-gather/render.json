@@ -1,0 +1,130 @@
+{
+  "component": {
+    "id": "charge-gather",
+    "family": "mote",
+    "priority": 1,
+    "fps": 24,
+    "binding": "caster",
+    "reviewSkill": "attack.fireball",
+    "phase": "Windup"
+  },
+  "frameSize": 256,
+  "frameCount": 24,
+  "units": "metres",
+  "source": "sources/charge-gather.blend",
+  "sourceSha256": "619a0847ef01ed82a84f4a403b69a6e047534d229c95744c31c62ed496f6380f",
+  "interrupt": {
+    "mode": "fade-current",
+    "durationSec": 0.16,
+    "emitContact": false
+  },
+  "cameras": [
+    {
+      "id": "raised",
+      "elevationDeg": 45,
+      "azimuthDeg": 0,
+      "orthographicSpanM": 5,
+      "targetHeightM": 0.65,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "directions": [
+        {
+          "id": "south",
+          "angleDeg": 90
+        },
+        {
+          "id": "south-east",
+          "angleDeg": 45
+        },
+        {
+          "id": "east",
+          "angleDeg": 0
+        },
+        {
+          "id": "north-east",
+          "angleDeg": -45
+        },
+        {
+          "id": "north",
+          "angleDeg": -90
+        },
+        {
+          "id": "north-west",
+          "angleDeg": -135
+        },
+        {
+          "id": "west",
+          "angleDeg": 180
+        },
+        {
+          "id": "south-west",
+          "angleDeg": 135
+        }
+      ]
+    },
+    {
+      "id": "arena",
+      "elevationDeg": 33,
+      "azimuthDeg": 0,
+      "orthographicSpanM": 5,
+      "targetHeightM": 0.65,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "directions": [
+        {
+          "id": "south",
+          "angleDeg": 90
+        },
+        {
+          "id": "south-east",
+          "angleDeg": 45
+        },
+        {
+          "id": "east",
+          "angleDeg": 0
+        },
+        {
+          "id": "north-east",
+          "angleDeg": -45
+        },
+        {
+          "id": "north",
+          "angleDeg": -90
+        },
+        {
+          "id": "north-west",
+          "angleDeg": -135
+        },
+        {
+          "id": "west",
+          "angleDeg": 180
+        },
+        {
+          "id": "south-west",
+          "angleDeg": 135
+        }
+      ]
+    }
+  ],
+  "phases": {
+    "start": [
+      0,
+      3
+    ],
+    "active": [
+      4,
+      17
+    ],
+    "contact": null,
+    "exit": [
+      18,
+      23
+    ]
+  },
+  "frameDurationUs": 41667,
+  "decorativeSeed": 20261111
+}

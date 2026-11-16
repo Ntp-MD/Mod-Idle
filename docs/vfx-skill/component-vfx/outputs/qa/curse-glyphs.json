@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "curse-glyphs",
+  "family": "mark-sigil",
+  "file": "curse-glyphs.png",
+  "rawFile": "raw/curse-glyphs.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    128,
+    109,
+    903,
+    921
+  ],
+  "sourceSha256": "0fbe26e1a4edd6e8822617b5cb94c4034df521f9b6b7a69822f06d52014bee08",
+  "masterSha256": "0a2e49d4872ad5ca921e3b10a39343fb77c1fed1ffc222117ec1aa9d00b2a528",
+  "rawVisibleAlphaBounds": [
+    329,
+    49,
+    910,
+    1181
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

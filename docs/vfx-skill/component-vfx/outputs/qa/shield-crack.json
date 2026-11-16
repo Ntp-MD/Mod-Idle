@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "shield-crack",
+  "family": "ward-shell",
+  "file": "shield-crack.png",
+  "rawFile": "raw/shield-crack.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    108,
+    917,
+    905
+  ],
+  "sourceSha256": "7efc4aacb0c34806aba07740f6530fa11c5a443deba18e0afbce9888bb732746",
+  "masterSha256": "9c705d2ec03b4a96f11f146f73fcc4baf740c42f6004817991fbb93b0ad29e34",
+  "rawVisibleAlphaBounds": [
+    207,
+    216,
+    1065,
+    1015
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

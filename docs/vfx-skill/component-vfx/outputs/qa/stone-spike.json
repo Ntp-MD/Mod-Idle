@@ -1,0 +1,23 @@
+{
+  "shape": "stone-spike",
+  "family": "column-eruption",
+  "file": "stone-spike.png",
+  "rawFile": "raw/stone-spike.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    921,
+    921
+  ],
+  "sourceSha256": "413542b7cdd1c71690c1bd119290c83ef03e6c406f13592ac4677870c9ae9b18",
+  "masterSha256": "4e5ee4471794e56874f11a1567bd54804819a516d2fa034f74d6de0feb3d6b91",
+  "humanReview": false
+}

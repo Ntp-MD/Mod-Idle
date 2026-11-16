@@ -1,0 +1,23 @@
+{
+  "shape": "slash-sweep",
+  "family": "slash-sweep",
+  "file": "slash-sweep.png",
+  "rawFile": "raw/slash-sweep.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    118,
+    912,
+    921
+  ],
+  "sourceSha256": "a24ff73b7611d44f2a602118e2de218e6be229151e9415eaebd0f9b93e7eb36f",
+  "masterSha256": "d970970b4fb84c927b7d4da1db9c10855c03d193cfe226de97f89ab53bed941c",
+  "humanReview": false
+}

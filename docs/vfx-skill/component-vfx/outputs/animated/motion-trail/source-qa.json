@@ -1,0 +1,27 @@
+{
+  "component": "motion-trail",
+  "sourceSha256": "736daac7a85314fa2aeb558d7e3264a939becdf6696419991613de018cf46564",
+  "geometrySha256": "9bf9806d047d6a2ca70c29453de8536d18e70a18f7e55889f9abea9dcdb32fbc",
+  "sourceUnchanged": true,
+  "cameraChangeWithoutRebuild": true,
+  "deterministicRerender": true,
+  "northUpEastRight": true,
+  "fixedRootAcrossEightHeadings": true,
+  "anchors": [
+    {
+      "camera": "arena",
+      "anchor": [
+        0.5,
+        0.60902703
+      ]
+    },
+    {
+      "camera": "raised",
+      "anchor": [
+        0.5,
+        0.5919238
+      ]
+    }
+  ],
+  "humanApproval": "pending"
+}

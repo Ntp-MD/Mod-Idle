@@ -1,0 +1,23 @@
+{
+  "shape": "vortex",
+  "family": "vortex",
+  "file": "vortex.png",
+  "rawFile": "raw/vortex.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    109,
+    921,
+    921
+  ],
+  "sourceSha256": "71af86c0b53711f698da17724a1073be6d6b7341c988a74f5d9cd6ca923310e8",
+  "masterSha256": "30e8de9e8e6e9cc927a9c1a7cf0ecea805940307c35553a5830f77e441e07867",
+  "humanReview": false
+}

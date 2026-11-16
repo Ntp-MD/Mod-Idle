@@ -1,0 +1,23 @@
+{
+  "shape": "crack-strip",
+  "family": "ground-residue",
+  "file": "crack-strip.png",
+  "rawFile": "raw/crack-strip.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    103,
+    917,
+    870
+  ],
+  "sourceSha256": "b1a59ab2ce0e82475a9fbfa19d45edd6ec262efec8d35b0e1a6bf3f29d462b82",
+  "masterSha256": "474033449466179d6691f15c452e724ccbcdca23651712adb56f24e257d23e76",
+  "humanReview": false
+}

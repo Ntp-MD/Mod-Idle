@@ -1,0 +1,33 @@
+{
+  "shape": "cone-stream",
+  "file": "cone-stream.png",
+  "rawFile": "raw/cone-stream.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    157,
+    898,
+    905
+  ],
+  "alphaExtrema": [
+    0,
+    254
+  ],
+  "visibleRgbSpreadMax": 30,
+  "visibleRgbSpreadMean": 1.381794,
+  "grayscaleAuthority": "AtlasFrame feColorMatrix saturate=0 before palette transfer",
+  "contentRatio": 0.8,
+  "sourceSha256": "845b05b219085f8d4c3b60efff0c0697fc99009c42d157f70a2e8493b2803308",
+  "masterSha256": "00869e1c60d0a87e1a14d8c410967a2c63a007c8db7939f159f5bd4716449116",
+  "humanReview": false,
+  "runtimeRegistered": false,
+  "verifiedRuntimePalettes": 0,
+  "family": "cloud-mist"
+}

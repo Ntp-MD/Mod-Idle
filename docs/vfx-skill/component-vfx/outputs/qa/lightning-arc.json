@@ -1,0 +1,23 @@
+{
+  "alphaBounds": [
+    103,
+    239,
+    893,
+    763
+  ],
+  "nativeSize": [
+    1536,
+    1024
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "humanReview": false,
+  "sourceSha256": "7b9a887c4395baa2bbb880feb432602673892f2f8a69074789c31c0e1c326360",
+  "masterSha256": "792cda699445045ebd6bad212b2da870c817a9ab5c75ff5abf9f9ae973df1195",
+  "shape": "lightning-arc",
+  "family": "ribbon-beam",
+  "file": "lightning-arc.png",
+  "rawFile": "raw/lightning-arc.png"
+}

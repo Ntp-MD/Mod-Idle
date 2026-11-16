@@ -1,0 +1,23 @@
+{
+  "shape": "rock-core",
+  "family": "projectile-core",
+  "file": "rock-core.png",
+  "rawFile": "raw/rock-core.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    118,
+    909,
+    913
+  ],
+  "sourceSha256": "a70cb3412d50b4a7e09772d1d274737eded4c8fc7dc3e4c7acabc936c9490470",
+  "masterSha256": "eb987d445c9e7c5fa189f4cb9349d0bf019a75f932efb1fe182a0b5af08ef66f",
+  "humanReview": false
+}

@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "ricochet-fan",
+  "family": "impact-burst",
+  "file": "ricochet-fan.png",
+  "rawFile": "raw/ricochet-fan.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    160,
+    908,
+    900
+  ],
+  "sourceSha256": "f32ab4382e3e1906ed81a6c94d0032ac9df2de25ac91aa0ff1469d2de96fb647",
+  "masterSha256": "5c13620adb43ea3bf1f5eb4754345b0317973b3ef2e28be5034c41410376a346",
+  "rawVisibleAlphaBounds": [
+    124,
+    273,
+    1115,
+    964
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}

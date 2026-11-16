@@ -1,0 +1,105 @@
+{
+  "attack.firestorm": [
+    "v3",
+    "v5",
+    [
+      "ground-fill",
+      "vortex",
+      "mote"
+    ]
+  ],
+  "attack.fireball": [
+    "v2",
+    "v4",
+    [
+      "projectile-core",
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  ],
+  "attack.cinder_nova": [
+    "v1",
+    "v3",
+    [
+      "ground-fill",
+      "ground-edge",
+      "mote",
+      "ground-residue"
+    ]
+  ],
+  "attack.blizzard": [
+    "v6",
+    "v8",
+    [
+      "cloud-mist",
+      "fragment-debris",
+      "ground-edge"
+    ]
+  ],
+  "attack.cleave": [
+    "v2",
+    "v4",
+    [
+      "slash-sweep",
+      "ground-edge",
+      "impact-burst"
+    ]
+  ],
+  "attack.fissure": [
+    "v1",
+    "v3",
+    [
+      "ground-fill",
+      "column-eruption",
+      "fragment-debris"
+    ]
+  ],
+  "attack.chain_lightning": [
+    "v1",
+    "v2",
+    [
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  ],
+  "attack.void_ray": [
+    "v1",
+    "v3",
+    [
+      "ribbon-beam",
+      "impact-burst"
+    ]
+  ],
+  "heal.heal": [
+    "v1",
+    "v3",
+    [
+      "mote",
+      "ground-edge"
+    ]
+  ],
+  "buff.flame_guard": [
+    "v1",
+    "v3",
+    [
+      "ward-shell",
+      "mote"
+    ]
+  ],
+  "curse.jinx": [
+    "v1",
+    "v3",
+    [
+      "mark-sigil",
+      "cloud-mist"
+    ]
+  ],
+  "aura.grace": [
+    "v1",
+    "v2",
+    [
+      "ground-edge",
+      "mote"
+    ]
+  ]
+}

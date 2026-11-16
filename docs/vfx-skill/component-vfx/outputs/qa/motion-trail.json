@@ -1,0 +1,23 @@
+{
+  "humanReview": false,
+  "shape": "motion-trail",
+  "family": "ribbon-beam",
+  "file": "motion-trail.png",
+  "rawFile": "raw/motion-trail.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    122,
+    891,
+    895
+  ],
+  "sourceSha256": "638ca27025259f7202388a2546190600ea042422c631436e4e6d5071db9c2602",
+  "masterSha256": "f6da548bce7573499c8a8475aaebb42e44ad9dbaf1776b4202db547256ca8ded"
+}

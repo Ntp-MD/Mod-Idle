@@ -1,0 +1,23 @@
+{
+  "alphaBounds": [
+    103,
+    138,
+    909,
+    910
+  ],
+  "nativeSize": [
+    1262,
+    1246
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "humanReview": false,
+  "sourceSha256": "3a909a95c2b64c8c0b5458c06a4fee583f64032ebe9fbf1af63f25801d074dae",
+  "masterSha256": "59ceae71010ac9fc18753d3492aa120dc24319e067548e65d23ae37e0fd77884",
+  "shape": "blade-thrust",
+  "family": "slash-sweep",
+  "file": "blade-thrust.png",
+  "rawFile": "raw/blade-thrust.png"
+}

@@ -1,0 +1,219 @@
+{
+  "component": "contact-flash",
+  "status": "mechanical-pass",
+  "humanApproval": "pending",
+  "sourceSha256": "7b654501890a2f192def818d6e6c09f99768cd432ac28bf62ecc21b9503f94e3",
+  "frameCount": 24,
+  "cameraCount": 2,
+  "directionCount": 8,
+  "checks": [
+    {
+      "camera": "arena",
+      "direction": "south",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 33,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "0146da371ccee916293f2ee55a70839f2dc59f309c84062a22d47386378629f8"
+    },
+    {
+      "camera": "arena",
+      "direction": "south-east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 40,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "f1769fd034f43c09ec6516858d5f278e4a5370880d322e05620424c894720ac3"
+    },
+    {
+      "camera": "arena",
+      "direction": "east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 39,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "518993d9852834f422f6a2dda24ef01b5a833ac5e06ac6e5b9c940599ff2e135"
+    },
+    {
+      "camera": "arena",
+      "direction": "north-east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 36,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "fde09905ec562855c7edcc843df5a9c1b23553bd6ee974b6bca4e2c3d7e69225"
+    },
+    {
+      "camera": "arena",
+      "direction": "north",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 31,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "27c84d27be14745129bebc62fea00a5985d4e0bd9ae1d08ee127dd8faebbf07c"
+    },
+    {
+      "camera": "arena",
+      "direction": "north-west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 29,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "234eec49ac1a059ea7ea9a82ee489dc45a3581b6789755dcea84b61c978807aa"
+    },
+    {
+      "camera": "arena",
+      "direction": "west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 27,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "4adabb0b0bc7f1648d30c80556aa37c9569b8d4f34008cd8a177489f6fb0febb"
+    },
+    {
+      "camera": "arena",
+      "direction": "south-west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 28,
+      "anchor": [
+        0.5,
+        0.60902703
+      ],
+      "atlasSha256": "8c5b62d121d164bcd6f32e794f1758a1d14dd79d6912ec8cb40e6d421c247e6c"
+    },
+    {
+      "camera": "raised",
+      "direction": "south",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 47,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "d2ed54bad5caee76f965846165992e72abf736f01f3b8eaf89526d95e52245d1"
+    },
+    {
+      "camera": "raised",
+      "direction": "south-east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 52,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "c24cf7e78bee798fdc66bd63dd76f8170e0d09fd4c6f5c739d090cb87509090e"
+    },
+    {
+      "camera": "raised",
+      "direction": "east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 55,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "c05948666d904977dc7c916d6364ccafeaa56c7d05de5e47623f37fee675cca1"
+    },
+    {
+      "camera": "raised",
+      "direction": "north-east",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 50,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "51e2bc62d3d699abb8c6be12d674286fba98a0405f14477549a8fcea48782f50"
+    },
+    {
+      "camera": "raised",
+      "direction": "north",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 45,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "c836624f7032b1d202f120ab4350c2071792a5ac6bc1729b7134613ba2c3cdd1"
+    },
+    {
+      "camera": "raised",
+      "direction": "north-west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 42,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "8f67c57c567456a0dcaada460ba1943eb4132408c4e1d986e3d2026fd5259a3d"
+    },
+    {
+      "camera": "raised",
+      "direction": "west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 38,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "42cebe51bcf1482cf4165ebc45bd4181de7b7d8ac50c49699ad9671b02466528"
+    },
+    {
+      "camera": "raised",
+      "direction": "south-west",
+      "frames": 24,
+      "activeFrames": 14,
+      "uniqueFrames": 24,
+      "minimumMarginPx": 39,
+      "anchor": [
+        0.5,
+        0.5919238
+      ],
+      "atlasSha256": "4583843c9aacefc4ca2543887ba5a40247e49a058181974f80b5534759ad1304"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "alphaBounds": [
+    103,
+    113,
+    917,
+    921
+  ],
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "humanReview": false,
+  "sourceSha256": "ca5cff069a5ec366ab3d2d9853c33d2f4054ae9e646911140e3729cadbe09c6d",
+  "masterSha256": "20e19d47157f327e3ebcf158040645beab1f382ae5a65efad2b41b6622752dd4",
+  "shape": "healing-wisps",
+  "family": "mote",
+  "file": "healing-wisps.png",
+  "rawFile": "raw/healing-wisps.png"
+}

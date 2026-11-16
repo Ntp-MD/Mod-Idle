@@ -1,0 +1,36 @@
+{
+  "humanReview": false,
+  "shape": "metal-spark-fan",
+  "family": "impact-burst",
+  "file": "metal-spark-fan.png",
+  "rawFile": "raw/metal-spark-fan.png",
+  "nativeSize": [
+    1254,
+    1254
+  ],
+  "canvas": [
+    1024,
+    1024
+  ],
+  "alphaBounds": [
+    103,
+    123,
+    921,
+    910
+  ],
+  "sourceSha256": "1fa04d219cf677019d50804f52910445f5865eeb736381b960f739f5cfda7aa1",
+  "masterSha256": "3e431e6990bdceef681d8cf5e094a5b51c2d2cb28a880d2a28054bc9b6099729",
+  "rawVisibleAlphaBounds": [
+    182,
+    307,
+    1104,
+    942
+  ],
+  "rawCornerAlpha": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "rawPreserved": true
+}
