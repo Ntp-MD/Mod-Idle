@@ -1,8 +1,8 @@
-import type { GameState } from '@sim/core/types';
+import type { Cell, FieldSite, GameState, Item, Mob, Walk } from '@sim/core/types';
 import { normalizeCombatHistory } from '@sim/combat/combat-history';
 import { normalizeAlchemyLedger } from '@engine/alchemy.ts';
 import { normalizeBlackMarket } from '@sim/town/black-market';
-import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState } from '@sim/combat/skills';
+import { ACTIVE_SLOTS, clampAuraReservations, clearUnownedTracks, effectsActive, newSkillState, type SkillConditions } from '@sim/combat/skills';
 import { newTown } from '@sim/town/town';
 import { normalizeDeliveries } from '@sim/town/delivery';
 import { normalizeQuestRewards } from '@sim/town/quest-rewards';
@@ -10,9 +10,11 @@ import { normalizeMapJournal } from '@sim/world/map-exploration';
 import { newFarm, QUICKBAR_SLOTS } from '@sim/world/farm';
 import { slotsAvailable, slotsUsed } from '@sim/gear/slots';
 import { newFieldwork, normalizeCampEncounterState } from '@sim/world/fieldwork';
+import type { FieldworkState } from '@sim/world/fieldwork';
 import { newPresets } from '@sim/core/presets';
 import { newCollector, newGrants } from '@sim/town/collector';
 import { newFilter, refresh as refreshFilter } from '@sim/gear/filter';
+import type { FilterState } from '@sim/gear/filter';
 import { newGoal } from '@sim/core/goal';
 import { newGuidance, normalizeGuidance } from '@sim/core/guidance';
 import { buildCharacter } from '@sim/core/player';
@@ -23,6 +25,7 @@ import { reason as snapshotReason, arm as armSnapshot, SAVE_CFG } from '@sim/cor
 import { E, TOWN, BASES, eng, fieldwork, loot, sm, tree, STAT_KEYS, type StatKey } from '../engine/client';
 import { craft } from '@sim/gear/craft';
 import { road, settlementZone, standingOrder } from '@sim/world/road';
+import type { JourneyLeg } from '@sim/world/travel';
 import { newEconomyState, validateEconomy } from '@sim/core/economy';
 import {
   newPendingNormalizeReceipt, normalizePendingWork,
@@ -31,7 +34,7 @@ import {
   newFieldNormalizeReceipt, normalizeFieldArchive, normalizeFieldState,
 } from '@sim/world/field-area';
 import { push } from '@sim/core/log';
-import { hexAdjacent } from '../../../engine/hex.ts';
+import { hexAdjacent, type Hex } from '../../../engine/hex.ts';
 
 // save.md: local only, three slots, IndexedDB with a localStorage fallback, JSON export/import.
 // The town layer is a schema bump, and an import at a different version is rejected rather than
@@ -80,6 +83,69 @@ export const SCHEMA_VERSION = 30;
 
 const SLOTS = ['slot1', 'slot2', 'slot3'] as const;
 export type SlotName = (typeof SLOTS)[number];
+
+/** Loose shapes read at the save boundary: a legacy or hand-edited file need not match the live schema. */
+type LooseRecord = Record<string, unknown>;
+
+/** A dropped piece before v9 also carried a Rarity label and, before v5, a player-chosen stat. */
+type LegacyItem = Item & { rarity?: string; chosenStat?: string };
+type LegacyMob = Partial<Mob>;
+type LegacyCell = Partial<Cell> & { wild?: number };
+
+/** A road place read by the v27 remap; kept local so no second copy of the engine type is written. */
+type RoadLocation = (typeof road.locations)[number];
+
+/** Legacy/foreign fields a saved state may carry but the current schema no longer declares. */
+interface LooseSave extends GameState {
+  road?: unknown;
+  purseDay?: unknown;
+  chestDay?: unknown;
+  autoDissolveRarity?: string;
+  junkByRarity?: Record<string, number>;
+  huntOrder?: unknown;
+  zoneFocus?: unknown;
+  patrol?: unknown;
+  autoReturn?: unknown;
+}
+
+/** A v7-v11 walk: endpoints are settlement ids, progress is a block triple. */
+interface EarlyWalk {
+  from?: string;
+  to?: string;
+  blocksTotal?: number;
+  blocksLeft?: number;
+  blocksWalked?: number;
+  secLeft?: number;
+}
+
+/** A pre-v30 walk after the v12 rewrite: hex endpoints plus the retired projections. */
+interface LegacyWalk {
+  from: Hex;
+  to: Hex;
+  origin: Hex;
+  journeyId: number;
+  legs: JourneyLeg[];
+  stepIndex: number;
+  secLeft: number;
+  lastEventStep: number;
+  node?: string;
+  kind?: string;
+  sub?: number | null;
+  site?: FieldSite | null;
+  terrain?: string | null;
+  wild?: number;
+  blocksTotal?: number;
+  blocksLeft?: number;
+  blocksWalked?: number;
+  activeSec?: number;
+}
+
+/** A v13 fieldwork carried meal and raw-meat stacks before the unified provision bag. */
+type LegacyFieldwork = FieldworkState & { meals?: Record<string, number> };
+
+/** A v26 unique row could still be named by its pre-rename `legacy_name`. */
+type LegacyUniqueRow = { name: string; id: string; legacy_name?: string };
+
 
 /** TEMPORARY until the game is finished: slot persistence is off. No localStorage/IndexedDB
  *  slot writes, no autosave, no Save nag. Flip back to false to restore the save flow.
@@ -490,10 +556,10 @@ export async function readSave(slot: SlotName): Promise<GameState | null> {
  * the piece's window with no RNG, so two loads of one save agree to the digit. A frame the rename left
  * unmatched simply keeps its lines, with no Frame Mod.
  */
-function restampItem(item: any): void {
+function restampItem(item: LegacyItem | null | undefined): void {
   if (!item || !Array.isArray(item.lines)) return;
-  const frame = BASES.bases.find((b: any) => b.name === item.base && b.slot === item.slot) || null;
-  const weapon = frame ? null : BASES.weapons.find((w: any) => item.base === w.name) || null;
+  const frame = BASES.bases.find((b) => b.name === item.base && b.slot === item.slot) || null;
+  const weapon = frame ? null : BASES.weapons.find((w) => item.base === w.name) || null;
   const q = item.q ?? Math.max(0, loot.BAND_LABEL.indexOf(item.quality));
   const band = loot.BAND_LABEL[q] || 'low';
   const base = loot.frameModAtFloor(BASES, item.slot, frame, weapon, item.ilvl ?? eng.floorLevelOf(band), q);
@@ -506,7 +572,7 @@ function restampItem(item: any): void {
  * onto the new order, because the old T1 named the window's bottom and the new T1 names its top. Every
  * value it holds is kept exactly as it was, and the Rarity field goes away.
  */
-function levelItem(item: any): void {
+function levelItem(item: LegacyItem | null | undefined): void {
   if (!item || !Array.isArray(item.lines)) return;
   const band = loot.BAND_LABEL[item.q ?? 0] || item.quality || 'low';
   if (item.ilvl == null) item.ilvl = Math.max(1, eng.floorLevelOf(band));
@@ -523,11 +589,11 @@ function levelItem(item: any): void {
  * or the piece's own first stat when nobody chose, so a migrated save keeps exactly the numbers it had
  * and every later Stat Mod line names its own stat the way a fresh drop does.
  */
-function restatItem(item: any): void {
+function restatItem(item: LegacyItem | null | undefined): void {
   if (!item || !Array.isArray(item.lines)) return;
   const fallback = item.chosenStat || loot.STAT_ROLLS[0];
   for (const line of item.lines) {
-    if (line && line.id === 'stat_mod_flat' && !line.stat) line.stat = fallback;
+    if (line && line.id === 'stat_mod_flat' && !line.stat) line.stat = fallback as StatKey;
   }
   delete item.chosenStat;
 }
@@ -564,20 +630,20 @@ function repairLegacyAutoSpend(s: GameState): void {
 type LegacyRewardDrop = { item: string; rarity: string; lean: 'gear' | 'herb' | 'junk' | 'none' };
 
 /** The payload a pre-migration actor earned, resolved from its original Species/rank/name. */
-function legacyRewardFor(mob: any): LegacyRewardDrop | null {
+function legacyRewardFor(mob: LegacyMob | null | undefined): LegacyRewardDrop | null {
   if (!mob || typeof mob.variant !== 'string') return null;
-  const drops = ((E.mob as any).variant_drops || {}) as Record<string, LegacyRewardDrop>;
-  const retired = ((E.mob as any).retired_variant_drops || {}) as Record<string, LegacyRewardDrop & { species: string }>;
+  const drops = (E.mob.variant_drops || {}) as Record<string, LegacyRewardDrop>;
+  const retired = (E.mob.retired_variant_drops || {}) as Record<string, LegacyRewardDrop & { species: string }>;
   const kind = String(mob.kind || '');
   if (kind.startsWith('Boss')) {
-    const row = (E.mob.bosses as any[]).find((b) => b.name === mob.variant);
+    const row = E.mob.bosses.find((b) => b.name === mob.variant);
     return row ? drops[row.id] ?? null : null;
   }
   if (kind.startsWith('Unique')) {
-    const row = (E.mob.uniques as any[]).find((u) => u.name === mob.variant || u.legacy_name === mob.variant);
+    const row = (E.mob.uniques as LegacyUniqueRow[]).find((u) => u.name === mob.variant || u.legacy_name === mob.variant);
     return row ? drops[row.id] ?? null : null;
   }
-  const siblings = (E.mob.variants as any[]).filter((row) => row.species === mob.speciesId && row.name === mob.variant);
+  const siblings = E.mob.variants.filter((row) => row.species === mob.speciesId && row.name === mob.variant);
   const payloads = new Set(siblings.map((row) => JSON.stringify(drops[row.id] ?? null)));
   if (payloads.size === 1) return drops[siblings[0].id] ?? null;
   if (payloads.size > 1) return null;            // conflicting inherited payload: never pick a winner
@@ -596,11 +662,11 @@ function sameReward(a: unknown, b: unknown): boolean {
  */
 function migrateLegacyPlacementMobs(s: GameState): void {
   const seen = new WeakSet<object>();
-  const unresolved = (mob: any) => {
+  const unresolved = (mob: LegacyMob) => {
     const text = `Legacy mob reward unresolved · ${mob.id} · ${mob.variant ?? 'unknown'}`;
     if (!(s.log || []).some((line) => line.text === text)) push(s, text);
   };
-  const visit = (mob: any) => {
+  const visit = (mob: LegacyMob | null | undefined) => {
     if (!mob || typeof mob !== 'object' || seen.has(mob)) return;
     seen.add(mob);
     if (mob.legacySnapshot !== true) {
@@ -615,42 +681,44 @@ function migrateLegacyPlacementMobs(s: GameState): void {
     if (mob.legacyDrop == null) unresolved(mob);
   };
   for (const mob of s.group || []) visit(mob);
-  const field = s.field as any;
-  for (const slot of field?.slots || []) visit(slot?.life?.mob);
-  for (const entry of Object.values((s.fieldArchive as any) || {})) {
-    for (const slot of (entry as any)?.slots || []) visit(slot?.life?.mob);
+  for (const slot of s.field?.slots || []) visit(slot?.life?.mob);
+  for (const entry of Object.values(s.fieldArchive || {})) {
+    for (const slot of entry?.slots || []) visit(slot?.life?.mob);
   }
-  const active = (s.fieldwork as any)?.campEncounters?.active;
+  const active = s.fieldwork?.campEncounters?.active;
   for (const mob of active?.preparedGroup || []) visit(mob);
 }
 
 /** Validate the display-only dungeon recap after the run shape has been repaired. It can never pay. */
 function normalizeDungeonReceipt(s: GameState): void {
-  const receipt = (s as any).lastDungeonReceipt;
-  if (receipt == null) { (s as any).lastDungeonReceipt = null; return; }
-  const fail = () => { (s as any).lastDungeonReceipt = null; };
+  const receipt: unknown = s.lastDungeonReceipt;
+  if (receipt == null) { s.lastDungeonReceipt = null; return; }
+  const fail = () => { s.lastDungeonReceipt = null; };
   if (typeof receipt !== 'object' || Array.isArray(receipt)) return fail();
-  if (typeof receipt.key !== 'string' || !receipt.key.startsWith('dungeon:')) return fail();
-  if (!eng.ZONES.some((zone: any) => zone.id === receipt.zone)) return fail();
-  if (!Number.isSafeInteger(receipt.atSec) || receipt.atSec < 0) return fail();
-  if (!['cleared', 'retreated', 'pushed', 'left-zone'].includes(receipt.reason)) return fail();
+  const r = receipt as LooseRecord;
+  if (typeof r.key !== 'string' || !r.key.startsWith('dungeon:')) return fail();
+  if (!eng.ZONES.some((zone) => zone.id === r.zone)) return fail();
+  if (!Number.isSafeInteger(r.atSec) || (r.atSec as number) < 0) return fail();
+  if (!['cleared', 'retreated', 'pushed', 'left-zone'].includes(r.reason as string)) return fail();
   const safe = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 0;
-  const resource = (entry: any) => {
+  const resource = (entry: unknown) => {
     if (!entry || typeof entry !== 'object') return false;
-    if (!['junk', 'stone', 'herb', 'potion', 'material'].includes(entry.bucket)) return false;
-    if (typeof entry.id !== 'string' || !entry.id.length) return false;
-    if (!Number.isSafeInteger(entry.count) || entry.count <= 0) return false;
-    if (entry.bucket === 'material') return fieldwork.F.materials.some((row: any) => row.id === entry.id);
-    if (entry.bucket === 'stone') return !!craft.STONE_NAME[entry.id] || entry.id.startsWith('imprint_');
-    if (entry.bucket === 'herb') return Object.hasOwn(s.farm?.herbs ?? {}, entry.id);
-    if (entry.bucket === 'potion') return Object.hasOwn(s.farm?.potions ?? {}, entry.id);
+    const e = entry as LooseRecord;
+    if (!['junk', 'stone', 'herb', 'potion', 'material'].includes(e.bucket as string)) return false;
+    if (typeof e.id !== 'string' || !e.id.length) return false;
+    if (!Number.isSafeInteger(e.count) || (e.count as number) <= 0) return false;
+    if (e.bucket === 'material') return fieldwork.F.materials.some((row) => row.id === e.id);
+    if (e.bucket === 'stone') return !!craft.STONE_NAME[e.id] || e.id.startsWith('imprint_');
+    if (e.bucket === 'herb') return Object.hasOwn(s.farm?.herbs ?? {}, e.id);
+    if (e.bucket === 'potion') return Object.hasOwn(s.farm?.potions ?? {}, e.id);
     return true;
   };
   for (const key of ['kept', 'forfeited', 'uncollected'] as const) {
-    if (!Array.isArray(receipt[key]) || !receipt[key].every(resource)) return fail();
+    const list = r[key];
+    if (!Array.isArray(list) || !list.every(resource)) return fail();
   }
-  const gear = receipt.gear;
-  if (!gear || typeof gear !== 'object' || !['processed', 'retained', 'salvaged', 'rejected', 'forfeited'].every((key) => safe((gear as any)[key]))) return fail();
+  const gear = r.gear;
+  if (!gear || typeof gear !== 'object' || !['processed', 'retained', 'salvaged', 'rejected', 'forfeited'].every((key) => safe((gear as LooseRecord)[key]))) return fail();
 }
 
 /** A save written by an earlier build is missing whole subsystems; fill the shape in. */
@@ -682,10 +750,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // none of them exist now, so they are dropped. Every settlement it had already visited keeps its
   // Waypoint, because a visited settlement is what a Waypoint is — the walk to the rest starts again.
   if (fromVersion < 8) {
-    delete (s as any).road;
-    delete (s as any).purseDay;
-    delete (s as any).chestDay;
-    if (s.town) delete (s.town as any).linksBought;
+    delete (s as LooseSave).road;
+    delete (s as LooseSave).purseDay;
+    delete (s as LooseSave).chestDay;
+    if (s.town) delete (s.town as unknown as LooseRecord).linksBought;
   }
   // v12 · a walk joins two cells and the feet stand on one. A v11 save names settlements where the new
   // shape holds hexes, so both ends are read off the walk graph's own coordinates — and the standing
@@ -693,7 +761,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (fromVersion < 12) {
     const home = road.nodeById(s.town?.waypoint || E.road.nodes[0].id) || E.road.nodes[0];
     s.cell = { q: home.q, r: home.r, sub: null, site: null };
-    const w = s.walk as any;
+    const w = s.walk as unknown as EarlyWalk;
     const from = w && typeof w.from === 'string' ? road.nodeById(w.from) : null;
     const to = w && typeof w.to === 'string' ? road.nodeById(w.to) : null;
     if (!from || !to) {
@@ -710,7 +778,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         blocksLeft: w.blocksLeft,
         secLeft: w.secLeft,
         blocksWalked: w.blocksWalked,
-      } as any;
+      } as unknown as Walk;
     }
   }
   if (!s.walk) s.walk = null;
@@ -721,26 +789,26 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // A v16 save marked a mine, grove or dungeon with a wild-side index on the cell. The index is gone;
   // the same ground keeps its site by name, so a character standing there still sees the entrance.
   const legacySites = ['dungeon', 'mine', 'grove'] as const;
-  const migrateLegacySite = (cell: any) => {
+  const migrateLegacySite = (cell: LegacyCell | null | undefined) => {
     if (!cell || typeof cell !== 'object') return;
-    if (cell.site === undefined && Number.isInteger(cell.wild)) cell.site = legacySites[cell.wild] ?? null;
+    if (cell.site === undefined && Number.isInteger(cell.wild)) cell.site = legacySites[cell.wild as number] ?? null;
     delete cell.wild;
   };
   migrateLegacySite(s.cell);
   if (s.walk) {
-    const w = s.walk as any;
+    const w = s.walk as unknown as LegacyWalk;
     migrateLegacySite(w);
     w.site ??= null;
     if (w.kind === 'wild') w.kind = 'bare';
   }
-  migrateLegacySite((s.fieldwork as any)?.camp?.cell);
-  migrateLegacySite((s.fieldwork as any)?.campEncounters?.active?.origin);
+  migrateLegacySite(s.fieldwork?.camp?.cell);
+  migrateLegacySite(s.fieldwork?.campEncounters?.active?.origin);
   if (!s.dungeon) s.dungeon = null;
-  if (s.dungeon && (!Number.isSafeInteger((s.dungeon as any).startedAtSec) || (s.dungeon as any).startedAtSec < 0)) {
-    (s.dungeon as any).startedAtSec = Number.isFinite(s.clockSec) ? s.clockSec : 0;
+  if (s.dungeon && (!Number.isSafeInteger(s.dungeon.startedAtSec) || (s.dungeon.startedAtSec as number) < 0)) {
+    s.dungeon.startedAtSec = Number.isFinite(s.clockSec) ? s.clockSec : 0;
   }
-  if ((s as any).lastDungeonReceipt === undefined) (s as any).lastDungeonReceipt = null;
-  if ((s as any).lastDungeonReceipt !== null && typeof (s as any).lastDungeonReceipt !== 'object') (s as any).lastDungeonReceipt = null;
+  if (s.lastDungeonReceipt === undefined) s.lastDungeonReceipt = null;
+  if (s.lastDungeonReceipt !== null && typeof s.lastDungeonReceipt !== 'object') s.lastDungeonReceipt = null;
   // the quickbar arrived after v17: an old save opens with seven empty squares
   if (!Array.isArray(s.quickbar) || s.quickbar.length !== QUICKBAR_SLOTS)
     s.quickbar = Array.from({ length: QUICKBAR_SLOTS }, (_, i) => (Array.isArray(s.quickbar) ? s.quickbar[i] ?? null : null));
@@ -751,7 +819,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // A camp fight already in combat at that site is the other exception: same origin and participants.
   if (fromVersion < 28) migrateLegacyPlacementMobs(s);
   const campFight = (() => {
-    const active = (s.fieldwork as any)?.campEncounters?.active;
+    const active = s.fieldwork?.campEncounters?.active;
     if (!active || active.stage !== 'combat' || !active.origin || !s.cell) return false;
     if (active.origin.q !== s.cell.q || active.origin.r !== s.cell.r) return false;
     const ids = new Set(active.participantIds || []);
@@ -764,7 +832,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // pieces from before the drop-count stamp gain it back: current Unbound lines minus Add stones
   // taken, so the +2 net cap reads the same on an old piece as on a fresh drop.
   {
-    const stamp = (item: any) => {
+    const stamp = (item: LegacyItem | null | undefined) => {
       if (!item || !Array.isArray(item.lines) || item.unbound_at_drop != null) return;
       const untouchable = (E.item_level.frame_mod_slots || 1) + (E.item_level.bound_slots || 2);
       item.unbound_at_drop = Math.max(0, item.lines.length - untouchable - (item.mods_added || 0));
@@ -780,9 +848,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     for (const item of s.gear || []) levelItem(item);
     for (const item of s.bag || []) levelItem(item);
     for (const tab of s.stash || []) for (const item of tab || []) levelItem(item);
-    const old = (s as any).autoDissolveRarity as string | undefined;
+    const old = (s as LooseSave).autoDissolveRarity;
     if (old && old !== 'off') s.autoDissolveLevel = eng.floorLevelOf(old === 'Rare' ? 'high' : 'mid');
-    delete (s as any).autoDissolveRarity;
+    delete (s as LooseSave).autoDissolveRarity;
   }
   if (!s.skills) s.skills = newSkillState();
   const skillIdsBefore = new Set<string>([
@@ -805,9 +873,9 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!s.skills.conditions) s.skills.conditions = {};
   // §14 moved the list off the character and onto each conditional row. A save still holding the one
   // shared set is copied onto the rows that were reading it, so an existing rotation keeps firing
-  const sharedCond = s.skills.conditions as any;
+  const sharedCond = s.skills.conditions as unknown as Partial<SkillConditions> | undefined;
   if (sharedCond && ('boss' in sharedCond || 'hpBelowPct' in sharedCond)) {
-    const perSlot: Record<string, any> = {};
+    const perSlot: Record<string, SkillConditions> = {};
     for (const id of s.skills.list || []) {
       if (id && s.skills.mode[id] === 'conditional') {
         perSlot[id] = {
@@ -850,22 +918,22 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // junk used to be carried per RARITY; the item is per variant now, so a pre-variant stack is moved
   // onto one item of its own rarity. Every rarity is worth the same gold per kill by construction, so
   // the move is value-exact — nothing is deleted and no gold is minted (`junk.rarities` · X39).
-  const junkByRarity = (s as any).junkByRarity as Record<string, number> | undefined;
+  const junkByRarity = (s as LooseSave).junkByRarity;
   if (junkByRarity) {
     const firstOfRarity: Record<string, string> = {};
-    for (const r of Object.values((E.mob as any).variant_drops || {}) as any[]) firstOfRarity[r.rarity] = firstOfRarity[r.rarity] || r.item;
+    for (const r of Object.values(E.mob.variant_drops || {}) as LegacyRewardDrop[]) firstOfRarity[r.rarity] = firstOfRarity[r.rarity] || r.item;
     for (const [rarity, count] of Object.entries(junkByRarity)) {
       const item = firstOfRarity[rarity];
       if (item && count) s.junk[item] = (s.junk[item] || 0) + Number(count);
     }
-    delete (s as any).junkByRarity;
+    delete (s as LooseSave).junkByRarity;
   }
   // v10 · the hunt systems are gone: the per-zone Hunt Order override and the per-zone hunting ground
   // are deleted fields, and a save that still carries them simply loses them (the variant's lean, which
   // survives, is the only author of a lean now).
   if (fromVersion < 10) {
-    delete (s as any).huntOrder;
-    delete (s as any).zoneFocus;
+    delete (s as LooseSave).huntOrder;
+    delete (s as LooseSave).zoneFocus;
   }
   if (!s.town) s.town = newTown(s.seed);
   // Additive task-skip state: an older save has used no free skips today.
@@ -874,8 +942,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   if (!Number.isSafeInteger(s.town.skipsToday) || s.town.skipsToday < 0) s.town.skipsToday = 0;
   if (!Number.isSafeInteger(s.town.skipDay) || s.town.skipDay < 0) s.town.skipDay = 0;
   // Retired v16 route automation carried no inventory or progress; a save that still names it loses it.
-  delete (s as any).patrol;
-  delete (s as any).autoReturn;
+  delete (s as LooseSave).patrol;
+  delete (s as LooseSave).autoReturn;
   normalizeMapJournal(s);
   // Additive market records preserve every existing stack and gold balance. Empty supply means full demand.
   s.town.market ||= {};
@@ -895,7 +963,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // v14 · carry old meal and meat stacks into the unified provision bag, then add Hunger and Auto Eat.
   if (fromVersion < 14 || !s.fieldwork.foods) {
     const defaults = newFieldwork();
-    const fw = s.fieldwork as any;
+    const fw = s.fieldwork as LegacyFieldwork;
     const foods = { ...defaults.foods, ...(fw.foods || {}) };
     for (const [id, count] of Object.entries(fw.meals || {})) foods[id] = (foods[id] || 0) + Number(count || 0);
     foods.raw_game_meat = (foods.raw_game_meat || 0) + Number(fw.materials?.meat || 0);
@@ -927,7 +995,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
     for (const key of Object.keys(s.town.questMilestones)) if (key.startsWith('expedition:')) delete s.town.questMilestones[key];
   }
   normalizeDeliveries(s);
-  for (const summary of Object.values(s.town?.deliverySummaries ?? {}) as any[]) {
+  for (const summary of Object.values(s.town?.deliverySummaries ?? {})) {
     if (summary && typeof summary === 'object' && summary.declined == null) summary.declined = 0;
   }
   normalizeQuestRewards(s);
@@ -974,7 +1042,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // a rule's numbers come back inside what the live filter can produce
   s.filterPresets = s.filterPresets.map((p) => {
     if (!p || typeof p.bySlot !== 'object' || p.bySlot === null) return null;
-    const bySlot: Record<string, any> = {};
+    const bySlot: FilterState['bySlot'] = {};
     for (const [slot, rule] of Object.entries(p.bySlot)) {
       if (!rule || typeof rule !== 'object') continue;
       bySlot[slot] = {
@@ -1087,7 +1155,7 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
        } else {
          s.player.treePoints = treeBudget + qEarned - treeSpent;
        }
-      const fixUpgrade = (item: any) => {
+      const fixUpgrade = (item: LegacyItem | null | undefined) => {
         if (!item || item.upgrade_lv == null) return;
         item.upgrade_lv = Math.max(0, Math.min(E.craft.upgrade_cap, Math.floor(finite(item.upgrade_lv, 0))));
         item.gearMod = item.upgrade_lv * E.craft.gear_mod_per_level;
@@ -1104,8 +1172,8 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
         ? Math.min(s.player.mana, c.maxMana) : Math.min(Math.max(0, s.player.mana), c.maxMana);
       s.player.es = Math.min(Math.max(0, s.player.es), c.es);
     }
-    if (!eng.ZONES.some((z: any) => z.id === s.zone)) s.zone = eng.ZONES[0].id;
-    if (s.dungeon && !eng.ZONES.some((z: any) => z.id === s.dungeon!.zone)) s.dungeon = null;
+    if (!eng.ZONES.some((z) => z.id === s.zone)) s.zone = eng.ZONES[0].id;
+    if (s.dungeon && !eng.ZONES.some((z) => z.id === s.dungeon!.zone)) s.dungeon = null;
     // a Hunger that is not a number would read as 0 forever (the empty cut, Auto Eat re-firing)
     if (s.fieldwork) {
       const h = Number(s.fieldwork.hunger);
@@ -1121,20 +1189,20 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
   // zone of the settlement that owns it on foot.
   if (fromVersion < 27) {
     const home = road.nodeById(s.town?.waypoint || E.road.nodes[0].id) || E.road.nodes[0];
-    const onLand = (cell: any) => !!cell && Number.isFinite(cell.q) && Number.isFinite(cell.r) && road.isLand(cell);
+    const onLand = (cell: Hex | Cell | null | undefined) => !!cell && Number.isFinite(cell.q) && Number.isFinite(cell.r) && road.isLand(cell);
     // An old named side or wild-side site keeps its stable id through the new coordinates. A bare
     // cell has no identity to follow, so its caller decides whether to drop the activity or move the
     // feet to a Waypoint.
-    const at = (loc: any) => ({ q: loc.q, r: loc.r, sub: loc.kind === 'sub' ? loc.index : null,
-      site: loc.kind === 'site' ? loc.site ?? null : null, terrain: loc.terrain });
-    const remap = (cell: any, zone: number | null | undefined) => {
+    const at = (loc: RoadLocation): Cell => ({ q: loc.q, r: loc.r, sub: loc.kind === 'sub' ? loc.index : null,
+      site: loc.kind === 'site' ? (loc.site as FieldSite | null) ?? null : null, terrain: loc.terrain });
+    const remap = (cell: Cell | null, zone: number | null | undefined): Cell | null => {
       if (!cell) return null;
       if (cell.sub != null) {
-        const loc = road.locations.find((l: any) => l.zone === zone && l.kind === 'sub' && l.index === cell.sub);
+        const loc = road.locations.find((l) => l.zone === zone && l.kind === 'sub' && l.index === cell.sub);
         if (loc) return at(loc);
       }
       if (cell.site) {
-        const loc = road.locations.find((l: any) => l.zone === zone && l.kind === 'site' && l.site === cell.site);
+        const loc = road.locations.find((l) => l.zone === zone && l.kind === 'site' && l.site === cell.site);
         if (loc) return at(loc);
       }
       return onLand(cell) ? cell : null;
@@ -1145,12 +1213,12 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
       s.cell = cell;
     }
     if (s.walk) {
-      const w: any = s.walk;
+      const w = s.walk as unknown as LegacyWalk;
       const destZone = w.node ? settlementZone(w.node) ?? s.zone : s.zone;
       const from = w.from;
       const town = w.kind === 'town' && w.node ? road.nodeById(w.node) : null;
       const to = town ? { q: town.q, r: town.r }
-        : remap({ ...w.to, sub: w.sub, site: w.site }, destZone);
+        : remap({ ...w.to, sub: w.sub, site: w.site } as Cell, destZone);
       const path = onLand(from) && to ? road.routeLand(from, to) : null;
       if (!path || path.length - 1 <= 0) s.walk = null;
       else {
@@ -1193,10 +1261,10 @@ export function migrate(s: GameState, fromVersion: number = SCHEMA_VERSION): Gam
 
 /** Commit a completed journey's destination without replaying a block or event. */
 function finalizeCompletedJourney(s: GameState, to: { q: number; r: number }): void {
-  const loc: any = road.locationAt(to);
+  const loc = road.locationAt(to);
   const owner = road.owningNode(to, standingOrder);
   s.cell = { q: to.q, r: to.r, sub: loc?.kind === 'sub' ? loc.index : null,
-    site: loc?.kind === 'site' ? loc.site ?? null : null,
+    site: loc?.kind === 'site' ? (loc.site as FieldSite | null) ?? null : null,
     terrain: loc?.terrain ?? null };
   s.zone = settlementZone(owner.id) ?? s.zone;
   if (road.cellRank(to) === 0) {
@@ -1210,7 +1278,7 @@ function journeyError(path: string, detail: string): Error {
   return new Error(`invalid save: journey ${path} ${detail}`);
 }
 
-function validJourneyHex(h: any, path: string): { q: number; r: number } {
+function validJourneyHex(h: Hex | null | undefined, path: string): Hex {
   if (!h || !Number.isInteger(h.q) || !Number.isInteger(h.r)) throw journeyError(path, 'needs integer coordinates');
   if (!road.isLand(h)) throw journeyError(path, 'is not land');
   return { q: h.q, r: h.r };
@@ -1223,7 +1291,7 @@ function validateCurrentJourney(s: GameState): void {
   if (s.travelSeq !== undefined && (!Number.isSafeInteger(s.travelSeq) || (s.travelSeq as number) < 0)) {
     s.travelSeq = Math.max(0, Math.floor(Number(s.travelSeq)));
   }
-  const w: any = s.walk;
+  const w = s.walk as unknown as LegacyWalk | null;
   if (!w) return;
   if (!Number.isInteger(w.journeyId) || (w.journeyId as number) <= 0) throw journeyError('journeyId', 'must be a positive integer');
   validJourneyHex(w.from, 'from');
@@ -1233,7 +1301,7 @@ function validateCurrentJourney(s: GameState): void {
   if (!Array.isArray(w.legs) || !w.legs.length) throw journeyError('legs', 'needs the frozen ordered legs');
   if (w.legs.length > 4096) throw journeyError('legs', 'exceeds the bounded route storage');
   let prev = w.origin;
-  w.legs.forEach((leg: any, i: number) => {
+  w.legs.forEach((leg, i) => {
     validJourneyHex(leg?.from, `legs[${i}].from`);
     validJourneyHex(leg?.to, `legs[${i}].to`);
     if (leg.from.q !== prev.q || leg.from.r !== prev.r) throw journeyError(`legs[${i}]`, 'breaks the ordered chain');
@@ -1251,7 +1319,7 @@ function validateCurrentJourney(s: GameState): void {
     throw journeyError('blocksWalked', 'does not agree with the completed-leg index');
   }
   if (!Number.isFinite(w.secLeft)) {
-    if (Number.isFinite(w.activeSec)) w.secLeft = w.activeSec;
+    if (Number.isFinite(w.activeSec)) w.secLeft = w.activeSec as number;
     else throw journeyError('secLeft', 'needs a finite remaining time');
   }
   if (!Number.isInteger(w.lastEventStep) || (w.lastEventStep as number) < 0 || (w.lastEventStep as number) > w.stepIndex) {
@@ -1275,7 +1343,7 @@ function migrateJourney(s: GameState, fromVersion: number): void {
     validateCurrentJourney(s);
     return;
   }
-  const w: any = s.walk;
+  const w = s.walk as unknown as LegacyWalk | null;
   if (!w || typeof w !== 'object') {
     s.walk = null;
     return;
@@ -1292,14 +1360,14 @@ function migrateJourney(s: GameState, fromVersion: number): void {
     s.walk = null;
     return;
   }
-  const walkedRaw = Number.isSafeInteger(w.blocksWalked) ? w.blocksWalked : 0;
+  const walkedRaw = Number.isSafeInteger(w.blocksWalked) ? (w.blocksWalked as number) : 0;
   const walked = Math.max(0, Math.min(walkedRaw, blocks));
-  const completed = walkedRaw >= blocks || (Number.isSafeInteger(w.blocksTotal) && w.blocksTotal > 0 && walkedRaw >= w.blocksTotal);
+  const completed = walkedRaw >= blocks || (Number.isSafeInteger(w.blocksTotal) && (w.blocksTotal as number) > 0 && walkedRaw >= (w.blocksTotal as number));
   if (completed) {
     finalizeCompletedJourney(s, w.to);
     return;
   }
-  const legs = path.slice(1).map((cell: any, i: number) => ({ from: { q: path[i].q, r: path[i].r }, to: { q: cell.q, r: cell.r } }));
+  const legs: JourneyLeg[] = path.slice(1).map((cell, i) => ({ from: { q: path[i].q, r: path[i].r }, to: { q: cell.q, r: cell.r } }));
   const sec = Number(w.secLeft);
   const secLeft = Number.isFinite(sec) ? sec : road.blockSec;
   const seq = (s.travelSeq ?? 0) as number;

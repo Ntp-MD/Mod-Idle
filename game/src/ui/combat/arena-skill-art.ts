@@ -13,6 +13,7 @@ import type { CombatArenaFrame } from '@sim/combat/combat-arena';
 import { componentScale } from './component-placement';
 import { ARENA_REF_PX_PER_M, ARENA_DIRECTIONS } from '../../presentation/arena-camera';
 import { applyWorldToViewport, applyWorldVector, fieldPointM, fieldVectorM, type Affine2 } from '../../presentation/view-transform';
+import { clamp } from '../../../../engine/index.ts';
 import type { SkillGeometry, SkillGeometryScreen } from './skill-geometry';
 import { VFX_BODY_LIFT_SHARE, VFX_HAND_LIFT_M, VFX_HAND_LIFT_SHARE, SKILL_SHAPE_MIN_M, groundShapeWorldPoints, projectSkillVfxAim } from './arena-vfx-space';
 
@@ -114,7 +115,6 @@ export type SkillArtPlacement = {
   mirror: boolean;
 };
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 const ratio = (value: number | undefined) => clamp(Number.isFinite(value) ? Number(value) : 1, 0.05, 1);
 /** Model-space minima from legacy ref-px minima through the single reference density. */
 const BODY_MIN_H_M = 48 / REF_PX_PER_M;

@@ -62,9 +62,7 @@
 
 .map-back.sheet {
   --sheet-ink: var(--text);
-  --sheet-place: #f2e7d0;
   --sheet-id: var(--dim);
-  --dim: var(--dim);
   --map-tile-edge: color-mix(in srgb, var(--es) 32%, var(--line));
   --sheet-fs-region: clamp(9px, 0.54vw, 15px);
   --sheet-fs-walk: clamp(8px, 0.4vw, 11px);
@@ -73,7 +71,7 @@
   --sheet-fs-zonename: clamp(8px, 0.46vw, 13px);
   --sheet-fs-id: clamp(7px, 0.4vw, 11px);
   --pin-here: #12a06a;
-  --pin-target: #e2503f;
+  --pin-target: var(--hot);
 }
 
 .sheet svg .cell { stroke: var(--map-tile-edge); stroke-width: .45; stroke-linejoin: round; transition: fill var(--motion-fast) linear; }
@@ -177,8 +175,8 @@
 
   opacity: calc(1 - var(--dof) / 12);
 
-  mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
-  -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0, 0, 0, .5));
+  mask-image: linear-gradient(180deg, var(--black) 0 62%, var(--scrim-50));
+  -webkit-mask-image: linear-gradient(180deg, var(--black) 0 62%, var(--scrim-50));
 
   transition: opacity var(--motion-ui) var(--ease-ui);
   touch-action: none;

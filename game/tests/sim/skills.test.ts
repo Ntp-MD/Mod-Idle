@@ -493,7 +493,7 @@ describe('skills in the live loop', () => {
     // the log is a 60-line window, so the proof is the ledger, not the last page of text
     expect(Object.keys(game.skills.owned).length).toBeGreaterThan(0);
     expect(game.skills.list.filter(Boolean).length).toBeGreaterThan(0);
-  }, 30000);
+  });
 });
 
 describe('F34 active skill contract — one manual skill for bar, shortcut, aim and command', () => {

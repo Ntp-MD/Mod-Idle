@@ -276,7 +276,7 @@
           </button>
         {:else}
           <span
-            class="slot slot-empty empty"
+            class="slot slot-empty vacant"
             style={cell.area ? `grid-area:${cell.area}` : ""}
             role={compactDoll || layout === "equipment" ? "img" : undefined}
             aria-hidden={!compactDoll && layout !== "equipment"}
@@ -451,7 +451,7 @@
     padding: 0 var(--spacing-xs);
     min-width: 0;
   }
-  .equipment .slot.empty {
+  .equipment .slot.vacant {
     display: grid;
     justify-content: stretch;
   }
@@ -485,7 +485,7 @@
     font-size: var(--font-xs);
     line-height: 1;
   }
-  .slot.empty {
+  .slot.vacant {
     display: flex;
     align-items: center;
     justify-content: center;

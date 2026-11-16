@@ -96,9 +96,12 @@ import { buyBlackMarket } from '@sim/town/black-market';
   import { bar } from './ui/shared/field';
   import { fxOut } from './ui/shared/motion';
   import FieldPlates from './ui/combat/FieldPlates.svelte';
+  import LiveCombatCards from './ui/combat/LiveCombatCards.svelte';
+  import NearbyFieldMap from './ui/combat/NearbyFieldMap.svelte';
+  import { nearbyFieldMobs, offViewCue } from './ui/combat/nearby-field';
   import CombatArenaScene from './ui/combat/CombatArenaScene.svelte';
   import { arenaGroundMaterials } from './ui/combat/arena/arena-ground-materials';
-  import { createCombatArena, syncCombatArena, arenaSkillTargets, type CombatArena } from '@sim/combat/combat-arena';
+  import { createCombatArena, syncCombatArena, arenaSkillTargets, type CombatArena, type CombatArenaFrame } from '@sim/combat/combat-arena';
   import { snapshotEnemy } from '@sim/combat/combat-history';
   import LogBox from './ui/hud/LogBox.svelte';
   import ObjectiveFeed from './ui/hud/ObjectiveFeed.svelte';
@@ -119,6 +122,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   import { DEFAULT_SHOWCASE_SAMPLE, showcaseView } from './app/showcase/samples';
   import { readShowcaseBoot } from './app/showcase/boot';
   import ShowcaseBanner from './ui/dev/showcase/ShowcaseBanner.svelte';
+  import ArenaPreviewControls from './ui/dev/showcase/ArenaPreviewControls.svelte';
+  import CombatFxPreviewControls from './ui/dev/showcase/CombatFxPreviewControls.svelte';
   import ShowcaseIndex from './ui/dev/showcase/ShowcaseIndex.svelte';
   import { createSessionActions, type AccountWriterLease } from './app/session';
   import { createGameLoop } from './app/loop';
@@ -205,10 +210,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         if (seen.has(variantId)) return false;
         seen.add(variantId);
         return ARENA_VARIANT_QA_PASS_PATHS.has(
-          `archive/art-reference/monsters/${eng.speciesById(speciesId).race}/${speciesId}/${variantId}/meta.json`,
+          `archive/art-reference/monsters/${eng.speciesById(speciesId)!.race}/${speciesId}/${variantId}/meta.json`,
         );
       });
-    return { speciesId, speciesName: eng.speciesById(speciesId).name, variants };
+    return { speciesId, speciesName: eng.speciesById(speciesId)!.name, variants };
   }).filter(group => group.variants.length > 0);
   const ARENA_VARIANT_SPECIES_ALREADY_LISTED = new Set<string>([...ARENA_MOB_SPECIES, ...ARENA_EXISTING_PREVIEW_SPECIES]);
   const ARENA_ADDITIONAL_VARIANT_SPECIES = ARENA_VARIANT_GROUPS
@@ -701,6 +706,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     });
   });
   let arenaVitals = $state<{ hp: number; es: number; mana: number } | null>(null);
+  /** The same sampled frame the arena scene paints, shared with the cards and local map. */
+  let arenaCardFrame = $state.raw<CombatArenaFrame | null>(null);
   /** F37 — the scene's persistent target read: committed strike, requested focus or next body. */
   let arenaTargetRead = $state<ArenaTargetRead | null>(null);
   function resetArena() {
@@ -715,6 +722,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     restoreFieldPositions(next, gameState);
     combatArena = next;
     arenaVitals = null;
+    arenaCardFrame = null;
     arenaTargetRead = null;
   }
   function replayArena() {
@@ -1035,6 +1043,10 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   const latestTaken = $derived(ring.find((e) => e.side === 'self' && e.kind === 'taken') || null);
   const latestOrbHeal = $derived(ring.find((e) => e.side === 'self' && e.kind === 'heal') || null);
   const plates = $derived([...gameState.group]);
+  /** One presentation window over the painted frame; order stays the simulation's target priority. */
+  const nearbyViews = $derived(arenaCardFrame ? nearbyFieldMobs(gameState.group, arenaCardFrame) : []);
+  const nearbyIds = $derived(new Set(nearbyViews.map((view) => view.id)));
+  const hiddenActionCue = $derived(offViewCue(ring, nearbyIds));
   /** the field is a fight, not a backdrop: cards answer to the Field tab or to a live fight only */
   const inCombat = $derived(gameState.phase === 'fighting' && fieldInFight(gameState));
   const liveArpgArena = $derived(!showcaseMode);
@@ -2302,100 +2314,60 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 {#if showcaseMode}
   <ShowcaseBanner sample={showcaseSample} onsample={applyShowcaseSample} />
   {#if arenaPreview}
-    <div class="arena-preview-controls">
-      <strong>Forest clearing</strong>
-      <div class="arena-command-controls" role="group" aria-label="Local combat commands">
-        <button class="btn btn-quiet" type="button" onclick={() => focusArenaEnemy()} disabled={!arenaLiving().length}>
-          {arenaFocusId ? 'Next focus' : 'Focus enemy'}
-        </button>
-        <button class="btn btn-quiet" type="button" onclick={clearArenaFocus} disabled={!arenaFocusId}>Clear focus</button>
-        <button class="btn btn-quiet" type="button" aria-pressed={!!arenaAimSkill} onclick={toggleArenaAim}>
-          {arenaAimSkill ? 'Cancel aim' : `Aim ${sm.byId[activeArenaSkillId() ?? '']?.name ?? 'skill'}`}
-        </button>
-        <button class="btn btn-quiet" type="button"
-          onpointerdown={(event) => {
-            if (sm.byId[activeArenaSkillId() ?? '']?.action?.kind !== 'ray-channel') return;
-            event.currentTarget.setPointerCapture(event.pointerId);
-            castArenaAtFocus(`pointer:${event.pointerId}`);
-          }}
-          onkeydown={(event) => {
-            if (sm.byId[activeArenaSkillId() ?? '']?.action?.kind !== 'ray-channel'
-              || (event.key !== 'Enter' && event.key !== ' ')) return;
-            event.preventDefault();
-            if (!event.repeat) castArenaAtFocus(`key:${event.code}`);
-          }} onclick={() => {
-            if (sm.byId[activeArenaSkillId() ?? '']?.action?.kind !== 'ray-channel') castArenaAtFocus();
-          }} disabled={!arenaLiving().length}>
-          Cast at focus
-        </button>
-      </div>
-      {#if arenaPreview}
-        <label>World scale <input type="range" aria-label="World scale in the arena"
-          min={ARENA_ZOOM_MIN} max={ARENA_ZOOM_MAX} step={ARENA_ZOOM_STEP} bind:value={arenaWorldScale} />
-          <output>{Math.round(arenaWorldScale * 100)}%</output></label>
-        <label>Mob rendering <select aria-label="Mob rendering mode in the arena" value={spritePreviewMode ? 'sprite' : 'fallback'} onchange={(event) => {
-          setArenaSpriteMode(event.currentTarget.value);
-        }}>
-          <option value="sprite">Sprite animations</option>
-          <option value="fallback">Fallback icons</option>
-        </select></label>
-      {/if}
-      {#if spritePreviewMode}
-        <label>Species <select value={arenaSpecies} onchange={(event) => {
-          arenaSpecies = event.currentTarget.value;
-          arenaVariantKey = null;
-          const url = new URL(window.location.href);
+    <ArenaPreviewControls
+      livingCount={arenaLiving().length}
+      focusId={arenaFocusId}
+      aimSkill={arenaAimSkill}
+      aimName={sm.byId[activeArenaSkillId() ?? '']?.name ?? ''}
+      rayChannel={sm.byId[activeArenaSkillId() ?? '']?.action?.kind === 'ray-channel'}
+      bind:worldScale={arenaWorldScale}
+      spriteMode={spritePreviewMode}
+      species={arenaSpecies}
+      variantKey={arenaVariantKey}
+      mobSpecies={ARENA_MOB_SPECIES}
+      additionalSpecies={ARENA_ADDITIONAL_VARIANT_SPECIES}
+      variantGroups={ARENA_VARIANT_GROUPS}
+      skills={combatFxSkills}
+      skillId={arenaSkillId}
+      versionId={arenaVersionId}
+      versions={arenaVersions}
+      vfxMode={arenaVfxMode}
+      minZoom={ARENA_ZOOM_MIN}
+      maxZoom={ARENA_ZOOM_MAX}
+      zoomStep={ARENA_ZOOM_STEP}
+      speciesName={(id) => eng.speciesById(id)?.name ?? id}
+      onFocus={() => focusArenaEnemy()}
+      onClearFocus={clearArenaFocus}
+      onToggleAim={toggleArenaAim}
+      onCastAtFocus={castArenaAtFocus}
+      onSpriteMode={setArenaSpriteMode}
+      onSpecies={(value) => {
+        arenaSpecies = value;
+        arenaVariantKey = null;
+        const url = new URL(window.location.href);
+        url.searchParams.set('sprite-species', arenaSpecies);
+        url.searchParams.delete('sprite-variant');
+        window.history.replaceState(null, '', url);
+        replayArena();
+      }}
+      onVariant={(value) => {
+        const selectedKey = value || null;
+        arenaVariantKey = selectedKey;
+        const variant = selectedKey ? ARENA_VARIANT_PREVIEW_BY_KEY.get(selectedKey) : null;
+        if (variant) arenaSpecies = variant.speciesId;
+        const url = new URL(window.location.href);
+        if (variant) {
+          url.searchParams.set('sprite-species', variant.speciesId);
+          url.searchParams.set('sprite-variant', variant.key);
+        } else {
           url.searchParams.set('sprite-species', arenaSpecies);
           url.searchParams.delete('sprite-variant');
-          window.history.replaceState(null, '', url);
-          replayArena();
-        }}>
-          <optgroup label="ARPG mob animations">
-            {#each ARENA_MOB_SPECIES as speciesId}
-              <option value={speciesId}>{eng.speciesById(speciesId).name}</option>
-            {/each}
-          </optgroup>
-          {#if ARENA_ADDITIONAL_VARIANT_SPECIES.length}
-            <optgroup label="Other variant species">
-              {#each ARENA_ADDITIONAL_VARIANT_SPECIES as species}
-                <option value={species.speciesId}>{species.speciesName}</option>
-              {/each}
-            </optgroup>
-          {/if}
-          <optgroup label="Existing previews">
-            <option value="spear-goblin">Spear Goblin reference</option><option value="little-demon">Little Demon reference</option>
-            <option value="skeleton-sword">Skeleton (Sword &amp; Shield) reference</option><option value="skeleton-bone">Skeleton (Original Bone) reference</option><option value="crypt-wraith">Crypt Wraith reference</option>
-            <option value="shadow-wolf">Shadow Wolf reference</option><option value="eclipse-wisp">Eclipse Wisp reference</option><option value="pixiblop-spider">Pixiblop Spider reference</option><option value="stone-golem">Stone Golem reference</option>
-          </optgroup>
-        </select></label>
-        <label>Named variant <select aria-label="Named variant animation preview" value={arenaVariantKey ?? ''} onchange={(event) => {
-          const selectedKey = event.currentTarget.value || null;
-          arenaVariantKey = selectedKey;
-          const variant = selectedKey ? ARENA_VARIANT_PREVIEW_BY_KEY.get(selectedKey) : null;
-          if (variant) arenaSpecies = variant.speciesId;
-          const url = new URL(window.location.href);
-          if (variant) {
-            url.searchParams.set('sprite-species', variant.speciesId);
-            url.searchParams.set('sprite-variant', variant.key);
-          } else {
-            url.searchParams.set('sprite-species', arenaSpecies);
-            url.searchParams.delete('sprite-variant');
-          }
-          window.history.replaceState(null, '', url);
-          replayArena();
-        }}>
-          <option value="">Species animation</option>
-          {#each ARENA_VARIANT_GROUPS as group}
-            <optgroup label={group.speciesName}>
-              {#each group.variants as variant}
-                <option value={`${group.speciesId}/${variant.variantId}`}>{variant.name}</option>
-              {/each}
-            </optgroup>
-          {/each}
-        </select></label>
-      {/if}
-      <label>Skill <select aria-label="Skill cast in the arena" value={arenaSkillId} onchange={(event) => {
-        arenaSkillId = event.currentTarget.value;
+        }
+        window.history.replaceState(null, '', url);
+        replayArena();
+      }}
+      onSkill={(value) => {
+        arenaSkillId = value;
         arenaVersionId = activeVfxVersionId(arenaSkillId) ?? '';
         arenaAimSkill = null;
         arenaManual.cast = undefined;
@@ -2403,71 +2375,35 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         url.searchParams.set('skill', arenaSkillId);
         window.history.replaceState(null, '', url);
         replayArena();
-      }}>
-        {#each ['attack', 'curse', 'heal', 'buff', 'aura'] as kind}
-          <optgroup label={kind}>
-            {#each combatFxSkills.filter((skill: any) => skill.type === kind) as skill}
-              <option value={skill.id}>{skill.name}</option>
-            {/each}
-          </optgroup>
-        {/each}
-      </select></label>
-      {#if arenaVersions.length}
-        <label>VFX art <select aria-label="Preview VFX art in the arena" value={arenaVfxMode === 'base' ? 'base' : `version:${arenaVersionId}`} onchange={(event) => {
-          chooseArenaVersion(event.currentTarget.value);
-        }}>
-          <option value="base">Base VFX (no skin)</option>
-          {#each arenaVersions as version (version.id)}
-            <option value={`version:${version.id}`}>{version.label}</option>
-          {/each}
-          {#if !arenaVersions.some((version) => version.id === arenaVersionId)}
-            <option value={`version:${arenaVersionId}`}>Selected</option>
-          {/if}
-        </select></label>
-      {/if}
-      <button class="btn btn-quiet" type="button" onclick={replayArena}>Replay encounter</button>
-    </div>
+      }}
+      onVersion={chooseArenaVersion}
+      onReplay={replayArena}
+    />
   {/if}
   {#if showcaseViewValue?.combatFx}
-    <div class="combat-fx-preview-controls">
-      <label><input type="checkbox" checked={animateCombatFx} onchange={(event) => {
-        if (event.currentTarget.checked) replayCombatFx(); else showCombatFxLabels();
-      }} /> Animate combat effects</label>
-      <label>Combat effect preview <select aria-label="Combat effect preview" value={combatFxPreview} onchange={(event) => {
-        combatFxPreview = event.currentTarget.value as CombatFxPreview;
+    <CombatFxPreviewControls
+      animate={animateCombatFx}
+      preview={combatFxPreview}
+      skillId={combatFxSkillId}
+      skills={combatFxSkills}
+      fireName={previewFire?.name}
+      lightningName={previewLightning?.name}
+      healName={previewHeal?.name}
+      areaName={previewArea?.name}
+      onAnimate={(checked) => {
+        if (checked) replayCombatFx(); else showCombatFxLabels();
+      }}
+      onPreview={(value) => {
+        combatFxPreview = value;
         if (animateCombatFx) replayCombatFx(); else showCombatFxLabels();
-      }}>
-        <option value="swing">Weapon swing</option>
-        <option value="critical">Critical hit</option>
-        <option value="fire">{previewFire?.name || 'Fire skill'}</option>
-        <option value="lightning">{previewLightning?.name || 'Lightning skill'}</option>
-        <option value="heal">{previewHeal?.name || 'Heal skill'}</option>
-        <option value="block">Block</option>
-        <option value="lethal">Killing blow</option>
-        <option value="rapid">Rapid sequence</option>
-        <option value="aoe">{previewArea?.name || 'Area skill'} · 3 targets</option>
-        <option value="exchange">Simultaneous exchange</option>
-        <option value="miss">Missed skill</option>
-        <option value="sizes">Small · Large · Boss</option>
-        <option value="boss">Boss skill</option>
-        <option value="skill">Chosen skill · all roster</option>
-      </select></label>
-      <label>Skill <select aria-label="Skill effect" value={combatFxSkillId} onchange={(event) => {
-        combatFxSkillId = event.currentTarget.value;
+      }}
+      onSkill={(value) => {
+        combatFxSkillId = value;
         combatFxPreview = 'skill';
         if (animateCombatFx) replayCombatFx(); else showCombatFxLabels();
-      }}>
-        {#each ['attack', 'curse', 'heal', 'buff', 'aura'] as kind}
-          <optgroup label={kind}>
-            {#each combatFxSkills.filter((skill: any) => skill.type === kind) as skill}
-              <option value={skill.id}>{skill.name}</option>
-            {/each}
-          </optgroup>
-        {/each}
-      </select></label>
-      <button onclick={replayCombatFx}>Replay combat effect</button>
-      <span>Sample effects only · game progress stays unchanged · replay restores the encounter</span>
-    </div>
+      }}
+      onReplay={replayCombatFx}
+    />
   {/if}
   <ShowcaseIndex />
 {/if}
@@ -2500,7 +2436,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
       effectLevel={settings.combatEffects || 'auto'}
       vfxMode={arenaVfxMode}
       onAimPoint={(point) => { arenaAimPoint = point; }}
-      onVitals={(vitals) => arenaVitals = vitals} onTargetRead={(read) => arenaTargetRead = read} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}
+      onVitals={(vitals) => arenaVitals = vitals} onTargetRead={(read) => arenaTargetRead = read}
+      onFrame={(frame) => { arenaCardFrame = frame; }} onInspectEnemy={(mob) => inspectedEnemy = snapshotEnemy(mob)}
       onFocusEnemy={(mob) => focusArenaEnemy(mob.id)} onGroundCommand={issueArenaGroundCommand} />
   {/if}
   <!-- one generated map sheet behind the HUD — the only copy, and the surface a place is picked on -->
@@ -2578,6 +2515,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         </div>
         {#if showPlaceRead}<p class="text-note journey-place">{placeRead}</p>{/if}
         <p class="journey-status">{phaseRead}</p>
+        {#if arenaMode && panel !== 'map'}
+          <NearbyFieldMap player={arenaCardFrame?.player ?? combatArena.player} views={nearbyViews}
+                          focusId={arenaFocusId} aimSkill={arenaAimSkill}
+                          onFocus={focusArenaEnemy} onGroundCommand={issueArenaGroundCommand} />
+        {/if}
         {#if gameState.walk}
           <p class="text-note journey-place">{gameState.walk.legs.length - gameState.walk.stepIndex} blocks left · next hex in {Math.max(0, Math.ceil(gameState.walk.secLeft))}s</p>
         {/if}
@@ -2878,6 +2820,22 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
         <i style={bar(xpPct, 100)}></i><b>{xpPct.toFixed(1)}%</b>
       </span>
   </div>
+
+  <!-- cards are the live view: one sampled fight drives the arena, these cards and the nearby map -->
+  {#if arenaMode && panel !== 'map'}
+    <div class="field live-cards-field"
+         style:grid-area={gridAreaCss({ ...hudLayout.field.area, columnStart: 1, columnEnd: 15 }, true)}
+         style:width="27%">
+      <LiveCombatCards s={gameState} c={c} ring={ring} views={nearbyViews}
+                       atUs={arenaCardFrame?.atUs ?? 0}
+                       vitals={{ hp: shownHp, es: shownEs, mana: shownMana }}
+                       statuses={gameState.playerStatuses} reserved={reserved} {fmtNum} {fxOutMs} {speed}
+                       effectLevel={settings.combatEffects || 'auto'} focusId={arenaFocusId}
+                       offView={hiddenActionCue} onFocus={focusArenaEnemy}
+                       onInspectEnemy={(enemy) => (inspectedEnemy = enemy)}
+                       onSheet={() => { sheetTab = 'stats'; sheetOpen = true; }} />
+    </div>
+  {/if}
 
   <!-- mob plates mount on the Field tab or over a live fight, and on nothing else -->
   {#if showCombatCards && !arenaMode}
@@ -3572,14 +3530,6 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .showcase-frame.active { display: grid; grid-template-rows: auto auto minmax(0, 1fr); height: 100vh; }
   .showcase-frame.active:has(.arena-preview-controls),
   .showcase-frame.active:has(.combat-fx-preview-controls) { grid-template-rows: auto auto auto minmax(0, 1fr); }
-  .combat-fx-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); }
-  .combat-fx-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .combat-fx-preview-controls span { color: var(--dim); font-size: var(--font-xs); }
-  .arena-preview-controls { display: flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); padding: var(--spacing-xs) var(--screen-pad); border-bottom: 1px solid var(--line); background: var(--inset); font-size: var(--font-xs); }
-  .arena-preview-controls strong { color: var(--gold-lit); }
-  .arena-preview-controls label { display: inline-flex; align-items: center; gap: var(--spacing-xs); }
-  .arena-command-controls { display: inline-flex; align-items: center; flex-wrap: wrap; gap: var(--spacing-xs); }
-  .arena-command-controls button[aria-pressed="true"] { border-color: var(--gold-lit); color: var(--gold-lit); }
   .showcase-note { padding: var(--spacing-xs) var(--spacing-sm); border: 1px solid var(--line); border-radius: var(--radius-card); color: var(--dim); background: var(--inset); font-size: var(--font-xs); }
 
 
@@ -3755,7 +3705,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
 
     --gate-line: rgba(255, 255, 255, .45);
-    --gate-line-soft: rgba(255, 255, 255, .18);
+    --gate-line-soft: var(--sheen-18);
   }
   .action-xp {
     position: fixed; inset-inline: 0; bottom: 0; z-index: var(--z-underlay);
@@ -3771,7 +3721,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .action-xp b {
     position: relative; color: var(--text);
     font-family: var(--num); font-size: var(--font-xs); line-height: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .95);
+    text-shadow: 0 1px 2px var(--scrim-95);
   }
   .action-cluster { display: flex; align-items: flex-end; gap: var(--spacing-md); }
   .vital-stack { --orb-size: clamp(100px, 7.74vw, 216px); display: flex; flex: none; flex-direction: column; align-items: center; gap: var(--spacing-xs); width: var(--orb-size); container-type: inline-size; }
@@ -3779,7 +3729,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     position: absolute; inset: 0; z-index: var(--z-label); pointer-events: none;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-xs);
     box-sizing: border-box; padding: 0 var(--spacing-sm);
-    color: var(--text); font-family: var(--ui); font-size: clamp(var(--font-xs), 8cqw, var(--font-sm)); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95); white-space: nowrap;
+    color: var(--text); font-family: var(--ui); font-size: clamp(var(--font-xs), 8cqw, var(--font-sm)); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px var(--scrim-95); white-space: nowrap;
   }
   .orb-readout > span { max-width: 100%; overflow: hidden; }
   .orb-readout strong { font-weight: inherit; }
@@ -3789,8 +3739,11 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .vital-orb {
     position: relative; flex: none; width: var(--orb-size); height: var(--orb-size); padding: var(--spacing-xs);
     isolation: isolate; border-radius: var(--radius-round); background: var(--face-floor); container-type: inline-size;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .18);
+    box-shadow: 0 4px 14px var(--scrim-70), inset 0 1px 0 var(--sheen-18);
   }
+  /* The beat length belongs to the only mount of these orbs; skins.css consumes it on .orb-energy. */
+  .life-orb { --orb-cycle: calc(var(--motion-travel) * 20); }
+  .mana-orb { --orb-cycle: calc(var(--motion-travel) * 12); }
   .vital-orb::after {
     content: ''; position: absolute; inset: 0; z-index: var(--z-floater); pointer-events: none;
     background: url('./assets/orb-skin.webp') center / contain no-repeat;
@@ -3800,9 +3753,9 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   }
   .orb-well {
     position: absolute; inset: var(--spacing-xs); overflow: hidden; border-radius: var(--radius-round);
-    background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, .09), transparent 34%), var(--face-floor);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .10),
-                inset 0 2px 10px rgba(0, 0, 0, .8), inset 0 -12px 20px rgba(0, 0, 0, .45);
+    background: radial-gradient(circle at 35% 25%, var(--sheen-09), transparent 34%), var(--face-floor);
+    box-shadow: 0 4px 10px var(--scrim-60), inset 0 0 0 1px rgba(255, 255, 255, .10),
+                inset 0 2px 10px var(--scrim-80), inset 0 -12px 20px var(--scrim-45);
   }
   .orb-well::before {
     content: ''; position: absolute; inset: 0; z-index: var(--z-content); pointer-events: none;
@@ -3970,7 +3923,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .cast small {
     position: absolute; inset: 0; display: grid; place-items: center; border-radius: var(--radius-card);
     background: none; font-size: clamp(var(--font-xs), calc(var(--slot-skill-size) * .3), var(--font-md)); color: var(--gold-lit);
-    font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px rgba(0, 0, 0, .95);
+    font-variant-numeric: tabular-nums; text-shadow: 0 1px 3px var(--scrim-95);
   }
 
   .cast .sweep {
@@ -3991,7 +3944,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     position: relative; z-index: var(--z-underlay);
     width: var(--icon-hub-img); height: var(--icon-hub-img); aspect-ratio: 1 / 1;
     padding: 0; border: 0; border-radius: var(--radius-card); background: none; box-sizing: border-box;
-    object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9));
+    object-fit: contain; filter: drop-shadow(0 1px 2px var(--scrim-90));
   }
   .toggle-ring > .icon-mask { background: currentColor; }
   .toggle-ring.here { border-color: color-mix(in srgb, var(--gold) 65%, var(--hud-edge)); background: var(--hud-face); }
@@ -4002,13 +3955,13 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .toggle-ring.here::before {
     inset: calc(var(--spacing-xs) * -1); z-index: var(--z-content);
     background: conic-gradient(transparent 0deg 240deg, color-mix(in srgb, var(--gold) 26%, transparent) 262deg, color-mix(in srgb, var(--gold-lit) 58%, transparent) 295deg, transparent 332deg);
-    mask: radial-gradient(circle closest-side, transparent 70%, #000 80%, transparent 90%);
+    mask: radial-gradient(circle closest-side, transparent 70%, var(--black) 80%, transparent 90%);
     filter: drop-shadow(0 0 var(--spacing-sm) color-mix(in srgb, var(--gold) 72%, transparent));
   }
   .toggle-ring.here::after {
     inset: calc(var(--spacing-xs) * -1); z-index: var(--z-effect);
     background: conic-gradient(transparent 0deg 270deg, color-mix(in srgb, var(--gold-lit) 55%, transparent) 292deg, #fff 309deg, var(--gold-lit) 318deg, transparent 337deg);
-    mask: radial-gradient(circle closest-side, transparent 82%, #000 90%, transparent 100%);
+    mask: radial-gradient(circle closest-side, transparent 82%, var(--black) 90%, transparent 100%);
     filter: drop-shadow(0 0 var(--spacing-xs) var(--gold-lit));
   }
   @keyframes auto-border-light { to { transform: rotate(1turn); } }
@@ -4032,14 +3985,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     display: flex; flex-direction: column; align-items: center; gap: var(--spacing-xs);
     pointer-events: none; text-align: center;
   }
-  .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
+  .target-name { margin: 0; font-size: var(--font-xs); color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px var(--scrim-95); }
   .target-name {
     display: inline-flex; align-items: center; gap: var(--spacing-xs);
     text-transform: uppercase; letter-spacing: clamp(1px, 0.05vw, 2px);
     padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-card);
     background: var(--hud-face);
     border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--edge));
-    box-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+    box-shadow: 0 2px 10px var(--scrim-50);
   }
   .target-name::before, .target-name::after { content: '◆'; font-size: var(--font-xs); color: var(--gold); }
   .target-name span { color: var(--dim); }
@@ -4048,7 +4001,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     overflow: hidden; background: rgba(4, 6, 9, .78);
     border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--edge));
     clip-path: polygon(clamp(6px, 0.58vw, 14px) 0, calc(100% - clamp(6px, 0.58vw, 14px)) 0, 100% 50%, calc(100% - clamp(6px, 0.58vw, 14px)) 100%, clamp(6px, 0.58vw, 14px) 100%, 0 50%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+    box-shadow: inset 0 1px 0 var(--sheen-08);
   }
   .target-hp i {
     display: block; height: 100%;
@@ -4060,14 +4013,14 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
 
   .target-hp::after {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%; pointer-events: none;
-    background: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent);
+    background: linear-gradient(180deg, var(--sheen-16), transparent);
   }
   .target-hp b {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     font-size: var(--font-xs); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, .95); pointer-events: none;
+    text-shadow: 0 1px 2px var(--scrim-95); pointer-events: none;
   }
-  .target-range { margin: 0; font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0, 0, 0, .95); }
+  .target-range { margin: 0; font-size: var(--font-xs); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px var(--scrim-95); }
   .offscreen-arrow { display: inline-block; transform: rotate(var(--bearing, 0deg)); color: var(--gold-lit); }
 
 
@@ -4192,7 +4145,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     font-size: var(--font-sm);
     font-weight: 600;
     color: var(--fx, var(--text));
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .85), 0 var(--spacing-xs) clamp(4px, 0.34vw, 9px) rgba(0, 0, 0, .7);
+    text-shadow: 0 1px 0 var(--scrim-85), 0 var(--spacing-xs) clamp(4px, 0.34vw, 9px) var(--scrim-70);
     animation: fx-rise 1.5s cubic-bezier(.2, .6, .3, 1) forwards;
     white-space: nowrap;
   }
@@ -4250,7 +4203,7 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
   .levelup {
     position: absolute; top: calc(var(--screen-pad) + var(--rail-h) + var(--spacing-xs)); left: 50%; z-index: var(--z-toast); pointer-events: none;
     margin: 0; white-space: nowrap; font-family: var(--num); font-size: var(--font-md); letter-spacing: clamp(2px, 0.10vw, 3px);
-    color: var(--fx, var(--gold)); text-shadow: 0 2px 12px rgba(0, 0, 0, .6);
+    color: var(--fx, var(--gold)); text-shadow: 0 2px 12px var(--scrim-60);
     animation: fx-level 1.5s cubic-bezier(.2, .7, .3, 1) forwards;
   }
   @keyframes fx-flare {
@@ -4382,6 +4335,8 @@ import { allocateTreePath, canSpendTree, respecTree, spendTreePoint, treePointsF
     min-width: 0;
     min-height: 0;
   }
+  .live-cards-field { display: flex; align-items: flex-start; justify-content: flex-start; pointer-events: auto; }
+  .live-cards-field :global(.live-cards) { max-height: 100%; }
   .field.clear { justify-content: center; }
   .commands-dock {
     grid-area: commands;

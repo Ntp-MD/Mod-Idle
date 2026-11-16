@@ -211,7 +211,7 @@
   .combat-effect { --impact-delay: 0ms; color: var(--fx); }
   .combat-effect.has-flight { --impact-delay: 170ms; }
   .skill-projectile { fill: currentColor; stroke: #fff0c6; stroke-width: 1.3; stroke-linejoin: round; filter: drop-shadow(0 0 5px currentColor); animation: skill-projectile var(--flight-ms, 320ms) linear both; }
-  .skill-fx-impact { fill: currentColor; stroke: #fff1ca; stroke-width: 1.8; stroke-linejoin: round; filter: drop-shadow(0 0 4px currentColor); }
+  .skill-fx-impact { fill: currentColor; stroke: var(--vfx-core); stroke-width: 1.8; stroke-linejoin: round; filter: drop-shadow(0 0 4px currentColor); }
   @keyframes skill-projectile {
     0% { transform: translate(var(--sx), var(--sy)) scale(.55); opacity: 0; }
     12% { opacity: 1; }

@@ -1,6 +1,7 @@
 import { E, sm, spawns } from '../../engine/client';
 import { mulberry32 } from '../../engine/client-helpers';
 import { spawnSlotSeed } from '../../../../engine/spawns.ts';
+import { clamp } from '../../../../engine/index.ts';
 import { arenaFacingIndex } from '../../presentation/arena-camera';
 import { isClear, route, sweepDisc, traceSight, type NavLayout, type NavPoint } from '../../../../engine/navigation.ts';
 import { attackProfileGeometry, type AttackRangeGeometry } from '../../../../engine/attack-range.ts';
@@ -482,11 +483,10 @@ export function arenaTarget(
 function placeArenaMob(arena: CombatArena, mob: Mob, index: number, home?: { x: number; y: number }, forceUpdate = false) {
   const offset = Math.ceil(index / 2) * (index % 2 ? -1 : 1);
   const radius = bodyRadiusM(mob);
-  const clamp = (value: number, max: number) => Math.max(radius, Math.min(max - radius, value));
-  const x = home ? clamp(home.x, arena.bounds.width)
-    : clamp(CFG.mob_start.x + (index > 2 ? CFG.mob_start.spacing : 0), arena.bounds.width);
-  const y = home ? clamp(home.y, arena.bounds.height)
-    : clamp(CFG.mob_start.y + offset * CFG.mob_start.spacing, arena.bounds.height);
+  const x = home ? clamp(home.x, radius, arena.bounds.width - radius)
+    : clamp(CFG.mob_start.x + (index > 2 ? CFG.mob_start.spacing : 0), radius, arena.bounds.width - radius);
+  const y = home ? clamp(home.y, radius, arena.bounds.height - radius)
+    : clamp(CFG.mob_start.y + offset * CFG.mob_start.spacing, radius, arena.bounds.height - radius);
   const existing = arena.mobs[mob.id];
   if (!existing) {
     arena.mobs[mob.id] = {

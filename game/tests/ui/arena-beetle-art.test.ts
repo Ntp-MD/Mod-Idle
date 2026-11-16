@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { arenaArtForSpecies } from '../../src/ui/combat/arena/arena-art';
 import { beetleVariants, directionalVariantArt } from '../../src/ui/combat/arena/arena-art-beetle';
 import pool from '../../src/ui/combat/arena/mob-pool.generated.json';
-import hollowDraftMeta from '../../public/combat/mob-pool/insect/beetle/variants/hollow-beetle/v1/meta.json';
+import playerFourViewMeta from '../../public/combat/arpg/player/pawn/v1/meta.json';
 
 describe('pawn beetle art', () => {
   it('uses eight static views for the base and falls back for an unavailable variant', () => {
@@ -31,7 +31,7 @@ describe('pawn beetle art', () => {
   });
 
   it('maps all actions to a static four-view atlas', () => {
-    const { frames: _frames, ...metadata } = hollowDraftMeta;
+    const { frames: _frames, ...metadata } = playerFourViewMeta;
     const draft = directionalVariantArt('/draft.png', metadata);
     expect(draft.clips.idle.south?.startFrame).toBe(0);
     expect(draft.clips.walk.east?.startFrame).toBe(3);

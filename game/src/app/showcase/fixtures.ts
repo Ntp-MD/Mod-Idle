@@ -45,7 +45,7 @@ export function buildShowcaseGame(opts: ShowcaseGameOpts, scenario: string = 'de
         opts.selectVfxReview(component, showcaseFieldSkill(scenario)!);
       }
       const speciesId = opts.activeArenaVariant?.speciesId ?? opts.ArenaPreviewSpawn[opts.arenaSpecies] ?? opts.arenaSpecies;
-      const species = eng.speciesById(speciesId);
+      const species = eng.speciesById(speciesId)!;
       const spawnBody = opts.spritePreviewMode && !species.sizes.includes('small') ? species.sizes[0] : 'small';
       const spawnZone = species.zones.includes(sample.zone) ? sample.zone : species.zones[0];
       const spawnSubzone = opts.spritePreviewMode

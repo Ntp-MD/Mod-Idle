@@ -130,7 +130,7 @@
   <section class="mods" aria-label="Item Mods">
     <div class="section-heading">
       <h5>Mods</h5>
-      <p>Frame/Bound fixed · Unbound editable</p>
+      <p class="text-note">Frame/Bound fixed · Unbound editable</p>
     </div>
     <ul class="lines">
       {#each item.lines as line, i}
@@ -154,7 +154,7 @@
     <section class="comparison">
       <div class="section-heading">
         <h5>Changed Mods</h5>
-        <p>vs. {comparedWorn ? itemName(comparedWorn) : 'the worn item'}</p>
+        <p class="text-note">vs. {comparedWorn ? itemName(comparedWorn) : 'the worn item'}</p>
       </div>
       <ul class="cmp" aria-label={`versus the worn ${comparedWorn ? itemName(comparedWorn) : ''}`}>
         {#each diff as r (r.id + (r.element ?? ''))}
@@ -168,7 +168,7 @@
     <section class="gear" aria-label="Gear Mod">
       <div class="section-heading">
         <h5>Gear Mod</h5>
-        <p>Inherent to this Base</p>
+        <p class="text-note">Inherent to this Base</p>
       </div>
       <div class="gear-row">
         <img src={modIcon(gear.stat)} alt="" aria-hidden="true" />
@@ -211,7 +211,6 @@
   .detail section { display: grid; gap: var(--spacing-xs); }
   .section-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--spacing-xs); }
   h5 { margin: 0; color: var(--gold-lit); font-size: var(--font-xs); }
-  .section-heading p { margin: 0; color: var(--dim); font-size: var(--font-xs); }
   .lines { display: grid; gap: var(--spacing-xs); list-style: none; margin: 0; padding: 0; }
   /* Mod lines: the bar's edge and tint carry the kind, never the words */
   .lines li {

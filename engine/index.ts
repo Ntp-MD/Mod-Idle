@@ -10,8 +10,35 @@
  * the same defect as a number typed twice (AGENTS.md §Code and data ownership).
  */
 
-import type { BasesData, EngineData, MobCore, MobDamageType, MobSize, MobSubzone, MobZone, WeaponCfg } from './types.ts';
+import type { BasesData, EngineData, MobBossPlacement, MobCore, MobDamageType, MobForm, MobPlacement, MobSize, MobSpecies, MobSubzone, MobUniquePlacement, MobZone, WeaponCfg } from './types.ts';
 import { ladderMult } from './skills.ts';
+
+type AnyPlacement = MobPlacement | MobBossPlacement | MobUniquePlacement;
+/** A Species row with the runtime profile extensions the roster and spawn attach. */
+type MobProfile = MobSpecies & { _fixedCore?: MobCore; reads_as?: string | null };
+/** The minimum coreOf/formOf read: a species, a profile, or the reference mean core. */
+type MobCoreSource = { id?: string; name?: string; core?: Partial<MobCore>; _fixedCore?: MobCore };
+/** The defensive surface mitigateMobHit reads off a live mob. */
+interface MobHitShape {
+  effArmour?: number; armour?: number;
+  weak?: { element: string; taken_pct: number } | null;
+  effRes?: number; res?: number;
+  effResByElement?: Record<string, number>; resByElement?: Record<string, number>;
+}
+
+/** One printed roster row: a placement × body entry, an Elite, a Unique or a Boss. */
+export interface MobRosterRow {
+  id: string; zone: number; zoneName: string; levels: [number, number]; level: number; placementId: string;
+  kind: string; species: string; formName: string; speciesId: string; variant: string;
+  innate: string[]; weapon: boolean; trait?: string; core: Record<string, number>;
+  hpFrom: number; hpTo: number; vit: number; hpBaseFrom: number; hpBaseTo: number;
+  manaFrom: number; manaTo: number; ps: number; bodyFactor?: number;
+  acc: number; ev: number; armour: number; res: number; resByElement?: Record<string, number>;
+  align: number; crit: number; dodge: number; damage?: MobDamageType;
+  immune: string[]; weak: { element: string; taken_pct: number } | null; burst: { ps_pct: number } | null;
+  mechanics: Record<string, string | boolean> | null; clockMult: number;
+  xpFrom: number; xpTo: number; group: string; readsAs?: string;
+}
 
 const BANDS = ['low', 'mid', 'high'];
 const BAND_KEYS = ['low', 'mid', 'high', 'high_full_lck'];
@@ -21,6 +48,8 @@ const r2 = (x: number) => Math.round(x * 100) / 100;
 const fmt = (x: number, d = 0) => (d
   ? Number(x).toFixed(d)
   : Math.round(x)).toLocaleString('en-US', d ? { minimumFractionDigits: d, maximumFractionDigits: d } : undefined);
+
+export const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 export function createEngine(E: EngineData) {
   const S = E.stat;
@@ -101,24 +130,24 @@ export function createEngine(E: EngineData) {
 
   // Named field forms cover the label progression through level 100. Live normal and Elite combat
   // uses the selected Species Variant's authored Core; later zones keep the latest form label.
-  const REF_ZONE = [...(E.mob.zones as any[])].reverse().find((z) => z.levels[0] <= E.mob.form_level_cap)?.id || 1;
+  const REF_ZONE = [...E.mob.zones].reverse().find((z) => z.levels[0] <= E.mob.form_level_cap)?.id || 1;
   // ---- authored placements: one stable identity per normal/Elite, Boss and Unique row.
-  const PLACEMENTS = ((E.mob as any).variants || []) as any[];
-  const BOSSES = ((E.mob as any).bosses || []) as any[];
-  const UNIQUES = ((E.mob as any).uniques || []) as any[];
-  const placementIndex = new Map<string, any>();
+  const PLACEMENTS = E.mob.variants || [];
+  const BOSSES = E.mob.bosses || [];
+  const UNIQUES = E.mob.uniques || [];
+  const placementIndex = new Map<string, AnyPlacement>();
   for (const row of PLACEMENTS) placementIndex.set(row.id, row);
   for (const row of BOSSES) placementIndex.set(row.id, row);
   for (const row of UNIQUES) placementIndex.set(row.id, row);
   /** Exact identity lookup; an unknown ID is a data error, never a midpoint guess. */
-  const placementById = (id: string): any => {
+  const placementById = (id: string): AnyPlacement => {
     const row = placementIndex.get(id);
     if (!row) throw new RangeError(`unknown placement ${id}`);
     return row;
   };
   /** Authored rows in matrix order; omitted one-based Subzone returns the Zone union. */
-  const placementsIn = (zoneId: number, subzone?: number): any[] => {
-    const z = ZONES.find((row: any) => row.id === zoneId);
+  const placementsIn = (zoneId: number, subzone?: number): MobPlacement[] => {
+    const z = ZONES.find((row) => row.id === zoneId);
     if (!z) throw new RangeError(`unknown zone ${zoneId}`);
     if (subzone != null) {
       if (!Number.isInteger(subzone) || subzone < 1 || subzone > (z.subzones || []).length) {
@@ -133,7 +162,7 @@ export function createEngine(E: EngineData) {
    */
   const placementPool = (zoneId: number, context: { subzone: number; rank: 'normal' | 'elite'; bodyHint: string | null; terrain: string | null; standing: boolean }) => {
     const rows = placementsIn(zoneId, context.subzone);
-    const spOf = (row: any) => {
+    const spOf = (row: MobPlacement) => {
       const sp = speciesById(row.species);
       if (!sp) throw new RangeError(`placement ${row.id} names unknown species ${row.species}`);
       return sp;
@@ -148,32 +177,33 @@ export function createEngine(E: EngineData) {
     return pool.map((row) => {
       const sp = spOf(row);
       const factor = !context.standing && context.terrain != null ? spawnSpeciesWeight(sp.terrain, context.terrain) : 1;
-      return { id: row.id as string, w: row.weight * factor };
+      return { id: row.id, w: row.weight * factor };
     });
   };
   /** Uniques of one Species in one Zone; a valid Species with none returns an empty list. */
-  const uniquesOf = (speciesId: string, zoneId: number): any[] => {
+  const uniquesOf = (speciesId: string, zoneId: number): MobUniquePlacement[] => {
     if (!speciesById(speciesId)) throw new RangeError(`unknown species ${speciesId}`);
-    if (!ZONES.some((row: any) => row.id === zoneId)) throw new RangeError(`unknown zone ${zoneId}`);
+    if (!ZONES.some((row) => row.id === zoneId)) throw new RangeError(`unknown zone ${zoneId}`);
     return UNIQUES.filter((u) => u.species === speciesId && u.zone === zoneId);
   };
   const CORE_KEYS = ['str', 'agi', 'vit', 'dex', 'int', 'wis', 'lck'] as const;
-  const FORM_ZONES = [...(E.mob.zones as any[])]
+  const FORM_ZONES = [...E.mob.zones]
     .filter((z) => z.levels[0] <= E.mob.form_level_cap)
     .sort((a, b) => b.levels[0] - a.levels[0]);
-  const formOf = (sp: any, zoneId: number) => {
-    const forms = E.mob.forms as any;
-    const exact = forms?.[String(zoneId)]?.[sp?.id];
+  const formOf = (sp: MobCoreSource | null | undefined, zoneId: number): { name: string; core: Partial<MobCore> } => {
+    const forms = E.mob.forms;
+    const spId = sp?.id;
+    const exact = spId ? forms?.[String(zoneId)]?.[spId] : undefined;
     if (exact) return exact;
     for (const z of FORM_ZONES) {
-      if (z.id <= zoneId && forms?.[String(z.id)]?.[sp?.id]) return forms[String(z.id)][sp.id];
+      if (z.id <= zoneId && spId && forms?.[String(z.id)]?.[spId]) return forms[String(z.id)][spId];
     }
     return { name: sp?.name || 'Mob', core: sp?.core || {} };
   };
   /** A form supplies the field label; an optional variant override supplies live combat Core. */
-  const coreOf = (sp: any, key: string, zoneId: number = REF_ZONE, override?: Partial<MobCore>) => {
+  const coreOf = (sp: MobCoreSource | null | undefined, key: string, zoneId: number = REF_ZONE, override?: Partial<MobCore>) => {
     const core = override || sp?._fixedCore || formOf(sp, zoneId).core || sp?.core;
-    return Number(core?.[key] || 0);
+    return Number((core as Record<string, number> | undefined)?.[key] || 0);
   };
   /** The legacy field-form Core; live normal and Elite spawns supply their Variant Core override. */
   const mobStatsOf = (speciesId: string, zoneId: number = REF_ZONE): Record<string, number> => {
@@ -183,8 +213,8 @@ export function createEngine(E: EngineData) {
   };
 
   // the zone's average body factor: mob_PS(L) is the zone's AVERAGE mob, so body entries divide by it
-  const speciesById = (id: string): any | undefined => (E.mob.species as any[]).find((x) => x.id === id);
-  const mobProfileOf = (species: any, boss?: any, zoneId = REF_ZONE) => boss ? ({
+  const speciesById = (id: string): MobSpecies | undefined => E.mob.species.find((x) => x.id === id);
+  const mobProfileOf = (species: MobSpecies, boss?: MobBossPlacement | MobUniquePlacement, zoneId = REF_ZONE): MobProfile => boss ? ({
     ...species,
     core: boss.core || species.core,
     _fixedCore: boss.core || formOf(species, zoneId).core,
@@ -199,19 +229,19 @@ export function createEngine(E: EngineData) {
   // A species' `mechanics` row names keys from the closed set; each key below is the one number that
   // mechanic runs on. None of them moves mob_HP, mob PS, the drop line or the stone funnel — a faster
   // clock thins the hit by the same share it speeds it by, and a weakness answers one Element only.
-  const TRAIT = ((E.mob as any).trait_mechanics || {}) as Record<string, any>;
-  const hasMechanic = (sp: any, key: string) => !!(sp?.mechanics && key in sp.mechanics);
+  const TRAIT = E.mob.trait_mechanics || {};
+  const hasMechanic = (sp: MobProfile | null | undefined, key: string) => !!(sp?.mechanics && key in sp.mechanics);
   /** The statuses this body cannot be dealt — a bleed immunity answers exactly the statuses its key names. */
-  const mobImmuneOf = (sp: any): string[] =>
+  const mobImmuneOf = (sp: MobProfile | null | undefined): string[] =>
     hasMechanic(sp, 'bleed_immune') ? (TRAIT.bleed_immune?.statuses || []) : [];
   /** The clock multiplier this body swings at; the hit is divided by it, so its PS never moves. */
-  const mobClockMultOf = (sp: any): number =>
+  const mobClockMultOf = (sp: MobProfile | null | undefined): number =>
     hasMechanic(sp, 'fast_clock') ? (TRAIT.fast_clock?.clock_mult ?? 1) : 1;
   /** The Element this body flinches from, with the percent more of that Element's hit it takes. */
-  const mobWeakOf = (sp: any): { element: string; taken_pct: number } | null =>
+  const mobWeakOf = (sp: MobProfile | null | undefined): { element: string; taken_pct: number } | null =>
     sp?.weakness ? { element: String(sp.weakness.element), taken_pct: Number(sp.weakness.taken_pct) || 0 } : null;
   /** What the body pays when it dies: a poison line worth this share of its own output. */
-  const mobBurstOf = (sp: any): { ps_pct: number } | null =>
+  const mobBurstOf = (sp: MobProfile | null | undefined): { ps_pct: number } | null =>
     hasMechanic(sp, 'poison_burst') ? { ps_pct: TRAIT.poison_burst?.ps_pct ?? 0 } : null;
   /**
    * The mechanics of one lineage in the words a player reads. The words are the data's
@@ -225,7 +255,7 @@ export function createEngine(E: EngineData) {
     });
   /** The same for one side's body mix (`mob.spawn_packs[].word`). */
   const packWordOf = (pack?: string | null): string => {
-    const packs = ((E.mob as any).spawn_packs || {}) as Record<string, any>;
+    const packs = E.mob.spawn_packs || {};
     const name = pack || 'even';
     return packs[name]?.word || name;
   };
@@ -236,7 +266,7 @@ export function createEngine(E: EngineData) {
    * of its Species ids must read back equal to this list (cage X53).
    */
   const speciesInZone = (zoneId: number): string[] =>
-    (E.mob.species as any[]).filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
+    E.mob.species.filter((sp) => (sp.zones || []).includes(zoneId)).map((sp) => sp.id).sort();
   /**
    * The Elements a zone fields, derived from what actually spawns there rather than declared beside
    * it: a Normal or Elite spawn wears its species' Element and a Boss wears its own declared one
@@ -245,7 +275,7 @@ export function createEngine(E: EngineData) {
    */
   const zoneElements = (zoneId: number): string[] => {
     const worn = new Set(speciesInZone(zoneId).map((id) => speciesById(id)?.element));
-    for (const b of E.mob.bosses as any[]) {
+    for (const b of E.mob.bosses) {
       if (b.zone === zoneId) worn.add(b.element || speciesById(b.species)?.element);
     }
     return (E.elements.order as string[]).filter((el) => worn.has(el));
@@ -316,8 +346,8 @@ export function createEngine(E: EngineData) {
    * map uses `mob.resByElement` (the Species' authored resistance line, X54), so that Element is
    * answered on its own line and every other Element lands unresisted.
    */
-  function mitigateMobHit(mob: any, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
-    const non = nonElement * (1 - mobArmourCut(mob.effArmour ?? mob.armour, nonElement, armourCutFraction));
+  function mitigateMobHit(mob: MobHitShape, nonElement: number, element: number | Record<string, number>, armourCutFraction = 0, resOffset = 0) {
+    const non = nonElement * (1 - mobArmourCut((mob.effArmour ?? mob.armour)!, nonElement, armourCutFraction));
     // a Species weakness (`mob.species[].weakness`) answers one named Element with more damage taken;
     // it is not a res line, so the resistance map stays exactly as X54 states
     const weak = mob.weak || null;
@@ -402,13 +432,13 @@ export function createEngine(E: EngineData) {
   };
   /** The body odds a normal spawn on this side draws from; the plain mix is the even pack. */
   const spawnPackOf = (zoneId: number, subIndex: number | null | undefined = null): Record<string, number> => {
-    const packs = ((E.mob as any).spawn_packs || {}) as Record<string, Record<string, number>>;
+    const packs = E.mob.spawn_packs || {};
     const name = subzoneAt(zoneId, subIndex)?.spawn?.pack || 'even';
     return packs[name] || packs.even || {};
   };
   /** The printed ground a sub-zone's environment stands on; null where the map is silent. */
   const terrainOfEnvironment = (env: string | null | undefined): string | null =>
-    env == null ? null : (((E.mob as any).environment_terrain || {})[env] ?? null);
+    env == null ? null : ((E.mob.environment_terrain || {})[env] ?? null);
   /** Habitat pick weights: a matching ground weighs up, the floor keeps every pool reachable. */
   const SPAWN_TERRAIN_MATCH_W = 3, SPAWN_TERRAIN_FLOOR_W = 1;
   /** Weight of one sub-zone's pool on the standing terrain; undefined terrain reads every pool even. */
@@ -434,7 +464,7 @@ export function createEngine(E: EngineData) {
   function winTarget() {
     const id = finalZoneId();
     const z = zoneById(id)!;
-    const boss = E.mob.bosses.find((b) => b.zone === id) as any;
+    const boss = E.mob.bosses.find((b) => b.zone === id);
     const sp = boss ? speciesById(boss.species) : undefined;
     // the Boss row owns its fixed level; the gate quotes the HP that spawn actually carries
     const level = boss?.level ?? z.levels[1];
@@ -494,11 +524,11 @@ export function createEngine(E: EngineData) {
   // selected by the Variant damage override or Species default (`damage_split`: physical → Str,
   // magic → Int, mixed → both halves). The zone mean divides it out below, so mob_PS stays the
   // published curve for the zone's AVERAGE mob and each actual spawn moves relative to that mean.
-  const speciesPowerStatOf = (sp: any, zoneId: number = REF_ZONE, override?: Partial<MobCore>, damageTag?: MobDamageType) => {
+  const speciesPowerStatOf = (sp: MobProfile, zoneId: number = REF_ZONE, override?: Partial<MobCore>, damageTag?: MobDamageType) => {
     const [wPhys, wMagic] = damageSplit(damageTag ?? sp.damage);
     return K.K_MOB_PS_STAT * (wPhys * coreOf(sp, 'str', zoneId, override) + wMagic * coreOf(sp, 'int', zoneId, override));
   };
-  const speciesPowerOf = (sp: any, zoneId: number = REF_ZONE, override?: Partial<MobCore>, damageTag?: MobDamageType) =>
+  const speciesPowerOf = (sp: MobProfile, zoneId: number = REF_ZONE, override?: Partial<MobCore>, damageTag?: MobDamageType) =>
     sp.power_base + speciesPowerStatOf(sp, zoneId, override, damageTag);
   // The zone's average species power: the same weighted mean `zoneBodyFactor` takes for PS, so a
   // species entry divides its own power by this and the zone's mean stays exactly 1 by construction.
@@ -518,7 +548,7 @@ export function createEngine(E: EngineData) {
     return factor;
   }
   /** The PS multiplier one species carries in its zone: its own power over the zone mean. */
-  const speciesPsMultOf = (zoneId: number, sp: any, override?: Partial<MobCore>, damageTag?: MobDamageType) =>
+  const speciesPsMultOf = (zoneId: number, sp: MobProfile, override?: Partial<MobCore>, damageTag?: MobDamageType) =>
     speciesPowerOf(sp, zoneId, override, damageTag) / zonePowerFactor(zoneId);
   const speciesPsMult = (zoneId: number, speciesId: string, override?: Partial<MobCore>, damageTag?: MobDamageType) => {
     const sp = speciesById(speciesId);
@@ -530,7 +560,7 @@ export function createEngine(E: EngineData) {
   // profile tilts the Vit line, so every other Element meets no res at all (X54). The same Cap the
   // player obeys holds the resistance line.
   /** Per-Element res: the Species' authored resistance line, every other Element at zero. */
-  const mobResByElementOf = (sp: any, zoneId: number = REF_ZONE) => {
+  const mobResByElementOf = (sp: MobProfile | null | undefined, zoneId: number = REF_ZONE) => {
     const profile = sp?.resistance;
     const cut = Math.min(CAP.elem_res, Math.max(0, Number(profile?.pct) || 0));
     const out: Record<string, number> = {};
@@ -540,7 +570,7 @@ export function createEngine(E: EngineData) {
     return out;
   };
   /** The headline res — the mean of the per-Element map, the number the roster's res column prints. */
-  const mobResOf = (sp: any, zoneId: number = REF_ZONE) => {
+  const mobResOf = (sp: MobProfile | null | undefined, zoneId: number = REF_ZONE) => {
     const map = mobResByElementOf(sp, zoneId);
     return (E.elements.order as string[]).reduce((t, el) => t + (map[el] || 0), 0) / (E.elements.order as string[]).length;
   };
@@ -804,10 +834,10 @@ export function createEngine(E: EngineData) {
    * reads_as`, overridable per boss). The table is passed in because `engine/` holds rules, not a
    * second copy of the data.
    */
-  const sizeMultOf = (ladder: Record<string, any> | undefined, weaponName: string, bodyLabel: string) => {
+  const sizeMultOf = (ladder: Record<string, Record<string, number>> | undefined, weaponName: string, bodyLabel: string) => {
     const want = String(weaponName || '').toLowerCase();
     const key = Object.keys(ladder || {}).find((k) => k.toLowerCase() === want);
-    const m = key ? (ladder as any)[key]?.[bodyLabel] : undefined;
+    const m = key ? ladder?.[key]?.[bodyLabel] : undefined;
     return typeof m === 'number' && m > 0 ? m : 1;
   };
   /**
@@ -819,7 +849,7 @@ export function createEngine(E: EngineData) {
    */
   const basicAttackOf = (bases: BasesData | undefined, weaponName: string) => {
     const w = (bases?.weapons || []).find((x) => String(x.name).toLowerCase() === String(weaponName || '').toLowerCase());
-    return w && (w as any).damage === 'magic' ? 'bolt' : 'swing';
+    return w && w.damage === 'magic' ? 'bolt' : 'swing';
   };
 
   /**
@@ -1061,8 +1091,8 @@ export function createEngine(E: EngineData) {
   // Unique and the clock Boss. No ladder midpoint and no form band chooses a live level.
 
   function mobRoster() {
-    const out: any[] = [];
-    const placementRows = (z: any, p: any) => {
+    const out: MobRosterRow[] = [];
+    const placementRows = (z: MobZone, p: MobPlacement) => {
       const sp = speciesById(p.species);
       if (!sp) return;
       const innate = [sp.element];
@@ -1074,7 +1104,7 @@ export function createEngine(E: EngineData) {
       const levels: [number, number] = [lvl, lvl];
       const psEdge = mobPsAt(lvl);
       const damage = p.damage ?? sp.damage;
-      for (const size of sp.sizes.map((sid: string) => sizeById(sid)!)) {
+      for (const size of sp.sizes.map((sid) => sizeById(sid)!)) {
         const hpBase = mobHpAt(lvl);
         const hp = hpBase + LG.hp_per_level * (lvl - 1) + vit * K.K_VIT_HP;
         out.push({
@@ -1120,7 +1150,7 @@ export function createEngine(E: EngineData) {
         });
       }
     };
-    const specialRow = (z: any, row: any, rank: 'boss' | 'unique') => {
+    const specialRow = (z: MobZone, row: MobBossPlacement | MobUniquePlacement, rank: 'boss' | 'unique') => {
       const sp = speciesById(row.species);
       if (!sp) return;
       const bs = mobProfileOf(sp, row, z.id);
@@ -1174,13 +1204,13 @@ export function createEngine(E: EngineData) {
     const z = zoneById(zoneId);
     const baseSpecies = speciesById(row.species);
     if (!baseSpecies) throw new RangeError(`placement ${placementId} names unknown species ${row.species}`);
-    const isSpecial = row.role == null;
-    const sp = isSpecial ? mobProfileOf(baseSpecies, row, zoneId) : baseSpecies;
+    const isSpecial = (row as MobPlacement).role == null;
+    const sp: MobProfile = isSpecial ? mobProfileOf(baseSpecies, row as MobBossPlacement | MobUniquePlacement, zoneId) : baseSpecies;
     const lv = row.level;
     const size = sizeById(bodyId) || sizeById('medium')!;
     const bf = zoneBodyFactor(zoneId);
     const hpBase = mobHpAt(lv);
-    const coreOverride = isSpecial ? null : row.core;
+    const coreOverride = isSpecial ? undefined : row.core;
     const damage = isSpecial ? sp.damage : (row.damage ?? sp.damage);
     const core = Object.fromEntries(CORE_KEYS.map((key) => [key, coreOf(sp, key, zoneId, coreOverride)]));
     const vit = core.vit;

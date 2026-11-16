@@ -125,21 +125,21 @@
       <section class="qol card-read">
         <h4>Before you leave town</h4>
         <div class="qrow">
-          <span>Bag · pieces to stash</span><b>{pieces} · {used} / {capacity} slots</b>
+          <span class="text-note">Bag · pieces to stash</span><b>{pieces} · {used} / {capacity} slots</b>
           <button class="mini" disabled={!pieces || !tabs} onclick={onstashall} title={!tabs ? 'No stash tab yet — buy one at the Stall.' : !pieces ? 'No gear pieces in the bag.' : 'Stash every carried piece'}>Stash it all</button>
           {#if !tabs}<small class="text-note">No stash tab yet — buy one at the Stall.</small>{:else if !pieces}<small class="text-note">No gear pieces in the bag.</small>{/if}
         </div>
         <div class="qrow">
-          <span>Junk to sell</span><b>{junk}</b>
+          <span class="text-note">Junk to sell</span><b>{junk}</b>
           <button class="mini" disabled={!junk} onclick={onsellall} title={junk ? 'Sell all junk here' : 'No junk carried.'}>Sell</button>
           {#if !junk}<small class="text-note">No junk carried.</small>{/if}
         </div>
         <div class="qrow">
-          <span>Warehouse</span><b>{stored} pieces · {tabs} tabs</b>
+          <span class="text-note">Warehouse</span><b>{stored} pieces · {tabs} tabs</b>
           <button class="mini" onclick={() => onopen('stash')}>Open</button>
         </div>
         <div class="qrow">
-          <span>Gear worn</span><b>{wornCount} of {E.stat.item_slots}</b>
+          <span class="text-note">Gear worn</span><b>{wornCount} of {E.stat.item_slots}</b>
           <button class="mini" onclick={onbest}>Put on the best I carry</button>
         </div>
       </section>
@@ -204,7 +204,6 @@
   .qrow { display: grid; grid-template-columns: 1fr auto; gap: var(--spacing-xs) var(--spacing-sm); align-items: center; }
   .qrow button { grid-column: 1 / -1; justify-self: end; }
   .qrow small { grid-column: 1 / -1; }
-  .qrow span { font-size: var(--font-xs); color: var(--dim); }
   .qrow b { font-family: var(--num); font-size: var(--font-xs); text-align: right; }
   .qol { display: grid; gap: var(--spacing-xs); }
   .chips { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }

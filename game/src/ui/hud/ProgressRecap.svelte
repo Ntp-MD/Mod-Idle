@@ -21,7 +21,7 @@
 
 <aside class="progress-recap surface-hud" aria-label="Offline progress summary">
   <div class="recap-summary">
-    <div><h2>Welcome back</h2><p>{report.mins.toLocaleString()} minutes away · {report.levels ? `+${report.levels} levels · ` : ''}{fmtNum(report.kills)} defeats · {fmtNum(report.stones)} stones</p></div>
+    <div><h2 class="text-heading">Welcome back</h2><p>{report.mins.toLocaleString()} minutes away · {report.levels ? `+${report.levels} levels · ` : ''}{fmtNum(report.kills)} defeats · {fmtNum(report.stones)} stones</p></div>
     <button class="btn btn-quiet" type="button" aria-expanded={expanded} aria-controls="offline-recap-details" onclick={() => expanded = !expanded}>{expanded ? 'Hide report' : 'View report'}</button>
     <button class="btn btn-flat btn-icon" type="button" aria-label="Dismiss offline report" onclick={ondismiss}><span class="icon-mask" style={`--glyph:url(${closeIcon})`} aria-hidden="true"></span></button>
   </div>
@@ -44,8 +44,7 @@
   .recap-summary { display: flex; align-items: center; gap: 12px; }
   .recap-summary > div { min-width: 0; flex: 1; }
   h2, h3, p, dl, dd, ul { margin: 0; }
-  h2 { color: var(--gold-lit); font-size: var(--font-sm); }
-  .recap-summary p, .report-note { color: var(--sheet-ink); font-size: var(--font-2xs); line-height: 1.5; }
+  .learned { display: grid; gap: 8px; } h3 { color: var(--gold-lit); font-size: var(--font-xs); }  .recap-summary p, .report-note { color: var(--sheet-ink); font-size: var(--font-2xs); line-height: 1.5; }
   .recap-summary button { flex: none; font-size: var(--font-2xs); }
   .recap-summary .icon-mask { width: 14px; height: 14px; }
   .recap-details { padding-top: 14px; border-top: 1px solid var(--edge); display: grid; gap: 14px; max-height: 55vh; overflow-y: auto; }

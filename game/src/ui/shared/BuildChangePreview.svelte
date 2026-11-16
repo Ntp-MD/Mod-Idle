@@ -16,7 +16,7 @@
   {#if preview.ok}
     {#if primary.length}
       <table aria-label="Changed character values">
-        <thead><tr><th scope="col">Character value</th><th scope="col">Current</th><th scope="col">After</th></tr></thead>
+        <thead><tr><th class="text-note" scope="col">Character value</th><th class="text-note" scope="col">Current</th><th class="text-note" scope="col">After</th></tr></thead>
         <tbody>
           {#each primary as change (change.key)}
             <tr><th scope="row">{change.label}</th><td>{formatBuildValue(change, change.current)}</td><td>{formatBuildValue(change, change.after)}</td></tr>
@@ -27,7 +27,7 @@
         <details>
           <summary>{additional.length} more changed value{additional.length === 1 ? '' : 's'}</summary>
           <table aria-label="Additional changed character values">
-            <thead><tr><th scope="col">Character value</th><th scope="col">Current</th><th scope="col">After</th></tr></thead>
+            <thead><tr><th class="text-note" scope="col">Character value</th><th class="text-note" scope="col">Current</th><th class="text-note" scope="col">After</th></tr></thead>
             <tbody>
               {#each additional as change (change.key)}
                 <tr><th scope="row">{change.label}</th><td>{formatBuildValue(change, change.current)}</td><td>{formatBuildValue(change, change.after)}</td></tr>
@@ -49,7 +49,6 @@
   table { width: 100%; border-collapse: collapse; font-size: inherit; }
   th, td { padding: 5px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 65%, transparent); }
   th { text-align: left; font-weight: 400; }
-  thead th { color: var(--dim); font-size: var(--font-xs); }
   td, thead th:not(:first-child) { padding-left: 8px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   tbody td:last-child { color: var(--gold-lit); font-weight: 600; }
   summary { padding-block: var(--spacing-xs); color: var(--gold-lit); cursor: pointer; }

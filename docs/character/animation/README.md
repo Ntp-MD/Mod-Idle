@@ -12,30 +12,33 @@ atlas) โฟลเดอร์นี้เป็นแม่แบบอ้า�
 
 1. อ่าน [base-prompt.md](base-prompt.md) — เป็นเทมเพลตเดียวสำหรับงาน atlas แอนิเมชัน
 2. เลือกชุด pose ที่ต้องการ: locomotion (idle/walk/turn), action
-   (windup/release/recovery), outcome (hit/death) ตาม `docs/character/animation.md`
+   (windup/release/recovery), outcome (hit/death) ตาม `game/src/ui/combat/animation/manifest.ts`
 3. กำหนดกริดและขนาดเซลล์ตามเป้าหมาย (ดูตัวอย่าง `archive/art-reference/monsters/beast/harpy/animation/meta.json`)
 4. ใช้ด่านตรวจด้านล่าง แล้วลองวางในเกมก่อนทำชุดถัดไป
 
 ## สัญญากล้อง (จาก `game/src/presentation/arena-camera.ts` + `arena-view-frame.ts`)
 
-**มุมมอง top-down north-up orthographic 90° สเกลสม่ำเสมอ** — renderer ใช้ affine
-matrix เดียวต่อเฟรมภาพ (`a = d > 0`, `b = c = 0`) วงกลมคงกลม ระยะ 1 m บนแกน X/Y
-ยาวเท่ากันบนจอทุกสเกล
+**มุมมอง north-up orthographic elevation 33°** (`ARENA_CAMERA_ELEVATION_DEG = 33`)
+— renderer ใช้ affine matrix เดียวต่อเฟรมภาพ (`a = 140 px/m`, `b = c = 0`,
+`d = 140·sin33° ≈ 76.2495 px/m`; basis `d = sin33° ≈ 0.5446`)
+ระนาบพื้นจึงบีบตามแกน Y วงกลมบนพื้นกลายเป็นวงรี ratio sin33° ไม่ใช่วงกลม
+และระยะ 1 m บนแกน X/Y ไม่เท่ากันบนจอ
 
 | ค่า                         | ตัวเลข                                         |
 | --------------------------- | ---------------------------------------------- |
-| มุมกล้อง                     | top-down 90° north-up สเกลสม่ำเสมอ              |
-| เมทริกซ์อ้างอิง M             | [[140, 0], [0, 140]] (140 px/m ที่ zoom 1 กว้าง 1920) |
-| วงรีเท้าแตะพื้น              | ไม่มี — วาดเป็นวงกลม axis-aligned ratio 1 tilt 0° |
+| มุมกล้อง                     | elevation 33° north-up (`ARENA_CAMERA_ELEVATION_DEG`) |
+| เมทริกซ์อ้างอิง M             | [[140, 0], [0, 140·sin33°]] ≈ [[140, 0], [0, 76.2495]] px/m ที่ zoom 1; basis d = sin33° ≈ 0.5446 |
+| วงรีเท้าแตะพื้น              | มี — วาดเป็นวงรี axis-aligned ratio sin33° ≈ 0.5446 tilt 0° |
 | 8 ทิศ                       | S SE E NE N NW W SW (ตามเข็ม, ใต้ก่อน)         |
 | จุดศูนย์กลาง sector (world)  | 8 sectors สม่ำเสมอรอบวง (ดู `arenaFacingIndex`) |
 
 **จุดต่างจาก skill VFX:** ตัวละครเป็น **upright sprite** — ตัวยืนตรง เห็นหัว/ไหล่
 จากด้านบน มีเพียงฐาน/เท้าที่แตะระนาบพื้น ไม่ใช่ footprint ทั้งตัวแบบสกิล
-พื้นและวงสกิลคงวงกลม ไม่มีการบีบฐานตาม projection
+พื้นและวงสกิลวาดผ่าน projection เดียวกันจึงบีบเป็นวงรี ratio sin33°; ตัวละครคงตรง
+ไม่บีบตาม projection
 
-หมายเหตุพิกัด: world heading ตรงกับ screen angle (สเกลสม่ำเสมอรักษา angle);
-lift แนวตั้งชดเชยบนจอเท่านั้น
+หมายเหตุพิกัด: world heading ไม่ตรงกับ screen angle แล้ว — screen angle =
+atan2(sin33°·sinθ, cosθ); lift แนวตั้งชดเชยบนจอเท่านั้น
 
 ใช้ direction labels (`S`, `SE`, `E`, `NE`, `N`, `NW`, `W`, `SW`) เป็นชื่อท่า
 เท่านั้น อย่าแปลงเป็นมุมโลกจาก turntable candidate: manifest นั้นระบุว่า requested
@@ -71,10 +74,11 @@ bearings ยังไม่ได้รับรอง Runtime รับ facing 
 ## ข้อควรระวัง
 
 - **มุมมองของตัวละคร ≠ การบีบพื้น** ตัวละคร upright ยืนตรง มุมกล้องเห็นหัว/ไหล่
-  จากด้านบนเท่านั้น พื้นและวงสกิลคงวงกลม ไม่มีการบีบ 0.718 ใดๆ
+  จากด้านบนเท่านั้น พื้นและวงสกิลบีบตาม projection ratio sin33° ≈ 0.5446
+  (เดิม 0.718); ตัวละครไม่บีบตาม
 - **ทิศทางต้องเป็น silhouette ที่ต่างกันจริง** ไม่ใช่การหมุน/สะท้อนภาพเดียว
 - **จุดยึดเท้าต้องอยู่ y = 0** (เมตร) และแนวสัมผัสพื้นคงที่ตลอดทุกเฟรม ตาม
-  `docs/character/animation.md`
+  `game/src/ui/combat/animation/manifest.ts`
 - ตาม [../map/README.md](../../map/README.md) อย่ากำหนดองศาจาก screenshot หรือ
   คัดลอกค่าด้วยมือ ใช้ค่าที่ refresh จากโค้ดจริงเท่านั้น
 

@@ -1,6 +1,6 @@
 # Pawn study
 
-Runtime source set for the four-view player and monster pawns. The atlases are already the game's default; regenerate the game copies from this folder.
+Runtime source set for the player and monster pawns. The atlases are the game's default; regenerate the game copies from this folder.
 
 ## Folders
 
@@ -13,11 +13,13 @@ Runtime source set for the four-view player and monster pawns. The atlases are a
 
 `manifest.json` records runtime approval and asset provenance. `roster.json` and `variant-roster.json` define the source lists; `build-study.py` regenerates atlases and installs them.
 
+Each monster species and variant has one runtime atlas in `master-version/`; integration updates it in place. The player pawn keeps its existing version pointer. Some generation sidecars retain old `vN` paths as historical references to the art used at generation time; those paths can be recovered from Git and are not runtime inputs.
+
 When a diagonal sheet is present, `build-study.py` copies the four cardinal cells from the active game atlas unchanged. It removes the diagonal sheet's white background, uses one scale factor for all four diagonals based on the cardinal body's visible height, then packs the eight directions in `south, south-east, east, north-east, north, north-west, west, south-west` order.
 
 For incremental review, install only completed identities with `integrate --only <pawn-id> ...`; an eight-view atlas is rejected until its diagonal sidecar records passed pose, anchor, shared-scale and cell-bound reviews. Keep roster checks blank until the same review is complete.
 
-`eight-direction-roster.md` tracks all 36 base species and 109 distinct art variants by owner and facing. Agent B's 14 species groups and the Player pawn are generated and checked; Agent A's rows remain the outstanding batch. New diagonal sources and reviewed 4×2 sheets are kept under `generation/eight-direction/` or `sheets/eight-direction/`. The game still reads the approved four-view runtime atlases until a separate integration step installs and validates the 8-view atlases.
+The runtime pool contains 36 species and 109 distinct art variants. New diagonal sources and reviewed 4×2 sheets are kept under `generation/eight-direction/` or `sheets/eight-direction/` and require review before integration.
 
 From the repository root:
 

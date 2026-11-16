@@ -6,7 +6,7 @@ import { characterSheet, newGame } from '@sim/core/game';
 import { mobFixture } from '../fixtures/mobFixture';
 import { createFieldViewFrame } from '../../src/presentation/arena-view-frame';
 import { fieldPointM } from '../../src/presentation/view-transform';
-import { applyViewportToWorld, applyWorldToViewport } from '../../src/presentation/view-transform';
+import { applyViewportToWorld, applyWorldToViewport, viewportPointPx } from '../../src/presentation/view-transform';
 import { actorArt } from '../../src/ui/combat/combat-actor';
 import { equippedPlayerArt } from '../../src/ui/combat/arena/arena-equipped-player';
 import { arenaArtForSpecies, type ArenaCharacterArt } from '../../src/ui/combat/arena/arena-art';
@@ -307,8 +307,8 @@ describe('WP3 — actor view from the WP2 model and the painted frame', () => {
 
   it('R4: culling keeps a root off-screen whose draw bounds cross the viewport (DR4)', () => {
     const h = harness(1);
-    // Root just below the viewport; a tall draw span (raised weapon) reaches back in.
-    const edge = { x: h.sampled.player.x, y: h.sampled.player.y + 7 };
+    // Root below the viewport + cull margin in painted pixels; a tall draw span (raised weapon) reaches back in.
+    const edge = applyViewportToWorld(h.frame.viewportToWorld, viewportPointPx(VIEW.width / 2, VIEW.height + 400));
     expect(actorVisibleInFrame(h.frame, edge)).toBe(false);
     const tall = { left: -0.3, top: -10, right: 0.3, bottom: 0.1 };
     expect(actorVisibleInFrame(h.frame, edge, false, tall)).toBe(true);
