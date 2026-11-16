@@ -88,7 +88,7 @@
   {/if}
   <header class="story-head">
     <p class="story-speaker">{view.speaker}</p>
-    <h3 class="story-heading" tabindex="-1" bind:this={headingEl}>{view.heading}</h3>
+    <h3 class="story-heading text-heading" tabindex="-1" bind:this={headingEl}>{view.heading}</h3>
   </header>
   <p class="story-line">{view.line}</p>
   {#if view.facts.length}
@@ -137,7 +137,7 @@
   .media-forge .role-anchor { color: var(--hot-deep); }
   .story-head { display: grid; gap: var(--spacing-xs); }
   .story-speaker { color: var(--sheet-ink); font-size: var(--font-xs); }
-  .story-heading { color: var(--gold-lit); font-size: var(--font-sm); }
+  .story-heading { margin: 0; }
   .story-line { color: var(--text); font-size: var(--font-sm); line-height: 1.5; }
   .story-facts { display: grid; gap: var(--spacing-xs); margin: 0; }
   .story-fact { display: flex; align-items: baseline; justify-content: space-between; gap: var(--spacing-sm); }

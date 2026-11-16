@@ -934,7 +934,7 @@ function runChecks() {
   // line range (an owner decision, never a side effect). What stays hard is the mechanics: a real
   // pool, the exact clock, and player-only.
   if (!(ES.delay_sec > 0)) esProblems.push(`es delay ${ES.delay_sec} sec must be positive`);
-  if (!ES.player_only || ROWS.some((r) => r.es)) esProblems.push('Energy Shield leaked to the mob side (it would double-count mob_HP · checks.md H1)');
+  if (!ES.player_only || ROWS.some((r) => (r as unknown as Record<string, unknown>).es)) esProblems.push('Energy Shield leaked to the mob side (it would double-count mob_HP · checks.md H1)');
   add('X25', esProblems.length === 0, esProblems.length ? esProblems.join(' · ')
     : `Energy Shield is Wis plus gear (owner ruling): Wis ${f0(eng.statAt(S.level_cap))} × ${K.K_WIS_ES} and ${M.energy_shield_flat_t1} flat, × (1 + ${M.max_energy_shield_pct}%) = ${f0(DERIVED.es_pool)} at the ceiling, and regen is ${ES.regen_pct}% of the pool per sec — ${f1(DERIVED.es_regen)}/sec after ${ES.delay_sec} sec without a hit, so the base rate alone returns the whole pool in ${f1(DERIVED.es_recover_sec)} sec · an \`es_regen\` skill, Mod or passive amplifies the rate · ${f1(DERIVED.es_share_of_hp * 100)}% of a caster build's ${f0(DERIVED.es_cast_hp)} HP · positive recharge delay and **player-only** so mob_HP stays the single survivability anchor`);
 

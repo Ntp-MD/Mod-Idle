@@ -87,13 +87,17 @@ describe('audit follow-up', () => {
     const from = outcome === 'dropped' ? 4 : E.craft.upgrade_breaks_from - 1;
     const item = { ...armour(), upgrade_lv: from, gearMod: craft.stepOf(null, from), protection_left: outcome === 'protected' ? 1 : 0 };
     const failed = craft.upgrade(item, () => 0.999);
-    expect(failed.changed.outcome).toBe(outcome);
-    const usable = failed.item.broken ? craft.repair(failed.item).item : failed.item;
+    if (!failed.ok) throw new Error(failed.why);
+    expect((failed.changed as Record<string, unknown>).outcome).toBe(outcome);
+    const repaired = failed.item.broken ? craft.repair(failed.item) : null;
+    if (repaired && !repaired.ok) throw new Error(repaired.why);
+    const usable = repaired ? repaired.item : failed.item;
     expect(usable.gearMod).toBe(craft.stepOf(usable, from - 1));
-    const retried = craft.upgrade(usable, () => 0).item;
-    expect(retried.upgrade_lv).toBe(from);
-    expect(retried.gearMod).toBe(item.gearMod);
-    expect(buildCharacter(1, [retried]).armour).toBe(buildCharacter(1, [item]).armour);
+    const retried = craft.upgrade(usable, () => 0);
+    if (!retried.ok) throw new Error(retried.why);
+    expect(retried.item.upgrade_lv).toBe(from);
+    expect(retried.item.gearMod).toBe(item.gearMod);
+    expect(buildCharacter(1, [retried.item as Item]).armour).toBe(buildCharacter(1, [item]).armour);
   });
 
   it('refuses crafting and stash transfers in the field without spending or moving items', () => {

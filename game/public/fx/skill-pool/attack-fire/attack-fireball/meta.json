@@ -27,7 +27,7 @@
       {
         "id": "sheet-explosion-one",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-fire/attack-fireball/VFX_SpriteSheet_8x8_145256.png",
+        "src": "/fx/skill-pool/attack-fire/attack-fireball/sheet-explosion-one.png",
         "frame": {
           "width": 256,
           "height": 256,

@@ -246,7 +246,7 @@ describe('the Corrupt gamble pays what its table promises', () => {
     for (let seed = 1; seed <= 400 && !landed; seed++) {
       const item = piece(seed);
       const r = craft.corrupt(item, poolOf(item), mulberry32(seed * 7 + 1));
-      if (r.ok && r.changed?.outcome === 'add_mod') {
+      if (r.ok && (r.changed as Record<string, unknown> | undefined)?.outcome === 'add_mod') {
         landed = r.item.lines.length > item.lines.length;
       }
     }
@@ -259,7 +259,7 @@ describe('the Corrupt gamble pays what its table promises', () => {
     for (let seed = 1; seed <= 400 && !atCap; seed++) {
       const item = { ...piece(seed), upgrade_lv: cap };
       const r = craft.corrupt(item, poolOf(item), mulberry32(seed * 11 + 3));
-      if (r.ok && r.changed?.outcome === 'gear_mod_up') {
+      if (r.ok && (r.changed as Record<string, unknown> | undefined)?.outcome === 'gear_mod_up') {
         atCap = true;
         expect(r.item.gearMod).toBe(item.gearMod); // no level behind the +N, no +N
         expect(r.item.upgrade_lv).toBe(cap);

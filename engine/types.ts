@@ -368,6 +368,8 @@ export interface MobSpecies {
   zones: number[];
   /** The regions this species may live in — its `zones` must be a subset (X52). */
   habitat: string[];
+  /** Grounds this species weighs up on when a spawn reads the standing terrain. */
+  terrain?: string[];
   sizes: string[];
   /** The one Element the Species attacks with and carries as its innate status; resistance is authored separately. */
   element: string;
@@ -728,6 +730,8 @@ export interface MobCfg {
   uniques?: MobUniquePlacement[];
   /** The second drop tilt keyed by the subzone environment; `none` is the identity (`X73`). */
   environment_lean?: Record<string, 'none' | 'gear' | 'herb' | 'junk'>;
+  /** The printed ground each environment stands on; absent rows read as null. */
+  environment_terrain?: Record<string, string>;
   /** The closed set of trait mechanics, each with the one number it runs on (`X74`). */
   trait_mechanics?: Record<string, any>;
   /** The three body mixes a side's normal spawns draw from (`mob.spawn_packs`, `X75`). */
@@ -754,6 +758,7 @@ export interface WeaponCfg {
   name: string;
   weapon_aspd: number;
   weapon_mult: number;
+  damage?: MobDamageType;
 }
 
 /** One band's own level span — the levels a band reads, `item-level.md`. */
@@ -1276,3 +1281,42 @@ export interface TownData {
    *  a per-block rate. The row that has none of them is not a price — it is a rule. */
   repeatable: { id: string; m?: number; m_min?: number; m_max?: number; m_per_block?: number }[];
 }
+
+/** One Mod line as the craft bench reads and writes it (`engine/craft.ts`). */
+export interface CraftLine {
+  id: string;
+  value: number;
+  slice?: number;
+  stat?: string;
+  element?: string | null;
+  crafted?: boolean;
+  extra?: { id: string; value: number }[];
+}
+
+/** The piece shape the bench reads; the game's Item satisfies it structurally. */
+export interface CraftPiece {
+  base: string;
+  ilvl: number;
+  q?: number;
+  quality?: string;
+  lines: CraftLine[];
+  baselines?: Record<number, number>;
+  mods_added?: number;
+  unbound_at_drop?: number;
+  upgrade_lv?: number;
+  gearMod?: number;
+  protection_left?: number;
+  broken?: boolean;
+  broken_at?: number;
+  corrupted?: boolean;
+}
+
+export type CraftGuard = { ok: true } | { ok: false; why: string };
+
+export type CraftOutcome =
+  | { ok: false; why: string }
+  | { ok: true; item: CraftPiece; changed?: Record<string, unknown> | { index: number; out: string; in: string }[] };
+
+export type RedrawOutcome =
+  | { ok: false; why: string }
+  | { ok: true; item: CraftPiece; changed: { index: number; out: string; in: string }[] };

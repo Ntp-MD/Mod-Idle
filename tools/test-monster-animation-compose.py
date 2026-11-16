@@ -64,8 +64,13 @@ class ComposeTests(unittest.TestCase):
             action = compose.DEFAULT_ACTIONS[index // 8]
             foot = death_bottom if (action == "death" and death_bottom is not None) else bottom
             left = (size - width) // 2
-            draw_frame(self.frames / f"{index:03d}.png", size,
-                       [(left, foot - height, left + width - 1, foot - 1)])
+            path = self.frames / f"{index:03d}.png"
+            draw_frame(path, size, [(left, foot - height, left + width - 1, foot - 1)])
+            if index:
+                # QA rejects identical poses; one interior hole per frame keeps the crop unchanged.
+                with Image.open(path) as image:
+                    image.load()[left + 1 + index % 20, foot - 1 - index // 20] = (0, 0, 0, 0)
+                    image.save(path)
 
     def write_base(self, anchor_x: int, anchor_y: int, variant: bool = False) -> Path:
         path = self.root / "base.json"
@@ -131,7 +136,15 @@ class ComposeTests(unittest.TestCase):
 
     def test_integer_downscale_keeps_hard_alpha(self) -> None:
         for index in range(40):
-            draw_frame(self.frames / f"{index:03d}.png", 128, [(24, 40, 103, 119)])
+            path = self.frames / f"{index:03d}.png"
+            draw_frame(path, 128, [(24, 40, 103, 119)])
+            if index:
+                # QA rejects identical poses; one interior hole per frame keeps the crop unchanged.
+                with Image.open(path) as image:
+                    hole = (26 + (index % 10) * 6, 92 + (index // 10) * 6,
+                            29 + (index % 10) * 6, 95 + (index // 10) * 6)
+                    ImageDraw.Draw(image).rectangle(hole, fill=(0, 0, 0, 0))
+                    image.save(path)
         self.assertEqual(self.run_compose(), 0)
         meta = json.loads((self.out / "meta.json").read_text(encoding="utf-8"))
         self.assertTrue(all(scale == 2 for scale in meta["composition"]["scales"].values()))

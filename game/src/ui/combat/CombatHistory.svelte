@@ -40,7 +40,7 @@
 
 <section class="combat-history" aria-label="Recent recorded combat">
   <header class="history-head">
-    <div><h3>Recent combat</h3><p>Up to {COMBAT_HISTORY_LIMIT} recorded events, newest first. Times use the game clock.</p></div>
+    <div><h3 class="text-heading">Recent combat</h3><p>Up to {COMBAT_HISTORY_LIMIT} recorded events, newest first. Times use the game clock.</p></div>
     <button class="btn btn-quiet" type="button" aria-pressed={held !== null} onclick={() => held = held ? null : [...entries]}>{held ? 'Resume updates' : 'Hold updates'}</button>
   </header>
   {#if held}<p class="history-note">History updates held. The game continues at its current speed.</p>{/if}
@@ -79,8 +79,7 @@
   .history-head { display: flex; align-items: start; justify-content: space-between; gap: var(--spacing-md); }
   .history-head > div { display: grid; gap: var(--spacing-xs); }
   h3, p, ol { margin: 0; }
-  h3 { color: var(--gold-lit); font-size: var(--font-sm); }
-  .history-head p, .history-note, .history-total { color: var(--sheet-ink); font-size: var(--font-2xs); line-height: 1.5; }
+  .history-filters [aria-pressed='true'] { color: var(--gold-lit); background: var(--face-top); }  .history-head p, .history-note, .history-total { color: var(--sheet-ink); font-size: var(--font-2xs); line-height: 1.5; }
   .history-head button { flex: none; }
   .history-filters { display: flex; flex-wrap: wrap; flex: none; }
   .history-filters [aria-pressed='true'] { color: var(--gold-lit); background: var(--face-top); }

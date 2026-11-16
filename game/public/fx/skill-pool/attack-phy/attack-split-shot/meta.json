@@ -59,7 +59,7 @@
       {
         "id": "gaph-arrow",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-phy/attack-split-shot/Arrow.png",
+        "src": "/fx/skill-pool/attack-phy/attack-split-shot/gaph-arrow.png",
         "frame": {
           "width": 256,
           "height": 256,

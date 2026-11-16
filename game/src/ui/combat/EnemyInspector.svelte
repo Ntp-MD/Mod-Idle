@@ -25,7 +25,7 @@
     {#if enemy.weak}<div><dt>Weakness</dt><dd>{enemy.weak.element}</dd></div>{/if}
   </dl>
   <section class="enemy-kit" aria-label="Resolved enemy skill kit">
-    <h4>Resolved skill kit</h4>
+    <h4 class="text-heading">Resolved skill kit</h4>
     <p class="snapshot-note">Strikes use this enemy's normal attack damage and innate element. A skill's visual element describes its effect art.</p>
     {#if !skills.length}<p>This enemy has no named skills in its resolved kit.</p>{/if}
     {#each skills as skill (skill.id)}
@@ -55,7 +55,6 @@
   dt { color: var(--sheet-ink); font-size: var(--font-2xs); }
   dd { font-size: var(--font-xs); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .enemy-kit { display: grid; gap: var(--spacing-sm); }
-  h4 { color: var(--gold-lit); font-size: var(--font-sm); }
   .enemy-skill { display: grid; gap: var(--spacing-sm); padding-block: var(--spacing-sm); border-top: 1px solid var(--edge); }
   .skill-heading { display: flex; align-items: center; gap: var(--spacing-sm); }
   h5 { font-size: var(--font-sm); }

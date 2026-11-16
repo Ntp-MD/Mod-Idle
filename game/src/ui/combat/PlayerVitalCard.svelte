@@ -26,6 +26,7 @@
         fmtNum,
         speed = 1,
         effectLevel = 'auto',
+        showActor = true,
     }: {
         s: GameState;
         c: Character;
@@ -38,6 +39,8 @@
         fmtNum: (n: number) => string;
         speed?: number;
         effectLevel?: CombatEffectLevel;
+        /** The live arena already paints the body; HUD-only mounts turn this off. */
+        showActor?: boolean;
     } = $props();
 
 
@@ -101,8 +104,8 @@
     });
 </script>
 
-<div class="player-card combat" class:effects-reduced={effectLevel === 'reduced'} class:effects-minimal={effects === 'minimal'} role="group" aria-label="Player vitals">
-    <div class="player-actor-slot"><CombatActor {ring} {c} opponents={s.group} {speed} {effectLevel} /></div>
+<div class="player-card combat" class:compact={!showActor} class:effects-reduced={effectLevel === 'reduced'} class:effects-minimal={effects === 'minimal'} role="group" aria-label="Player vitals">
+    {#if showActor}<div class="player-actor-slot"><CombatActor {ring} {c} opponents={s.group} {speed} {effectLevel} /></div>{/if}
     <!-- the incoming figures ride above the card root, outside the cramped-layout scroller, so a rising
        number is never clipped by the body it rose off -->
     <div class="pops" aria-hidden="true">
@@ -189,6 +192,7 @@
         min-height: 0;
     }
 
+    .player-card.compact { grid-template-rows: auto; }
     .player-actor-slot { position: relative; min-height: 0; }
 
     .card-body {

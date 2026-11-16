@@ -301,11 +301,13 @@ def runtime_cardinal_frames(entry):
         folder = public / 'combat/mob-pool' / entry['race'] / entry['variantOf'] / 'variants' / entry['id'].split('--', 1)[1]
     else:
         folder = public / 'combat/mob-pool' / entry['race'] / entry['id']
-    pointer = folder / 'default/version.json'
-    if not pointer.exists():
-        return None
-    version = json.loads(pointer.read_text(encoding='utf-8'))['version']
-    version_root = folder / version
+    if entry['id'] == 'player':
+        pointer = folder / 'default/version.json'
+        if not pointer.exists():
+            return None
+        version_root = folder / json.loads(pointer.read_text(encoding='utf-8'))['version']
+    else:
+        version_root = folder / 'master-version'
     metadata_path = version_root / 'meta.json'
     atlas_path = version_root / 'atlas.png'
     if not metadata_path.exists() or not atlas_path.exists():
@@ -485,34 +487,43 @@ def integrate(only_ids=None):
             })
 
         folder.mkdir(parents=True, exist_ok=True)
-        versions = sorted(
-            ((int(child.name[1:]), child) for child in folder.iterdir()
-             if child.is_dir() and child.name.startswith('v') and child.name[1:].isdigit()),
-            key=lambda item: item[0],
-        )
         source_hash = hashlib.sha256(atlas_source.read_bytes()).hexdigest()
         diagonal_hash = entry.get('diagonalSheetSha256')
-        version_root = None
-        for _, candidate in versions:
-            meta_path = candidate / 'meta.json'
-            atlas_path = candidate / 'atlas.png'
-            if not meta_path.exists() or not atlas_path.exists():
-                continue
-            old = json.loads(meta_path.read_text(encoding='utf-8'))
-            if old.get('artSet') != 'pawn-study':
-                raise FileExistsError(f"Existing non-pawn sprite version at {candidate}")
-            if (old.get('studyEntryId') == entry['id']
-                    and old.get('sourceSha256') == entry.get('sourceSha256')
-                    and old.get('diagonalSourceSha256') == diagonal_hash
-                    and old.get('layout', {}).get('frameCount') == layout['frameCount']
-                    and hashlib.sha256(atlas_path.read_bytes()).hexdigest() == source_hash):
-                version_root = candidate
-                break
-        if version_root is None:
-            version_root = folder / f"v{versions[-1][0] + 1 if versions else 1}"
-        default_root = folder / 'default'
+        if entry['id'] == 'player':
+            versions = sorted(
+                ((int(child.name[1:]), child) for child in folder.iterdir()
+                 if child.is_dir() and child.name.startswith('v') and child.name[1:].isdigit()),
+                key=lambda item: item[0],
+            )
+            version_root = None
+            for _, candidate in versions:
+                meta_path = candidate / 'meta.json'
+                atlas_path = candidate / 'atlas.png'
+                if not meta_path.exists() or not atlas_path.exists():
+                    continue
+                old = json.loads(meta_path.read_text(encoding='utf-8'))
+                if old.get('artSet') != 'pawn-study':
+                    raise FileExistsError(f"Existing non-pawn sprite version at {candidate}")
+                if (old.get('studyEntryId') == entry['id']
+                        and old.get('sourceSha256') == entry.get('sourceSha256')
+                        and old.get('diagonalSourceSha256') == diagonal_hash
+                        and old.get('layout', {}).get('frameCount') == layout['frameCount']
+                        and hashlib.sha256(atlas_path.read_bytes()).hexdigest() == source_hash):
+                    version_root = candidate
+                    break
+            if version_root is None:
+                version_root = folder / f"v{versions[-1][0] + 1 if versions else 1}"
+        else:
+            version_root = folder / 'master-version'
+            if version_root.exists():
+                meta_path = version_root / 'meta.json'
+                atlas_path = version_root / 'atlas.png'
+                if not meta_path.is_file() or not atlas_path.is_file():
+                    raise FileExistsError(f"Incomplete master sprite at {version_root}")
+                old = json.loads(meta_path.read_text(encoding='utf-8'))
+                if old.get('artSet') != 'pawn-study' or old.get('studyEntryId') != entry['id']:
+                    raise FileExistsError(f"Unexpected master sprite at {version_root}")
         version_root.mkdir(parents=True, exist_ok=True)
-        default_root.mkdir(parents=True, exist_ok=True)
 
         metadata = {
             'artSet': 'pawn-study',
@@ -541,24 +552,32 @@ def integrate(only_ids=None):
                 'west': {'mainHand': {'x': 116, 'y': 169}, 'offHand': {'x': 163, 'y': 169}},
                 'east': {'mainHand': {'x': 140, 'y': 169}, 'offHand': {'x': 93, 'y': 169}},
             }
-        if not (version_root / 'atlas.png').exists():
+        atlas_path = version_root / 'atlas.png'
+        meta_path = version_root / 'meta.json'
+        if not atlas_path.exists() or (entry['id'] != 'player' and hashlib.sha256(atlas_path.read_bytes()).hexdigest() != source_hash):
             shutil.copyfile(atlas_source, version_root / 'atlas.png')
-            (version_root / 'meta.json').write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
-        pointer = default_root / 'version.json'
-        content = json.dumps({'version': version_root.name}, indent=2) + '\n'
-        if not pointer.exists() or pointer.read_text(encoding='utf-8') != content:
-            pointer.write_text(content, encoding='utf-8')
+        if not meta_path.exists() or (entry['id'] != 'player' and json.loads(meta_path.read_text(encoding='utf-8')) != metadata):
+            meta_path.write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
+        if entry['id'] == 'player':
+            default_root = folder / 'default'
+            default_root.mkdir(parents=True, exist_ok=True)
+            pointer = default_root / 'version.json'
+            content = json.dumps({'version': version_root.name}, indent=2) + '\n'
+            if not pointer.exists() or pointer.read_text(encoding='utf-8') != content:
+                pointer.write_text(content, encoding='utf-8')
         return version_root.name
 
-    def current_version(folder):
-        pointer = folder / 'default/version.json'
-        return json.loads(pointer.read_text(encoding='utf-8')).get('version') if pointer.exists() else None
+    def current_version(folder, player=False):
+        if player:
+            pointer = folder / 'default/version.json'
+            return json.loads(pointer.read_text(encoding='utf-8')).get('version') if pointer.exists() else None
+        return 'master-version' if (folder / 'master-version/atlas.png').exists() else None
 
     versions_by_id = {}
     for entry in manifest['entries']:
         folder = public / 'combat/arpg/player/pawn' if entry['id'] == 'player' else pool / entry['race'] / entry['id']
         if selected and entry['id'] not in selected:
-            versions_by_id[entry['id']] = current_version(folder)
+            versions_by_id[entry['id']] = current_version(folder, entry['id'] == 'player')
         else:
             versions_by_id[entry['id']] = install(entry, folder, 'species')
             integrated.append(entry)
@@ -583,7 +602,7 @@ def integrate(only_ids=None):
         'style': 'pawn-study',
         'sourceManifest': 'docs/character/pawn-study/manifest.json',
         'runtimeIntegrated': True,
-        'defaultVersion': 'per-entry pointer',
+        'defaultVersion': 'mob master-version; player per-entry pointer',
         'atlasLayout': manifest['atlasLayout'],
         'directions': directions,
         'player': f"/combat/arpg/player/pawn/{versions_by_id['player']}/atlas.png",
@@ -602,7 +621,7 @@ def integrate(only_ids=None):
         player_manifest = json.loads(player_manifest_path.read_text(encoding='utf-8'))
         player_manifest.update({
             'status': 'runtime-default',
-            'scope': 'Pawn body with separate weapon and shield equipment layers; each identity follows its default version pointer.',
+            'scope': 'Pawn body with separate weapon and shield equipment layers; the player follows its default version pointer.',
             'identityReference': 'docs/character/pawn-study/atlases/player.png',
             'bodyReference': 'docs/character/pawn-study/sheets/player.png',
             'runtimeFrame': {
@@ -626,7 +645,7 @@ def integrate(only_ids=None):
             'Two-handed stances visually stow the equipped shield; existing equipment rules remain authoritative.',
         ]
         player_manifest_path.write_text(json.dumps(player_manifest, indent=2) + '\n', encoding='utf-8')
-    print(f"Integrated {len(integrated)} pawn identities through their default version pointers")
+    print(f"Integrated {len(integrated)} pawn identities")
 
 
 if __name__ == '__main__':

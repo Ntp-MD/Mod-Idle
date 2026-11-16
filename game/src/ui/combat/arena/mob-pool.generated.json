@@ -194,7 +194,7 @@
   },
   "species": {
     "harpy": {
-      "href": "/combat/mob-pool/beast/harpy/v4/atlas.png",
+      "href": "/combat/mob-pool/beast/harpy/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "harpy",
@@ -345,7 +345,7 @@
       }
     },
     "werewolf": {
-      "href": "/combat/mob-pool/beast/werewolf/v2/atlas.png",
+      "href": "/combat/mob-pool/beast/werewolf/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "werewolf",
@@ -496,7 +496,7 @@
       }
     },
     "wolf": {
-      "href": "/combat/mob-pool/beast/wolf/v2/atlas.png",
+      "href": "/combat/mob-pool/beast/wolf/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "wolf",
@@ -647,7 +647,7 @@
       }
     },
     "demon": {
-      "href": "/combat/mob-pool/demon/demon/v2/atlas.png",
+      "href": "/combat/mob-pool/demon/demon/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "demon",
@@ -798,7 +798,7 @@
       }
     },
     "imp": {
-      "href": "/combat/mob-pool/demon/imp/v2/atlas.png",
+      "href": "/combat/mob-pool/demon/imp/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "imp",
@@ -949,7 +949,7 @@
       }
     },
     "dragon": {
-      "href": "/combat/mob-pool/dragon/dragon/v2/atlas.png",
+      "href": "/combat/mob-pool/dragon/dragon/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "dragon",
@@ -1100,7 +1100,7 @@
       }
     },
     "mirehydra": {
-      "href": "/combat/mob-pool/dragon/mirehydra/v2/atlas.png",
+      "href": "/combat/mob-pool/dragon/mirehydra/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "mirehydra",
@@ -1251,7 +1251,7 @@
       }
     },
     "wyrmling": {
-      "href": "/combat/mob-pool/dragon/wyrmling/v2/atlas.png",
+      "href": "/combat/mob-pool/dragon/wyrmling/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "wyrmling",
@@ -1402,7 +1402,7 @@
       }
     },
     "wyvern": {
-      "href": "/combat/mob-pool/dragon/wyvern/v2/atlas.png",
+      "href": "/combat/mob-pool/dragon/wyvern/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "wyvern",
@@ -1553,7 +1553,7 @@
       }
     },
     "golem": {
-      "href": "/combat/mob-pool/elemental/golem/v2/atlas.png",
+      "href": "/combat/mob-pool/elemental/golem/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "golem",
@@ -1704,7 +1704,7 @@
       }
     },
     "slaggolem": {
-      "href": "/combat/mob-pool/elemental/slaggolem/v2/atlas.png",
+      "href": "/combat/mob-pool/elemental/slaggolem/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "slaggolem",
@@ -1855,7 +1855,7 @@
       }
     },
     "wisp": {
-      "href": "/combat/mob-pool/elemental/wisp/v4/atlas.png",
+      "href": "/combat/mob-pool/elemental/wisp/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "wisp",
@@ -2006,7 +2006,7 @@
       }
     },
     "siren": {
-      "href": "/combat/mob-pool/fish/siren/v2/atlas.png",
+      "href": "/combat/mob-pool/fish/siren/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "siren",
@@ -2157,7 +2157,7 @@
       }
     },
     "ooze": {
-      "href": "/combat/mob-pool/formless/ooze/v2/atlas.png",
+      "href": "/combat/mob-pool/formless/ooze/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "ooze",
@@ -2308,7 +2308,7 @@
       }
     },
     "slime": {
-      "href": "/combat/mob-pool/formless/slime/v2/atlas.png",
+      "href": "/combat/mob-pool/formless/slime/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "slime",
@@ -2459,7 +2459,7 @@
       }
     },
     "elf": {
-      "href": "/combat/mob-pool/humanoid/elf/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/elf/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "elf",
@@ -2610,7 +2610,7 @@
       }
     },
     "giant": {
-      "href": "/combat/mob-pool/humanoid/giant/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/giant/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "giant",
@@ -2761,7 +2761,7 @@
       }
     },
     "goblin": {
-      "href": "/combat/mob-pool/humanoid/goblin/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/goblin/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "goblin",
@@ -2912,7 +2912,7 @@
       }
     },
     "human": {
-      "href": "/combat/mob-pool/humanoid/human/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/human/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "human",
@@ -3063,7 +3063,7 @@
       }
     },
     "kobold": {
-      "href": "/combat/mob-pool/humanoid/kobold/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/kobold/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "kobold",
@@ -3214,7 +3214,7 @@
       }
     },
     "lizardman": {
-      "href": "/combat/mob-pool/humanoid/lizardman/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/lizardman/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "lizardman",
@@ -3365,7 +3365,7 @@
       }
     },
     "minotaur": {
-      "href": "/combat/mob-pool/humanoid/minotaur/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/minotaur/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "minotaur",
@@ -3516,7 +3516,7 @@
       }
     },
     "ogre": {
-      "href": "/combat/mob-pool/humanoid/ogre/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/ogre/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "ogre",
@@ -3667,7 +3667,7 @@
       }
     },
     "orc": {
-      "href": "/combat/mob-pool/humanoid/orc/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/orc/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "orc",
@@ -3818,7 +3818,7 @@
       }
     },
     "troll": {
-      "href": "/combat/mob-pool/humanoid/troll/v2/atlas.png",
+      "href": "/combat/mob-pool/humanoid/troll/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "troll",
@@ -3969,7 +3969,7 @@
       }
     },
     "beetle": {
-      "href": "/combat/mob-pool/insect/beetle/v2/atlas.png",
+      "href": "/combat/mob-pool/insect/beetle/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "beetle",
@@ -4120,7 +4120,7 @@
       }
     },
     "hornet": {
-      "href": "/combat/mob-pool/insect/hornet/v2/atlas.png",
+      "href": "/combat/mob-pool/insect/hornet/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "hornet",
@@ -4271,7 +4271,7 @@
       }
     },
     "spider": {
-      "href": "/combat/mob-pool/insect/spider/v2/atlas.png",
+      "href": "/combat/mob-pool/insect/spider/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "spider",
@@ -4422,7 +4422,7 @@
       }
     },
     "dryad": {
-      "href": "/combat/mob-pool/plant/dryad/v2/atlas.png",
+      "href": "/combat/mob-pool/plant/dryad/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "dryad",
@@ -4573,7 +4573,7 @@
       }
     },
     "treant": {
-      "href": "/combat/mob-pool/plant/treant/v2/atlas.png",
+      "href": "/combat/mob-pool/plant/treant/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "treant",
@@ -4724,7 +4724,7 @@
       }
     },
     "bonehound": {
-      "href": "/combat/mob-pool/undead/bonehound/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/bonehound/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "bonehound",
@@ -4874,7 +4874,7 @@
       }
     },
     "mummy": {
-      "href": "/combat/mob-pool/undead/mummy/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/mummy/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "mummy",
@@ -5025,7 +5025,7 @@
       }
     },
     "revenant": {
-      "href": "/combat/mob-pool/undead/revenant/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/revenant/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "revenant",
@@ -5175,7 +5175,7 @@
       }
     },
     "skeleton": {
-      "href": "/combat/mob-pool/undead/skeleton/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/skeleton/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "skeleton",
@@ -5326,7 +5326,7 @@
       }
     },
     "vampire": {
-      "href": "/combat/mob-pool/undead/vampire/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/vampire/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "vampire",
@@ -5477,7 +5477,7 @@
       }
     },
     "wraith": {
-      "href": "/combat/mob-pool/undead/wraith/v2/atlas.png",
+      "href": "/combat/mob-pool/undead/wraith/master-version/atlas.png",
       "metadata": {
         "artSet": "pawn-study",
         "studyEntryId": "wraith",
@@ -5631,7 +5631,7 @@
   "variants": {
     "harpy": {
       "Harpy Screecher": {
-        "href": "/combat/mob-pool/beast/harpy/variants/harpy-screecher/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/harpy/variants/harpy-screecher/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "harpy--harpy-screecher",
@@ -5785,7 +5785,7 @@
     },
     "werewolf": {
       "Blood Werewolf": {
-        "href": "/combat/mob-pool/beast/werewolf/variants/blood-werewolf/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/werewolf/variants/blood-werewolf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "werewolf--blood-werewolf",
@@ -5938,7 +5938,7 @@
         }
       },
       "Elder Werewolf": {
-        "href": "/combat/mob-pool/beast/werewolf/variants/elder-werewolf/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/werewolf/variants/elder-werewolf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "werewolf--elder-werewolf",
@@ -6093,7 +6093,7 @@
     },
     "wolf": {
       "Hunting Wolf": {
-        "href": "/combat/mob-pool/beast/wolf/variants/hunting-wolf/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/wolf/variants/hunting-wolf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wolf--hunting-wolf",
@@ -6246,7 +6246,7 @@
         }
       },
       "Moonfang Wolf": {
-        "href": "/combat/mob-pool/beast/wolf/variants/moonfang-wolf/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/wolf/variants/moonfang-wolf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wolf--moonfang-wolf",
@@ -6399,7 +6399,7 @@
         }
       },
       "Shadow Wolf": {
-        "href": "/combat/mob-pool/beast/wolf/variants/shadow-wolf/v2/atlas.png",
+        "href": "/combat/mob-pool/beast/wolf/variants/shadow-wolf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wolf--shadow-wolf",
@@ -6554,7 +6554,7 @@
     },
     "demon": {
       "Dread Herald Demon": {
-        "href": "/combat/mob-pool/demon/demon/variants/dread-herald-demon/v2/atlas.png",
+        "href": "/combat/mob-pool/demon/demon/variants/dread-herald-demon/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "demon--dread-herald-demon",
@@ -6707,7 +6707,7 @@
         }
       },
       "Ember Knight Demon": {
-        "href": "/combat/mob-pool/demon/demon/variants/ember-knight-demon/v2/atlas.png",
+        "href": "/combat/mob-pool/demon/demon/variants/ember-knight-demon/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "demon--ember-knight-demon",
@@ -6862,7 +6862,7 @@
     },
     "imp": {
       "Hornling Imp": {
-        "href": "/combat/mob-pool/demon/imp/variants/hornling-imp/v2/atlas.png",
+        "href": "/combat/mob-pool/demon/imp/variants/hornling-imp/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "imp--hornling-imp",
@@ -7015,7 +7015,7 @@
         }
       },
       "Pinch Imp": {
-        "href": "/combat/mob-pool/demon/imp/variants/pinch-imp/v2/atlas.png",
+        "href": "/combat/mob-pool/demon/imp/variants/pinch-imp/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "imp--pinch-imp",
@@ -7170,7 +7170,7 @@
     },
     "dragon": {
       "Dawnfire Dragon": {
-        "href": "/combat/mob-pool/dragon/dragon/variants/dawnfire-dragon/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/dragon/variants/dawnfire-dragon/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "dragon--dawnfire-dragon",
@@ -7323,7 +7323,7 @@
         }
       },
       "Rime Dragon": {
-        "href": "/combat/mob-pool/dragon/dragon/variants/rime-dragon/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/dragon/variants/rime-dragon/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "dragon--rime-dragon",
@@ -7476,7 +7476,7 @@
         }
       },
       "Wyrmling": {
-        "href": "/combat/mob-pool/dragon/dragon/variants/wyrmling/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/dragon/variants/wyrmling/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "dragon--wyrmling",
@@ -7631,7 +7631,7 @@
     },
     "mirehydra": {
       "Mire Hydra Broodling": {
-        "href": "/combat/mob-pool/dragon/mirehydra/variants/mire-hydra-broodling/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/mirehydra/variants/mire-hydra-broodling/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "mirehydra--mire-hydra-broodling",
@@ -7786,7 +7786,7 @@
     },
     "wyrmling": {
       "Wyrmling Scaler": {
-        "href": "/combat/mob-pool/dragon/wyrmling/variants/wyrmling-scaler/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/wyrmling/variants/wyrmling-scaler/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wyrmling--wyrmling-scaler",
@@ -7941,7 +7941,7 @@
     },
     "wyvern": {
       "Elder Wyvern": {
-        "href": "/combat/mob-pool/dragon/wyvern/variants/elder-wyvern/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/wyvern/variants/elder-wyvern/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wyvern--elder-wyvern",
@@ -8094,7 +8094,7 @@
         }
       },
       "Shriek Wyvern": {
-        "href": "/combat/mob-pool/dragon/wyvern/variants/shriek-wyvern/v2/atlas.png",
+        "href": "/combat/mob-pool/dragon/wyvern/variants/shriek-wyvern/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wyvern--shriek-wyvern",
@@ -8249,7 +8249,7 @@
     },
     "golem": {
       "Crystal Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/crystal-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/crystal-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--crystal-golem",
@@ -8402,7 +8402,7 @@
         }
       },
       "Drowned Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/drowned-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/drowned-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--drowned-golem",
@@ -8555,7 +8555,7 @@
         }
       },
       "Guardian Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/guardian-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/guardian-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--guardian-golem",
@@ -8708,7 +8708,7 @@
         }
       },
       "Icebound Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/icebound-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/icebound-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--icebound-golem",
@@ -8861,7 +8861,7 @@
         }
       },
       "Stone Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/stone-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/stone-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--stone-golem",
@@ -9014,7 +9014,7 @@
         }
       },
       "Vault Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/vault-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/vault-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--vault-golem",
@@ -9167,7 +9167,7 @@
         }
       },
       "Watchtower Golem": {
-        "href": "/combat/mob-pool/elemental/golem/variants/watchtower-golem/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/golem/variants/watchtower-golem/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "golem--watchtower-golem",
@@ -9322,7 +9322,7 @@
     },
     "slaggolem": {
       "Slag Golem Crusher": {
-        "href": "/combat/mob-pool/elemental/slaggolem/variants/slag-golem-crusher/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/slaggolem/variants/slag-golem-crusher/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slaggolem--slag-golem-crusher",
@@ -9477,7 +9477,7 @@
     },
     "wisp": {
       "Arc Wisp": {
-        "href": "/combat/mob-pool/elemental/wisp/variants/arc-wisp/v2/atlas.png",
+        "href": "/combat/mob-pool/elemental/wisp/variants/arc-wisp/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wisp--arc-wisp",
@@ -9631,7 +9631,7 @@
     },
     "siren": {
       "Abyssal Siren": {
-        "href": "/combat/mob-pool/fish/siren/variants/abyssal-siren/v2/atlas.png",
+        "href": "/combat/mob-pool/fish/siren/variants/abyssal-siren/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "siren--abyssal-siren",
@@ -9784,7 +9784,7 @@
         }
       },
       "Stormwater Siren": {
-        "href": "/combat/mob-pool/fish/siren/variants/stormwater-siren/v2/atlas.png",
+        "href": "/combat/mob-pool/fish/siren/variants/stormwater-siren/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "siren--stormwater-siren",
@@ -9937,7 +9937,7 @@
         }
       },
       "Tidal Wave Siren": {
-        "href": "/combat/mob-pool/fish/siren/variants/tidal-wave-siren/v2/atlas.png",
+        "href": "/combat/mob-pool/fish/siren/variants/tidal-wave-siren/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "siren--tidal-wave-siren",
@@ -10092,7 +10092,7 @@
     },
     "ooze": {
       "Blight Ooze": {
-        "href": "/combat/mob-pool/formless/ooze/variants/blight-ooze/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/ooze/variants/blight-ooze/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ooze--blight-ooze",
@@ -10245,7 +10245,7 @@
         }
       },
       "Mire Ooze": {
-        "href": "/combat/mob-pool/formless/ooze/variants/mire-ooze/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/ooze/variants/mire-ooze/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ooze--mire-ooze",
@@ -10398,7 +10398,7 @@
         }
       },
       "Silt Ooze": {
-        "href": "/combat/mob-pool/formless/ooze/variants/silt-ooze/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/ooze/variants/silt-ooze/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ooze--silt-ooze",
@@ -10551,7 +10551,7 @@
         }
       },
       "Vat Ooze": {
-        "href": "/combat/mob-pool/formless/ooze/variants/vat-ooze/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/ooze/variants/vat-ooze/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ooze--vat-ooze",
@@ -10706,7 +10706,7 @@
     },
     "slime": {
       "Abyss Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/abyss-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/abyss-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--abyss-slime",
@@ -10859,7 +10859,7 @@
         }
       },
       "Bog Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/bog-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/bog-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--bog-slime",
@@ -11012,7 +11012,7 @@
         }
       },
       "Brook Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/brook-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/brook-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--brook-slime",
@@ -11165,7 +11165,7 @@
         }
       },
       "Deepwater Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/deepwater-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/deepwater-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--deepwater-slime",
@@ -11318,7 +11318,7 @@
         }
       },
       "Devourer Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/devourer-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/devourer-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--devourer-slime",
@@ -11471,7 +11471,7 @@
         }
       },
       "Orchard Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/orchard-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/orchard-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--orchard-slime",
@@ -11624,7 +11624,7 @@
         }
       },
       "Rime Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/rime-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/rime-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--rime-slime",
@@ -11777,7 +11777,7 @@
         }
       },
       "Slag Slime": {
-        "href": "/combat/mob-pool/formless/slime/variants/slag-slime/v2/atlas.png",
+        "href": "/combat/mob-pool/formless/slime/variants/slag-slime/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "slime--slag-slime",
@@ -11932,7 +11932,7 @@
     },
     "elf": {
       "Dark Elf": {
-        "href": "/combat/mob-pool/humanoid/elf/variants/dark-elf/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/elf/variants/dark-elf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "elf--dark-elf",
@@ -12085,7 +12085,7 @@
         }
       },
       "Starreader Elf": {
-        "href": "/combat/mob-pool/humanoid/elf/variants/starreader-elf/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/elf/variants/starreader-elf/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "elf--starreader-elf",
@@ -12240,7 +12240,7 @@
     },
     "giant": {
       "Hill Giant": {
-        "href": "/combat/mob-pool/humanoid/giant/variants/hill-giant/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/giant/variants/hill-giant/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "giant--hill-giant",
@@ -12393,7 +12393,7 @@
         }
       },
       "Peak Giant": {
-        "href": "/combat/mob-pool/humanoid/giant/variants/peak-giant/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/giant/variants/peak-giant/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "giant--peak-giant",
@@ -12548,7 +12548,7 @@
     },
     "goblin": {
       "Sneak Goblin": {
-        "href": "/combat/mob-pool/humanoid/goblin/variants/sneak-goblin/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/goblin/variants/sneak-goblin/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "goblin--sneak-goblin",
@@ -12701,7 +12701,7 @@
         }
       },
       "Tallow Goblin": {
-        "href": "/combat/mob-pool/humanoid/goblin/variants/tallow-goblin/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/goblin/variants/tallow-goblin/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "goblin--tallow-goblin",
@@ -12854,7 +12854,7 @@
         }
       },
       "Warcaller Goblin": {
-        "href": "/combat/mob-pool/humanoid/goblin/variants/warcaller-goblin/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/goblin/variants/warcaller-goblin/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "goblin--warcaller-goblin",
@@ -13009,7 +13009,7 @@
     },
     "human": {
       "Banner Captain": {
-        "href": "/combat/mob-pool/humanoid/human/variants/banner-captain/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/human/variants/banner-captain/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "human--banner-captain",
@@ -13162,7 +13162,7 @@
         }
       },
       "Knight": {
-        "href": "/combat/mob-pool/humanoid/human/variants/knight/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/human/variants/knight/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "human--knight",
@@ -13315,7 +13315,7 @@
         }
       },
       "Mage": {
-        "href": "/combat/mob-pool/humanoid/human/variants/mage/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/human/variants/mage/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "human--mage",
@@ -13468,7 +13468,7 @@
         }
       },
       "Orchard Poacher": {
-        "href": "/combat/mob-pool/humanoid/human/variants/orchard-poacher/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/human/variants/orchard-poacher/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "human--orchard-poacher",
@@ -13621,7 +13621,7 @@
         }
       },
       "Ranger": {
-        "href": "/combat/mob-pool/humanoid/human/variants/ranger/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/human/variants/ranger/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "human--ranger",
@@ -13776,7 +13776,7 @@
     },
     "kobold": {
       "Drake Kobold": {
-        "href": "/combat/mob-pool/humanoid/kobold/variants/drake-kobold/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/kobold/variants/drake-kobold/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "kobold--drake-kobold",
@@ -13929,7 +13929,7 @@
         }
       },
       "Flintlock Kobold": {
-        "href": "/combat/mob-pool/humanoid/kobold/variants/flintlock-kobold/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/kobold/variants/flintlock-kobold/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "kobold--flintlock-kobold",
@@ -14082,7 +14082,7 @@
         }
       },
       "Miner Kobold": {
-        "href": "/combat/mob-pool/humanoid/kobold/variants/miner-kobold/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/kobold/variants/miner-kobold/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "kobold--miner-kobold",
@@ -14235,7 +14235,7 @@
         }
       },
       "Scavenger Kobold": {
-        "href": "/combat/mob-pool/humanoid/kobold/variants/scavenger-kobold/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/kobold/variants/scavenger-kobold/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "kobold--scavenger-kobold",
@@ -14388,7 +14388,7 @@
         }
       },
       "Tinker Kobold": {
-        "href": "/combat/mob-pool/humanoid/kobold/variants/tinker-kobold/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/kobold/variants/tinker-kobold/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "kobold--tinker-kobold",
@@ -14543,7 +14543,7 @@
     },
     "lizardman": {
       "Mire Lizardman": {
-        "href": "/combat/mob-pool/humanoid/lizardman/variants/mire-lizardman/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/lizardman/variants/mire-lizardman/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "lizardman--mire-lizardman",
@@ -14696,7 +14696,7 @@
         }
       },
       "Reed Spear Lizardman": {
-        "href": "/combat/mob-pool/humanoid/lizardman/variants/reed-spear-lizardman/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/lizardman/variants/reed-spear-lizardman/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "lizardman--reed-spear-lizardman",
@@ -14849,7 +14849,7 @@
         }
       },
       "Scale Knight Lizardman": {
-        "href": "/combat/mob-pool/humanoid/lizardman/variants/scale-knight-lizardman/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/lizardman/variants/scale-knight-lizardman/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "lizardman--scale-knight-lizardman",
@@ -15002,7 +15002,7 @@
         }
       },
       "Sunscale Lizardman": {
-        "href": "/combat/mob-pool/humanoid/lizardman/variants/sunscale-lizardman/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/lizardman/variants/sunscale-lizardman/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "lizardman--sunscale-lizardman",
@@ -15157,7 +15157,7 @@
     },
     "minotaur": {
       "Maze Warden Minotaur": {
-        "href": "/combat/mob-pool/humanoid/minotaur/variants/maze-warden-minotaur/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/minotaur/variants/maze-warden-minotaur/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "minotaur--maze-warden-minotaur",
@@ -15312,7 +15312,7 @@
     },
     "ogre": {
       "Brute Ogre": {
-        "href": "/combat/mob-pool/humanoid/ogre/variants/brute-ogre/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/ogre/variants/brute-ogre/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ogre--brute-ogre",
@@ -15465,7 +15465,7 @@
         }
       },
       "Mesa Ogre": {
-        "href": "/combat/mob-pool/humanoid/ogre/variants/mesa-ogre/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/ogre/variants/mesa-ogre/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ogre--mesa-ogre",
@@ -15618,7 +15618,7 @@
         }
       },
       "Oathbrand Ogre": {
-        "href": "/combat/mob-pool/humanoid/ogre/variants/oathbrand-ogre/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/ogre/variants/oathbrand-ogre/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ogre--oathbrand-ogre",
@@ -15771,7 +15771,7 @@
         }
       },
       "Swamp Ogre": {
-        "href": "/combat/mob-pool/humanoid/ogre/variants/swamp-ogre/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/ogre/variants/swamp-ogre/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "ogre--swamp-ogre",
@@ -15926,7 +15926,7 @@
     },
     "orc": {
       "Ashen Orc": {
-        "href": "/combat/mob-pool/humanoid/orc/variants/ashen-orc/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/orc/variants/ashen-orc/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "orc--ashen-orc",
@@ -16079,7 +16079,7 @@
         }
       },
       "Berserker Orc": {
-        "href": "/combat/mob-pool/humanoid/orc/variants/berserker-orc/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/orc/variants/berserker-orc/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "orc--berserker-orc",
@@ -16232,7 +16232,7 @@
         }
       },
       "Raider Orc": {
-        "href": "/combat/mob-pool/humanoid/orc/variants/raider-orc/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/orc/variants/raider-orc/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "orc--raider-orc",
@@ -16387,7 +16387,7 @@
     },
     "troll": {
       "Cave Troll": {
-        "href": "/combat/mob-pool/humanoid/troll/variants/cave-troll/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/troll/variants/cave-troll/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "troll--cave-troll",
@@ -16540,7 +16540,7 @@
         }
       },
       "Oldgrowth Troll": {
-        "href": "/combat/mob-pool/humanoid/troll/variants/oldgrowth-troll/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/troll/variants/oldgrowth-troll/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "troll--oldgrowth-troll",
@@ -16693,7 +16693,7 @@
         }
       },
       "Reed Troll": {
-        "href": "/combat/mob-pool/humanoid/troll/variants/reed-troll/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/troll/variants/reed-troll/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "troll--reed-troll",
@@ -16846,7 +16846,7 @@
         }
       },
       "Swamp Troll": {
-        "href": "/combat/mob-pool/humanoid/troll/variants/swamp-troll/v2/atlas.png",
+        "href": "/combat/mob-pool/humanoid/troll/variants/swamp-troll/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "troll--swamp-troll",
@@ -17001,7 +17001,7 @@
     },
     "beetle": {
       "Carapace Beetle": {
-        "href": "/combat/mob-pool/insect/beetle/variants/carapace-beetle/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/beetle/variants/carapace-beetle/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "beetle--carapace-beetle",
@@ -17154,7 +17154,7 @@
         }
       },
       "Hollow Beetle": {
-        "href": "/combat/mob-pool/insect/beetle/variants/hollow-beetle/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/beetle/variants/hollow-beetle/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "beetle--hollow-beetle",
@@ -17307,7 +17307,7 @@
         }
       },
       "Meadow Beetle": {
-        "href": "/combat/mob-pool/insect/beetle/variants/meadow-beetle/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/beetle/variants/meadow-beetle/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "beetle--meadow-beetle",
@@ -17462,7 +17462,7 @@
     },
     "hornet": {
       "Bog Hornet": {
-        "href": "/combat/mob-pool/insect/hornet/variants/bog-hornet/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/hornet/variants/bog-hornet/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "hornet--bog-hornet",
@@ -17615,7 +17615,7 @@
         }
       },
       "Meadow Hornet": {
-        "href": "/combat/mob-pool/insect/hornet/variants/meadow-hornet/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/hornet/variants/meadow-hornet/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "hornet--meadow-hornet",
@@ -17768,7 +17768,7 @@
         }
       },
       "Queenling Hornet": {
-        "href": "/combat/mob-pool/insect/hornet/variants/queenling-hornet/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/hornet/variants/queenling-hornet/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "hornet--queenling-hornet",
@@ -17921,7 +17921,7 @@
         }
       },
       "Vespa Hornet": {
-        "href": "/combat/mob-pool/insect/hornet/variants/vespa-hornet/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/hornet/variants/vespa-hornet/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "hornet--vespa-hornet",
@@ -18076,7 +18076,7 @@
     },
     "spider": {
       "Cave Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/cave-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/cave-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--cave-spider",
@@ -18229,7 +18229,7 @@
         }
       },
       "Fenweb Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/fenweb-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/fenweb-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--fenweb-spider",
@@ -18382,7 +18382,7 @@
         }
       },
       "Moonweb Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/moonweb-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/moonweb-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--moonweb-spider",
@@ -18535,7 +18535,7 @@
         }
       },
       "Mossback Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/mossback-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/mossback-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--mossback-spider",
@@ -18688,7 +18688,7 @@
         }
       },
       "Orchard Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/orchard-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/orchard-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--orchard-spider",
@@ -18841,7 +18841,7 @@
         }
       },
       "Venom Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/venom-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/venom-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--venom-spider",
@@ -18994,7 +18994,7 @@
         }
       },
       "Web Spider": {
-        "href": "/combat/mob-pool/insect/spider/variants/web-spider/v2/atlas.png",
+        "href": "/combat/mob-pool/insect/spider/variants/web-spider/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "spider--web-spider",
@@ -19149,7 +19149,7 @@
     },
     "dryad": {
       "Verdant Elder Dryad": {
-        "href": "/combat/mob-pool/plant/dryad/variants/verdant-elder-dryad/v2/atlas.png",
+        "href": "/combat/mob-pool/plant/dryad/variants/verdant-elder-dryad/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "dryad--verdant-elder-dryad",
@@ -19304,7 +19304,7 @@
     },
     "treant": {
       "Groveheart Treant": {
-        "href": "/combat/mob-pool/plant/treant/variants/groveheart-treant/v2/atlas.png",
+        "href": "/combat/mob-pool/plant/treant/variants/groveheart-treant/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "treant--groveheart-treant",
@@ -19457,7 +19457,7 @@
         }
       },
       "Rotting Treant": {
-        "href": "/combat/mob-pool/plant/treant/variants/rotting-treant/v2/atlas.png",
+        "href": "/combat/mob-pool/plant/treant/variants/rotting-treant/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "treant--rotting-treant",
@@ -19610,7 +19610,7 @@
         }
       },
       "Thicket Treant": {
-        "href": "/combat/mob-pool/plant/treant/variants/thicket-treant/v2/atlas.png",
+        "href": "/combat/mob-pool/plant/treant/variants/thicket-treant/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "treant--thicket-treant",
@@ -19765,7 +19765,7 @@
     },
     "bonehound": {
       "Bone Hound Gnawer": {
-        "href": "/combat/mob-pool/undead/bonehound/variants/bone-hound-gnawer/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/bonehound/variants/bone-hound-gnawer/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "bonehound--bone-hound-gnawer",
@@ -19919,7 +19919,7 @@
     },
     "mummy": {
       "Ashwrap Mummy": {
-        "href": "/combat/mob-pool/undead/mummy/variants/ashwrap-mummy/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/mummy/variants/ashwrap-mummy/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "mummy--ashwrap-mummy",
@@ -20072,7 +20072,7 @@
         }
       },
       "Cartouche Mummy": {
-        "href": "/combat/mob-pool/undead/mummy/variants/cartouche-mummy/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/mummy/variants/cartouche-mummy/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "mummy--cartouche-mummy",
@@ -20225,7 +20225,7 @@
         }
       },
       "Vault Mummy": {
-        "href": "/combat/mob-pool/undead/mummy/variants/vault-mummy/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/mummy/variants/vault-mummy/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "mummy--vault-mummy",
@@ -20380,7 +20380,7 @@
     },
     "revenant": {
       "Frost Revenant Warden": {
-        "href": "/combat/mob-pool/undead/revenant/variants/frost-revenant-warden/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/revenant/variants/frost-revenant-warden/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "revenant--frost-revenant-warden",
@@ -20534,7 +20534,7 @@
     },
     "skeleton": {
       "Crownless Skeleton": {
-        "href": "/combat/mob-pool/undead/skeleton/variants/crownless-skeleton/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/skeleton/variants/crownless-skeleton/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "skeleton--crownless-skeleton",
@@ -20687,7 +20687,7 @@
         }
       },
       "Drowned Skeleton": {
-        "href": "/combat/mob-pool/undead/skeleton/variants/drowned-skeleton/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/skeleton/variants/drowned-skeleton/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "skeleton--drowned-skeleton",
@@ -20840,7 +20840,7 @@
         }
       },
       "Knight Skeleton": {
-        "href": "/combat/mob-pool/undead/skeleton/variants/knight-skeleton/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/skeleton/variants/knight-skeleton/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "skeleton--knight-skeleton",
@@ -20993,7 +20993,7 @@
         }
       },
       "Mage Skeleton": {
-        "href": "/combat/mob-pool/undead/skeleton/variants/mage-skeleton/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/skeleton/variants/mage-skeleton/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "skeleton--mage-skeleton",
@@ -21146,7 +21146,7 @@
         }
       },
       "Rattleblade Skeleton": {
-        "href": "/combat/mob-pool/undead/skeleton/variants/rattleblade-skeleton/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/skeleton/variants/rattleblade-skeleton/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "skeleton--rattleblade-skeleton",
@@ -21301,7 +21301,7 @@
     },
     "vampire": {
       "Bloodveil Vampire": {
-        "href": "/combat/mob-pool/undead/vampire/variants/bloodveil-vampire/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/vampire/variants/bloodveil-vampire/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "vampire--bloodveil-vampire",
@@ -21454,7 +21454,7 @@
         }
       },
       "Crimson Knight Vampire": {
-        "href": "/combat/mob-pool/undead/vampire/variants/crimson-knight-vampire/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/vampire/variants/crimson-knight-vampire/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "vampire--crimson-knight-vampire",
@@ -21607,7 +21607,7 @@
         }
       },
       "Grave Count Vampire": {
-        "href": "/combat/mob-pool/undead/vampire/variants/grave-count-vampire/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/vampire/variants/grave-count-vampire/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "vampire--grave-count-vampire",
@@ -21760,7 +21760,7 @@
         }
       },
       "Night Lord Vampire": {
-        "href": "/combat/mob-pool/undead/vampire/variants/night-lord-vampire/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/vampire/variants/night-lord-vampire/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "vampire--night-lord-vampire",
@@ -21915,7 +21915,7 @@
     },
     "wraith": {
       "Chain Wraith": {
-        "href": "/combat/mob-pool/undead/wraith/variants/chain-wraith/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/wraith/variants/chain-wraith/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wraith--chain-wraith",
@@ -22068,7 +22068,7 @@
         }
       },
       "Dread Wraith": {
-        "href": "/combat/mob-pool/undead/wraith/variants/dread-wraith/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/wraith/variants/dread-wraith/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wraith--dread-wraith",
@@ -22221,7 +22221,7 @@
         }
       },
       "Hollow Wraith": {
-        "href": "/combat/mob-pool/undead/wraith/variants/hollow-wraith/v2/atlas.png",
+        "href": "/combat/mob-pool/undead/wraith/variants/hollow-wraith/master-version/atlas.png",
         "metadata": {
           "artSet": "pawn-study",
           "studyEntryId": "wraith--hollow-wraith",

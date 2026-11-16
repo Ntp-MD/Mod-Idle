@@ -15,7 +15,7 @@
   import { mobSkillById } from '@sim/combat/mobSkills';
   import type { Character } from '@sim/core/player';
   import type { FxEvent, GameState, Mob } from '@sim/core/types';
-  import { arenaDistance, arenaSkillRange, arenaTarget, attackGeometryFor, mobAttackProfile, sampleCombatArena, type CombatArena, type CombatArenaActor } from '@sim/combat/combat-arena';
+  import { arenaDistance, arenaSkillRange, arenaTarget, attackGeometryFor, mobAttackProfile, sampleCombatArena, type CombatArena, type CombatArenaActor, type CombatArenaFrame } from '@sim/combat/combat-arena';
   import { arenaArtForSpecies, type ArenaCharacterArt } from './arena/arena-art';
   import { equippedPlayerArt } from './arena/arena-equipped-player';
   import { actorArt, actorProfile } from './combat-actor';
@@ -31,7 +31,7 @@
 
   let { arena, s, c, ring, speed = 1, paused = false, spritePreviewSpecies = null, spritePreviewVariant = null, aoePreview = false, iconActors = false, groundMaterialOverride = null,
     focusId = null, aimSkill = null, inspect = false, effectLevel = 'auto', keyboardAim = null, zoom = 1, vfxMode = 'auto', frame = null,
-    onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onAimPoint, onVitals, onTargetRead, onStageCss }: {
+    onReviewPause, onReviewStep, onInspectEnemy, onFocusEnemy, onGroundCommand, onAimPoint, onVitals, onTargetRead, onStageCss, onFrame }: {
     arena: CombatArena; s: GameState; c: Character; ring: FxEvent[]; speed?: number; paused?: boolean; vfxMode?: 'auto' | 'base';
     groundMaterialOverride?: ArenaGroundMaterial | null;
     spritePreviewSpecies?: string | null;
@@ -63,6 +63,8 @@
     onVitals?: (vitals: { hp: number; es: number; mana: number }) => void;
     /** The persistent target read for the HUD bar — identity, kind, offscreen bearing and range. */
     onTargetRead?: (read: ArenaTargetRead | null) => void;
+    /** The one sampled frame at the painted playhead, so HUD views share this scene's clock. */
+    onFrame?: (frame: CombatArenaFrame) => void;
   } = $props();
 
   let host = $state<HTMLDivElement | null>(null);
@@ -139,6 +141,8 @@
   }
   $effect(() => { if (!paused) { reviewAt = null; reviewPlaying = false; } });
   const sampled = $derived(sampleCombatArena(arena, playhead));
+  // One clock, one sample: the HUD cards and nearby map read the frame this scene paints.
+  $effect(() => { onFrame?.(sampled); });
   const groundMaterial = $derived.by(() => { void playhead; return groundMaterialOverride ?? arenaGroundForField(s); });
   const player = $derived(sampled.player);
   /** Displayed scale glides toward the target scale (~140 ms) so slider steps
@@ -905,10 +909,10 @@
   .arena-inspect:hover, .arena-inspect:focus-visible { background: transparent; }
   .arena-inspect:focus-visible { outline: none; }
   .arena-inspect:focus-visible .arena-name { outline: 2px solid var(--focus); outline-offset: 2px; }
-  .arena-health { position: absolute; bottom: calc(100% + 2px); left: 50%; translate: -50% 0; width: 44px; height: 4px; padding: 1px; box-sizing: content-box; border-radius: 2px; background: rgba(7, 12, 10, .85); box-shadow: 0 2px 4px rgba(0, 0, 0, .3); }
+  .arena-health { position: absolute; bottom: calc(100% + 2px); left: 50%; translate: -50% 0; width: 44px; height: 4px; padding: 1px; box-sizing: content-box; border-radius: 2px; background: rgba(7, 12, 10, .85); box-shadow: 0 2px 4px var(--scrim-30); }
   .arena-health > span { display: block; height: 100%; background: #c8674d; border-radius: 1px; }
   .target .arena-health > span { background: var(--hp-lit); }
-  .arena-name { position: absolute; bottom: calc(100% + 13px); left: 50%; translate: -50% 0; width: max-content; max-width: 190px; padding: 2px 5px; border-radius: 2px; background: rgba(9, 16, 13, .86); color: #f2eedb; opacity: 0; font: 600 12px/1.3 var(--ui); white-space: nowrap; text-shadow: 0 2px 3px rgba(0, 0, 0, .7); }
+  .arena-name { position: absolute; bottom: calc(100% + 13px); left: 50%; translate: -50% 0; width: max-content; max-width: 190px; padding: 2px 5px; border-radius: 2px; background: rgba(9, 16, 13, .86); color: #f2eedb; opacity: 0; font: 600 12px/1.3 var(--ui); white-space: nowrap; text-shadow: 0 2px 3px var(--scrim-70); }
   .arena-name small { color: #c5cba9; font-size: 10px; }
   .target .arena-name, .arena-inspect:hover .arena-name, .arena-inspect:focus-visible .arena-name { opacity: 1; }
   .arena-threat { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--actor-height) + 6px); display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(120, 28, 20, .9); color: #ffe9c9; font: 700 11px/1 var(--ui); box-shadow: 0 0 6px rgba(255, 92, 64, .55); }

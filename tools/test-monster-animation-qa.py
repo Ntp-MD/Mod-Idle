@@ -239,13 +239,13 @@ export const pixelArenaArt = {
 };
 """, encoding="utf-8")
         pool = self.directory / "pool.json"
-        pool.write_text(json.dumps({"species": {"goblin": {"href": "/combat/mob-pool/humanoid/goblin/v1/atlas.png"}}}), encoding="utf-8")
+        pool.write_text(json.dumps({"species": {"goblin": {"href": "/combat/mob-pool/humanoid/goblin/master-version/atlas.png"}}}), encoding="utf-8")
         pairs, errors = qa.runtime_atlases(registry, pool)
         self.assertEqual(errors, [])
         self.assertEqual(pairs, [((self.directory / "hero.json").resolve(),
                                   (qa.ROOT / "game/public/combat/arpg/pixel-v2/player.png").resolve()),
-                                 ((qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/v1/meta.json").resolve(),
-                                  (qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/v1/atlas.png").resolve())])
+                                 ((qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/master-version/meta.json").resolve(),
+                                  (qa.ROOT / "game/public/combat/mob-pool/humanoid/goblin/master-version/atlas.png").resolve())])
 
     def test_runtime_cli_checks_registry_pairs(self) -> None:
         output = io.StringIO()

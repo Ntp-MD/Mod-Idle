@@ -76,7 +76,7 @@ function checks() {
   const r = CRAFT.imprint({ ...fixture(), baselines: { 3: 999 } }, 3, target, rng);
   if (!r.ok) im3.push(`imprint refused a clean Unbound line: ${r.why}`);
   else {
-    const [lo, hi] = LOOT.rangeOf(target, 60, 1, r.item.lines[3].slice);
+    const [lo, hi] = LOOT.rangeOf(target, 60, 1, r.item.lines[3].slice!);
     if (r.item.lines[3].id !== target) im3.push('imprint did not write its Mod');
     if (r.item.lines[3].value < lo || r.item.lines[3].value > hi) im3.push('imprint value outside the fresh window');
     if (r.item.baselines && r.item.baselines[3] != null) im3.push('imprint kept the old baseline');
@@ -233,7 +233,8 @@ function checks() {
       POOL.find((id: string) => !rolled.item.lines.some((l: any) => l.id === id))!, POOL, roll);
     if (!swapped.ok) im9.push(`Replace refused the crafted line: ${swapped.why}`);
     else if (!swapped.item.lines[swapped.item.lines.length - 1].crafted) im9.push('Replace dropped the crafted mark with the old identity');
-    const born = CRAFT.rebirth(swapped.item, POOL, roll);
+    const swappedPiece = swapped.ok ? swapped.item : undefined;
+    const born = CRAFT.rebirth(swappedPiece!, POOL, roll);
     if (!born.ok) im9.push(`Rebirth refused the crafted piece: ${born.why}`);
     else if (!born.item.lines[born.item.lines.length - 1].crafted) im9.push('Rebirth dropped the crafted mark');
     else if (born.item.lines.slice(0, CRAFT.UNTOUCHABLE).some((l: any) => l.crafted)) im9.push('Rebirth stamped the head of the piece');

@@ -126,7 +126,6 @@
   .preview-scroll { max-height: 16rem; }
   .preview table { width: 100%; border-collapse: collapse; font-size: var(--font-xs); }
   .preview th, .preview td { padding: var(--spacing-2xs) var(--spacing-xs); text-align: left; vertical-align: top; }
-  .preview th { color: var(--dim); font-weight: 500; }
   .preview tr.protected td { color: var(--gold-lit); }
   .preview tr.dissolve td { color: var(--alarm); }
   .preview tr.blocked td { color: var(--alarm); font-weight: 600; }

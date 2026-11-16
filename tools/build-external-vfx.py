@@ -68,7 +68,7 @@ def prepare(effect):
         x, y = (runtime - frame_width) // 2, (runtime - frame_height) // 2
         cell.paste(painted, (x, y))
         atlas.paste(cell, ((i % columns) * runtime, (i // columns) * runtime))
-    destination = CACHE / path.name
+    destination = CACHE / (effect + '.png')
     atlas.save(destination, optimize=True)
     return destination, {'widthRatio': width / runtime, 'heightRatio': height / runtime}, hashlib.sha256(path.read_bytes()).hexdigest()
 

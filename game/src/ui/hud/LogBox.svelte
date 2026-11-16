@@ -74,7 +74,7 @@
   .feed-body > p {
     flex: none;
     margin: 0; padding: var(--spacing-xs) var(--spacing-xs); font-size: var(--font-xs);
-    background: linear-gradient(90deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .3) 78%, transparent);
+    background: linear-gradient(90deg, rgba(0, 0, 0, .62), var(--scrim-30) 78%, transparent);
     border-radius: var(--radius-card);
     overflow-wrap: anywhere;
   }

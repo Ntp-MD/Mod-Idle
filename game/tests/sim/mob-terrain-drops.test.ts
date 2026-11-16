@@ -361,11 +361,11 @@ describe('mob, terrain and drop data', () => {
     for (const boss of E.mob.bosses as any[]) {
       const row = roster.find((entry: any) => entry.id === `${boss.id}_boss`);
       expect(row).toBeDefined();
-      expect(row.innate).toEqual([boss.element]);
-      expect(row.damage).toBe(boss.damage);
-      expect(row.core.vit).toBe(boss.core.vit);
-      expect(row.vit).toBe(row.core.vit);
-      expect(row.readsAs).toBe(boss.reads_as);
+      expect(row!.innate).toEqual([boss.element]);
+      expect(row!.damage).toBe(boss.damage);
+      expect(row!.core.vit).toBe(boss.core.vit);
+      expect(row!.vit).toBe(row!.core.vit);
+      expect(row!.readsAs).toBe(boss.reads_as);
     }
   });
 

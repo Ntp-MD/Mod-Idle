@@ -8,7 +8,7 @@ only when the target pipeline explicitly requires it.
 
 ## Source of truth
 
-- Identity, phase names, feet pivot and presentation-only markers: `docs/character/animation.md` and
+- Identity, phase names, feet pivot and presentation-only markers:
   `game/src/ui/combat/animation/manifest.ts`.
 - Standard 8×5 `pilotArt` cell map: `game/src/ui/combat/arena/arena-art-pixel-v2.ts`.
 - Live equipped-player body frames, feet lines and separate equipment layers:
@@ -22,17 +22,19 @@ The standard 8×5 map below is not universal, and an unused clip must not be add
 ## Ground-camera reference
 
 The arena renderer stores an affine ground projection, not a 3D camera angle. Its full matrix
-is authoritative; **45.92° is an effective elevation** derived from the ground ellipse.
+is authoritative; the elevation is **33°** (`ARENA_CAMERA_ELEVATION_DEG = 33` in
+`game/src/presentation/arena-camera.ts`), measured above the horizontal ground plane.
 
 - Ground-vector projection at canonical 1920×1080:
-  **M = [[137.5274, 32.7446], [−26.1957, 98.2339]]** (screen Y points down).
+  **M = [[140, 0], [0, 140·sin33°]] ≈ [[140, 0], [0, 76.2495]]** (screen Y points down);
+  normalized basis **d = sin33° ≈ 0.5446**.
 - M maps world-plane displacement vectors to canonical screen pixels per world metre.
   World points also receive the arena origin and camera-follow translation.
-- A ground circle's principal minor/major ratio is **0.7183**; its screen major axis is
-  **−2.29°** and world-space principal direction is **11.75°**. Projected world-axis length
-  ratio `|M·Y| / |M·X|` is **0.7396**.
+- A ground circle's principal minor/major ratio is **0.5446** (`sin 33°`); its screen major axis is
+  **0°** (screen +X) and world-space principal direction is **0°** (world +X). Projected world-axis length
+  ratio `|M·Y| / |M·X|` is **0.5446**.
 - The matrix is for ground positions and footprints. **Do not skew, rotate or scale the whole
-  upright actor by this matrix or by the 0.7183 ground-ellipse ratio.** The character image
+  upright actor by this matrix or by the 0.5446 ground-ellipse ratio.** The character image
   stays upright; only its root/feet are placed at the projected ground point.
 - Runtime facing is a world-space radian angle with `0 = +X`; the camera maps it to one of
   eight equal screen-facing sectors. Direction names in the frame map are presentation labels,
@@ -40,9 +42,9 @@ is authoritative; **45.92° is an effective elevation** derived from the ground 
 - Runtime sector-index order is `E, SE, S, SW, W, NW, N, NE`; the standard `pilotArt` source
   atlas idle-cell order below is `S, SE, E, NE, N, NW, W, SW`. These orders intentionally
   differ. Use the target frame map, not one order as a substitute for the other.
-- World +X appears at screen angle **−10.78°** and +Y at **+71.57°**. Runtime facing-sector
+- World +X appears at screen angle **0°** and +Y at **+90°**. Runtime facing-sector
   world centres in screen-label order `E, SE, S, SW, W, NW, N, NE` are approximately
-  **14.93°, 68.20°, 103.39°, 139.64°, 194.93°, 248.20°, 283.39°, 319.64°**. These values
+  **0°, 61.43°, 90°, 118.57°, 180°, 241.43°, 270°, 298.57°**. These values
   are for runtime mapping only; do not use them as sprite-generation bearings.
 
 The player turntable manifest records requested bearings and explicitly says its exact rendered
@@ -128,7 +130,7 @@ FRAME AND POSE
 - Weapons, shields, claws, tails, wings and attack reach may change the outer silhouette.
   They must not change the scale of the stable body. Keep the full pose inside the supplied
   frame bounds with transparent clearance for the packing tool.
-- Pose phases and order come from the supplied frame map and `docs/character/animation.md`. Do not add
+- Pose phases and order come from the supplied frame map and `game/src/ui/combat/animation/manifest.ts`. Do not add
   frames, directions, attacks or equipment that are absent from the target contract.
 - Clip images are presentation only. The simulation owns start, release, impact, recovery,
   damage and rewards. Never invent timing or gameplay facts in the artwork.

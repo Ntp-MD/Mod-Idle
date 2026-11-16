@@ -338,7 +338,7 @@
   @keyframes vfx-aura { 0%, 100% { opacity: .55; } 50% { opacity: .8; } }
   .vfx-field-snow { fill: #eaf6ff; opacity: .8; animation: vfx-snow 1400ms linear infinite; }
   @keyframes vfx-snow { 0% { transform: translateY(-0.043px); opacity: 0; } 20% { opacity: .85; } 100% { transform: translateY(0.186px); opacity: 0; } }
-  .vfx-field-rock { fill: currentColor; stroke: #fff1ca; stroke-width: .6; opacity: .9; animation: vfx-rock 1100ms ease-in infinite; }
+  .vfx-field-rock { fill: currentColor; stroke: var(--vfx-core); stroke-width: .6; opacity: .9; animation: vfx-rock 1100ms ease-in infinite; }
   @keyframes vfx-rock { 0% { transform: translateY(-0.24px) scale(.7); opacity: 0; } 30% { opacity: .95; } 100% { transform: translateY(0.06px) scale(1.1); opacity: 0; } }
   .vfx-field-spark { stroke: currentColor; stroke-width: 2; stroke-linecap: round; opacity: .9; animation: vfx-spark 700ms steps(2, end) infinite; }
   @keyframes vfx-spark { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
@@ -354,8 +354,8 @@
     100% { opacity: 0; translate: calc(var(--gx) * var(--p)) calc(var(--gy) * var(--p)); }
   }
   .vfx-sprite-trail { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; opacity: .55; }
-  .vfx-sprite-core { fill: currentColor; stroke: #fff1ca; stroke-width: 1.2; filter: drop-shadow(0 0 4px currentColor); opacity: .85; }
-  .vfx-projectile { fill: currentColor; stroke: #fff1ca; stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 0 4px currentColor); }
+  .vfx-sprite-core { fill: currentColor; stroke: var(--vfx-core); stroke-width: 1.2; filter: drop-shadow(0 0 4px currentColor); opacity: .85; }
+  .vfx-projectile { fill: currentColor; stroke: var(--vfx-core); stroke-width: 1.1; stroke-linejoin: round; filter: drop-shadow(0 0 4px currentColor); }
   .vfx-sprite-shadow { fill: rgba(8, 14, 11, .5); }
   .vfx-sweep { fill: none; stroke: currentColor; stroke-width: 3; stroke-dasharray: .16 .84; stroke-linecap: round; opacity: .9; animation: vfx-sweep 420ms ease-out both; }
   .vfx-channel-beam { fill: currentColor; fill-opacity: .18; stroke: currentColor; stroke-width: 2; opacity: .9; }
@@ -368,7 +368,7 @@
     0% { opacity: .95; translate: 0 0; }
     100% { opacity: 0; translate: var(--dx) calc(var(--dy) + var(--rise)); }
   }
-  .vfx-debris { fill: currentColor; stroke: color-mix(in srgb, currentColor 60%, #fff1ca); stroke-width: .8; opacity: 0; animation: vfx-debris 900ms ease-out both; }
+  .vfx-debris { fill: currentColor; stroke: color-mix(in srgb, currentColor 60%, var(--vfx-core)); stroke-width: .8; opacity: 0; animation: vfx-debris 900ms ease-out both; }
   @keyframes vfx-debris { 0% { opacity: 0; } 14% { opacity: .9; } 70% { opacity: .75; } 100% { opacity: 0; } }
   .vfx-loop-body { fill: currentColor; opacity: .8; animation: vfx-loop 1500ms ease-in-out infinite; }
   @keyframes vfx-loop {
@@ -382,7 +382,7 @@
     100% { opacity: 0; translate: var(--drift, 0) var(--rise, -0.6); }
   }
   .vfx-column-core { fill: none; stroke: currentColor; stroke-width: var(--column-w, 6); stroke-linejoin: round; filter: drop-shadow(0 0 6px currentColor); animation: vfx-column 360ms steps(2, end) both; }
-  .vfx-column-glow { fill: none; stroke: #fff1ca; stroke-width: 2; opacity: .85; animation: vfx-column 360ms steps(2, end) both; }
+  .vfx-column-glow { fill: none; stroke: var(--vfx-core); stroke-width: 2; opacity: .85; animation: vfx-column 360ms steps(2, end) both; }
   .vfx-column-flash { fill: currentColor; opacity: 0; animation: vfx-column-flash 420ms ease-out both; }
   @keyframes vfx-column { 0% { opacity: 0; } 18%, 55% { opacity: 1; } 100% { opacity: 0; } }
   @keyframes vfx-column-flash { 0% { opacity: .8; } 100% { opacity: 0; } }
@@ -390,7 +390,7 @@
   .vfx-spin-channel { animation-duration: 620ms; }
   .vfx-blade { fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; opacity: .8; }
   @keyframes vfx-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
-  .vfx-volley-hit { fill: currentColor; stroke: #fff1ca; stroke-width: 1; opacity: 0; animation: vfx-volley 420ms ease-out both; }
+  .vfx-volley-hit { fill: currentColor; stroke: var(--vfx-core); stroke-width: 1; opacity: 0; animation: vfx-volley 420ms ease-out both; }
   @keyframes vfx-volley { 0% { opacity: .9; } 100% { opacity: 0; transform: scale(1.7); } }
   .no-motion .vfx-support-aura, .no-motion .vfx-field-snow, .no-motion .vfx-field-rock, .no-motion .vfx-field-spark, .no-motion .vfx-field-dust { animation: none; }
   @media (prefers-reduced-motion: reduce) {

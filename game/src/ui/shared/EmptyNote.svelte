@@ -9,10 +9,9 @@
   } = $props();
 </script>
 
-<p class={`empty-note ${tone === 'dim' ? 'text-dim' : tone === 'note' ? 'text-note' : tone}`}>{text}</p>
+<p class={`empty-note ${tone === 'dim' ? 'text-dim' : tone === 'note' || tone === 'xs' ? 'text-note' : tone}`}>{text}</p>
 
 <style>
   .empty-note { margin: 0; }
   .dense { color: var(--dim); font-size: var(--font-2xs); }
-  .xs { color: var(--dim); font-size: var(--font-xs); }
 </style>

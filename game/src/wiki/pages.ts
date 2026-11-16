@@ -34,18 +34,18 @@ import { WIKI_RUNTIME } from './runtime.ts';
  * no longer exists is not a value, it is a page that must refuse to render.
  */
 const PASS = ['toJSON', 'then', 'catch', 'finally', 'constructor', 'valueOf', 'nodeType', 'length'];
-const VIEWS = new WeakMap<object, any>();
-const strict = (obj: any, name: string): any => {
+const VIEWS = new WeakMap<object, object>();
+const strict = <T>(obj: T, name: string): T => {
   if (obj === null || typeof obj !== 'object') return obj;
   const held = VIEWS.get(obj);
-  if (held) return held;
+  if (held) return held as T;
   const view = new Proxy(obj, {
-    get(target: any, key: any) {
+    get(target, key) {
       if (typeof key !== 'string' || key in target || PASS.includes(key) || key in Object.prototype) {
         const plain = Reflect.get(target, key);
         if (typeof plain === 'function') return plain.bind(target);
         // the same view further down the chain, so `E.craft.ascend_add_stone` fails as loudly as `E.craf`
-        return plain !== null && typeof plain === 'object' ? strict(plain, `${name}.${key}`) : plain;
+        return plain !== null && typeof plain === 'object' ? strict(plain, `${name}.${String(key)}`) : plain;
       }
       // A key the data does not carry YET is not a broken page: it reads as `undefined`, so a page's own
       // `?? '—'` fallback still works, and it says so on the console. That is what lets an element, a
@@ -58,11 +58,11 @@ const strict = (obj: any, name: string): any => {
   return view;
 };
 /** Every data block a page may touch, behind that view, named as the file that owns it. */
-const E: any = strict(ENGINE, 'engine.json');
-const MODS: any = strict(MODS_DATA, 'mods.json');
-const TOWN: any = strict(TOWN_DATA, 'town.json');
-const BASES: any = strict(BASES_DATA, 'bases.json');
-const SKILLS: any = strict(SKILLS_DATA, 'skills.json');
+const E = strict(ENGINE, 'engine.json');
+const MODS = strict(MODS_DATA, 'mods.json');
+const TOWN = strict(TOWN_DATA, 'town.json');
+const BASES = strict(BASES_DATA, 'bases.json');
+const SKILLS = strict(SKILLS_DATA, 'skills.json');
 
 /**
  * A lookup by a name the data may legitimately not carry — a variant that pays no junk, a scale that
@@ -74,26 +74,26 @@ const maybe = (o: any, k: any): any => (k in o ? o[k] : undefined);
 /** Every reference build a press is printed against — the engine's own two. */
 /** The engine's own published figures, behind the same view: a derived line that is renamed or 
  *  moved fails the page instead of printing an em dash where the number used to be. */
-const DV: any = strict(eng.DERIVED, 'engine.DERIVED');
-const EBAND: any = strict(eng.BAND, 'engine.BAND');
-const EREF: any = strict(eng.REF, 'engine.REF');
-const EREFERENCE: any = strict(eng.REFERENCE, 'engine.REFERENCE');
+const DV = strict(eng.DERIVED, 'engine.DERIVED');
+const EBAND = strict(eng.BAND, 'engine.BAND');
+const EREF = strict(eng.REF, 'engine.REF');
+const EREFERENCE = strict(eng.REFERENCE, 'engine.REFERENCE');
 
-const REFS: any = EREF;
+const REFS = EREF;
 /** The skill types, in the order the roster prints them. */
 const TYPES: string[] = SKILLS.meta.types;
 
 // ---------------------------------------------------------------- rendering
 
-const esc = (s: any): string => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
-const escAttr = (s: any): string => esc(s).replace(/"/g, '&quot;');
-const n0 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—');
-const n1 = (n: any): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
+const esc = (s: unknown): string => String(s ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string));
+const escAttr = (s: unknown): string => esc(s).replace(/"/g, '&quot;');
+const n0 = (n: unknown): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—');
+const n1 = (n: unknown): string => (Number.isFinite(Number(n)) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—');
 /** A published multiplier keeps its decimal: ×1.8 must never render as ×2. */
-const xOf = (n: any): string => (Number.isFinite(Number(n)) ? String(Math.round(Number(n) * 10) / 10) : '—');
-const list = (a: any): string => (a || []).map((x: any) => esc(x)).join(' · ');
-const rowHtml = (cells: any[]): string => `<tr>${cells.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`;
-const table = (head: string[], rows: any[][]): string =>
+const xOf = (n: unknown): string => (Number.isFinite(Number(n)) ? String(Math.round(Number(n) * 10) / 10) : '—');
+const list = (a: readonly unknown[] | null | undefined): string => (a || []).map((x) => esc(x)).join(' · ');
+const rowHtml = (cells: unknown[]): string => `<tr>${cells.map((c) => `<td>${c == null ? '' : String(c)}</td>`).join('')}</tr>`;
+const table = (head: string[], rows: unknown[][]): string =>
   `<table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>` +
   rows.map((r) => rowHtml(r)).join('') +
   '</tbody></table>';
@@ -389,7 +389,7 @@ page({
 
 
 const press = (s: any, which: string, lv: number) => {
-  const v = sm.perPress(s, { ...REFS[which], level: lv });
+  const v = sm.perPress(s, { ...(REFS as Record<string, (typeof REFS)['glass']>)[which], level: lv });
   return v == null ? '—' : n0(v);
 };
 const n2 = (n: any): string => Number(n).toFixed(2);
@@ -1187,7 +1187,7 @@ page({
       ])),
       '<code>goldPerMinute = junkPerHour / 60</code>; expected base gold per kill = <code>sellGold × rarityChance</code>.'),
     block('Town buyers and trade routes', table(['Town', 'Import needs', 'Abundant exports', 'Why it buys'], TOWN.settlements.map((town: any) => {
-      const profile = TOWN.trade.towns[town.id];
+      const profile = (TOWN.trade.towns as Record<string, (typeof TOWN.trade.towns)[keyof typeof TOWN.trade.towns]>)[town.id];
       const words = (entries: string[]) => entries.map((id) => trade.byId[id]?.name || id.replace('junk:', '')).join(' · ');
       return [esc(town.name), esc(words(profile.imports)), esc(words(profile.exports)), esc(profile.needs)];
     })), `<code>quote = volume × floorMult + ((remaining² − max(0, remaining − volume)²) / (2 × capacity)) × (peak − floorMult)</code>; <code>volume = count × baseValue</code>. Peak is import/export/neutral by town; remaining demand recovers by <code>elapsed × capacity / recoverySec</code>.`),
@@ -1249,7 +1249,7 @@ page({
         .map(([, row]: any) => `${esc(row.name)}${Object.keys(row.bases).length ? `: ${Object.keys(row.bases).map((slot) => esc(slot)).join(', ')}` : ': weapon frames only'}`)
         .join(' · ');
       const materials = Object.entries(F.materials)
-        .map(([id, row]: any) => `${esc(fieldwork.materialById[id]?.name || id)} (${esc(F.families[row.family]?.name || row.family)}, grade ${n0(row.grade)})`)
+        .map(([id, row]: any) => `${esc(fieldwork.materialById[id]?.name || id)} (${esc((F.families as Record<string, (typeof F.families)[keyof typeof F.families]>)[row.family]?.name || row.family)}, grade ${n0(row.grade)})`)
         .join(' · ');
       const armour = Object.entries(F.armour).map(([, row]: any) => `${esc(row.name)} ${n0(row.count)}`).join(' · ');
       const weapons = Object.entries(F.weapons).map(([, row]: any) => `${esc(row.name)} ${n0(row.count)} · ${esc(row.frame)}`).join(' · ');
@@ -1491,7 +1491,7 @@ page({
       list((E.mob.species || []).filter((sp: any) => sp.weakness.element === el).map((sp: any) => `${sp.name} +${n0(sp.weakness.taken_pct)}%`)) || '—',
     ])), `<code>resistance(Element) = min(resistanceCap, authored pct)</code>; a weakness multiplies that Element's damage taken by <code>1 + taken_pct / 100</code>. Every other Element meets 0% resistance. Bosses and Uniques inherit their Species profile.`),
     block('What each Element leaves behind', table(['Element', 'Its mark'], E.elements.order.map((e: string) => [
-      esc(e), esc(E.elements.status_of?.[e]?.name || E.elements.status_of?.[e] || '—'),
+      esc(e), esc((E.elements.status_of as Record<string, { name?: string }>)?.[e]?.name || (E.elements.status_of as Record<string, { name?: string }>)?.[e] || '—'),
     ])), '<code>status outcome = configured status effect</code>; resistance is applied to the Element damage before its status roll.'),
   ],
 });

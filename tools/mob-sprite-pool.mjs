@@ -9,11 +9,12 @@ const data = JSON.parse(readFileSync(join(root, 'tools/data/engine.json'), 'utf8
 const races = new Map(data.mob.species.map(({ id, race }) => [id, race]));
 const readJson = path => JSON.parse(readFileSync(path, 'utf8'));
 const directories = path => readdirSync(path, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
-const result = { player: active(join(root, 'game/public/combat/arpg/player/pawn')), species: {}, variants: {} };
+const player = join(root, 'game/public/combat/arpg/player/pawn');
+const playerVersion = readJson(join(player, 'default/version.json')).version;
+if (typeof playerVersion !== 'string' || !/^v[1-9]\d*$/.test(playerVersion)) throw new Error(`Invalid version at ${player}`);
+const result = { player: active(player, playerVersion), species: {}, variants: {} };
 
-function active(path) {
-  const { version } = readJson(join(path, 'default/version.json'));
-  if (typeof version !== 'string' || !/^v[1-9]\d*$/.test(version)) throw new Error(`Invalid version at ${path}`);
+function active(path, version = 'master-version') {
   const dir = join(path, version);
   const metadata = readJson(join(dir, 'meta.json'));
   if (!existsSync(join(dir, 'atlas.png'))) throw new Error(`Missing atlas at ${dir}`);

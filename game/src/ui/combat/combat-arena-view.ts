@@ -2,6 +2,7 @@ import type { CombatArena, CombatArenaAction, CombatArenaActor, CombatArenaFrame
 import type { FxEvent, GameState } from '@sim/core/types';
 import type { ArenaDirection, ArenaSpriteSheet } from './arena/arena-art';
 import { sm } from '../../engine/client';
+import { clamp } from '../../../../engine/index.ts';
 
 import { ARENA_DIRECTIONS, ARENA_FACING_HYSTERESIS, arenaFacingIndex, projectArenaPoint, projectArenaVector, arenaScreenAngle, arenaScreenAngleFor } from '../../presentation/arena-camera';
 /** Fixed-reference projection: these helpers delegate to presentation/arena-camera and stay
@@ -19,7 +20,7 @@ const FALLBACK_IMPACT_MS = 340;
 const CONTACT_HOLD_MS = 90;
 const DIRECTION_HYSTERESIS = ARENA_FACING_HYSTERESIS;
 const directions = ARENA_DIRECTIONS;
-const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+const clamp01 = (value: number) => clamp(value, 0, 1);
 const msToUs = (ms: number, unitsPerSec: number) => ms * unitsPerSec / 1000;
 
 export function arenaFacingSector(facing: number, current?: ArenaDirection, hysteresis = DIRECTION_HYSTERESIS): ArenaDirection {

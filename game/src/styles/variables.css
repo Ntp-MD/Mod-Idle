@@ -19,6 +19,21 @@
 
     --glass: rgba(17, 22, 30, 0.74);
     --edge: rgba(255, 255, 255, 0.1);
+    --black: #000;
+    --scrim-30: rgba(0, 0, 0, 0.3);
+    --scrim-45: rgba(0, 0, 0, 0.45);
+    --scrim-50: rgba(0, 0, 0, 0.5);
+    --scrim-60: rgba(0, 0, 0, 0.6);
+    --scrim-70: rgba(0, 0, 0, 0.7);
+    --scrim-80: rgba(0, 0, 0, 0.8);
+    --scrim-85: rgba(0, 0, 0, 0.85);
+    --scrim-90: rgba(0, 0, 0, 0.9);
+    --scrim-95: rgba(0, 0, 0, 0.95);
+    --sheen-08: rgba(255, 255, 255, 0.08);
+    --sheen-09: rgba(255, 255, 255, 0.09);
+    --sheen-16: rgba(255, 255, 255, 0.16);
+    --sheen-18: rgba(255, 255, 255, 0.18);
+    --vfx-core: #fff1ca;
     --gold: #e8c169;
 
     --hud-face: linear-gradient(180deg, rgba(23, 29, 40, 0.88), rgba(11, 15, 21, 0.94));

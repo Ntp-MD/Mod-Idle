@@ -56,9 +56,9 @@ Re-read them after context compaction. Do not announce any mode.
 
 Gameplay numbers live in data JSON, formulas in `engine/`; do not duplicate either in the client. New game-content filenames use lowercase hyphens. `skill.md`, `skills.md`, `SKILL.md` and `.agents/skills/` are reserved for agent skills, not game content. Gate output is the run record; do not create transcript files.
 
-Art guides, sources and review candidates live in topic folders under [docs/](docs/README.md): [vfx-skill](docs/vfx-skill/), [character](docs/character/pawn-study/README.md) and [map](docs/map/README.md). Read the topic folder and relevant guide before art work; follow that topic's existing source/output folders. Approved runtime assets keep their established game paths.
+Art guides, sources and review candidates live in topic folders under [docs/](docs/README.md): [VFX packs](docs/external-packs.md), [character](docs/character/pawn-study/README.md) and [map](docs/map/README.md). Read the topic folder and relevant guide before art work; follow that topic's existing source/output folders. Approved runtime assets keep their established game paths.
 
-VFX component authoring follows the [single source shelf](docs/vfx-skill/component-vfx/outputs/README.md). Runtime uses [flat skill folders](game/public/fx/skill-pool/README.md), with no delivery subfolders or pointer files. Update named assets and recipes in place; do not create numbered source folders, filename revisions or new runtime `vN` folders for source-art updates. Git owns history; technical QA does not grant human visual approval.
+Skill VFX sourcing, licensing and the rebuild pipeline live in [docs/external-packs.md](docs/external-packs.md). Runtime uses flat skill folders `game/public/fx/skill-pool/<group>/<skill>/`, with no delivery subfolders or pointer files. Update named assets and recipes in place; do not create numbered source folders, filename revisions or new runtime `vN` folders for source-art updates. Git owns history; technical QA does not grant human visual approval.
 
 ## Answers & citations
 
@@ -96,8 +96,8 @@ VFX component authoring follows the [single source shelf](docs/vfx-skill/compone
 
 ## Plan files
 
-- Every requested plan file is HTML in `docs/plan/`, English only.
-- Each heading and requirement is a checklist item: `- [ ]` open, `- [x]` done; render them as real `<input type="checkbox">` in the page.
+- Every requested plan file is Markdown in `docs/plan/`, English only.
+- Each heading and requirement is a checklist item: `- [ ]` open, `- [x]` done.
 - When an item finishes, edit the file to check it and immediately continue with the next unchecked item in the same turn. Do not stop to report between items.
 - Each plan keeps one resume marker in its meta block: `<p id="plan-current" class="meta">Current: <item-id></p>`. Update it when an item starts. After compaction, read the marker and continue from it, not from the top.
 - Continuous execution: with an open plan, keep working until every checkbox is checked or a stop condition fires. Do not end a turn with a progress summary.

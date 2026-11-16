@@ -27,7 +27,7 @@
       {
         "id": "sheet-magic-slash",
         "role": "upright",
-        "src": "/fx/skill-pool/attack-phy/attack-double-strike/VFX_SpriteSheet_9x9_210818.png",
+        "src": "/fx/skill-pool/attack-phy/attack-double-strike/sheet-magic-slash.png",
         "frame": {
           "width": 256,
           "height": 256,

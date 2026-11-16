@@ -12,7 +12,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-explosion-one",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-fireball/VFX_SpriteSheet_8x8_145256.png",
+          "src": "/fx/skill-pool/attack-fire/attack-fireball/sheet-explosion-one.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -163,7 +163,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-meteor-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-meteor/Effect_02_8x6-48.png",
+          "src": "/fx/skill-pool/attack-fire/attack-meteor/creepy-meteor-burst.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -398,7 +398,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-04",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/fx_lightning_gg_a.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-chain-lightning/bolt-fx-lightning-04.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -548,7 +548,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-01",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/fx_lightning_cc.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-strike/bolt-fx-lightning-01.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1099,7 +1099,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-meteor-burst",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/Effect_02_8x6-48.png",
+          "src": "/fx/skill-pool/attack-phy/attack-ground-slam/creepy-meteor-burst.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1425,7 +1425,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-magic-hit",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/VFX_SpriteSheet_9x9_212412.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/sheet-magic-hit.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1457,7 +1457,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-piercing-shot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1532,7 +1532,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-arrow-shower/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1607,7 +1607,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-headshot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-headshot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -1724,7 +1724,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-shatter-ring",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-cold/attack-shatter/Effect_05_8x8-64.png",
+          "src": "/fx/skill-pool/attack-cold/attack-shatter/creepy-shatter-ring.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3585,7 +3585,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-split-shot/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-split-shot/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3660,7 +3660,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "gaph-arrow",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/Arrow.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strafe/gaph-arrow.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3703,7 +3703,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "sheet-magic-slash",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-phy/attack-double-strike/VFX_SpriteSheet_9x9_210818.png",
+          "src": "/fx/skill-pool/attack-phy/attack-double-strike/sheet-magic-slash.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3819,7 +3819,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "creepy-nova",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/Effect_08_8x4-32.png",
+          "src": "/fx/skill-pool/attack-fire/attack-cinder-nova/creepy-nova.png",
           "frame": {
             "width": 256,
             "height": 256,
@@ -3895,7 +3895,7 @@ export const POOL_VERSIONS: Record<string, VfxVersion[]> = {
         {
           "id": "bolt-fx-lightning-12",
           "role": "upright",
-          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/fx_lightning_oo.png",
+          "src": "/fx/skill-pool/attack-lightning/attack-thunder-storm/bolt-fx-lightning-12.png",
           "frame": {
             "width": 256,
             "height": 256,
