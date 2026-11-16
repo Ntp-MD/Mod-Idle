@@ -1,0 +1,3 @@
+# Generated JSON is compared byte-for-byte by its generator (tools/mob-sprite-pool.mjs --check).
+# Keep LF on every platform so a Windows checkout does not read a false "stale" registry.
+*.generated.json text eol=lf
