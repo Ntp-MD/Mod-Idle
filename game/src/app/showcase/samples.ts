@@ -4,7 +4,8 @@ export const SHOWCASE_SAMPLES = ['combat-field', 'magic-aoe', 'build-workbench',
   'craft-stash', 'combat-fx', 'story-camp-warning', 'story-cache-choices', 'story-cache-working',
   'story-cache-bagfull', 'story-cache-results', 'story-delivery-choices', 'story-courier-unaccepted',
   'story-courier-destination', 'story-market-promotion', 'story-forge-ready', 'story-forge-shortage',
-  'story-road-result', 'story-site-result', 'story-dungeon-result', 'story-read-only'] as const;
+  'story-road-result', 'story-site-result', 'story-dungeon-result', 'story-read-only',
+  'vfx-charge-gather', 'vfx-motion-trail', 'vfx-contact-flash', 'vfx-shield-ripple', 'vfx-body-coating'] as const;
 
 export type ShowcaseSampleId = (typeof SHOWCASE_SAMPLES)[number];
 export const DEFAULT_SHOWCASE_SAMPLE: ShowcaseSampleId = 'combat-field';
@@ -39,7 +40,22 @@ export const SHOWCASE_SAMPLE_LABELS: Record<ShowcaseSampleId, string> = {
   'story-site-result': 'Story: Site result',
   'story-dungeon-result': 'Story: Dungeon result',
   'story-read-only': 'Story: Read-only',
+  'vfx-charge-gather': '3D VFX: charge gather',
+  'vfx-motion-trail': '3D VFX: motion trail',
+  'vfx-contact-flash': '3D VFX: contact flash',
+  'vfx-shield-ripple': '3D VFX: shield ripple',
+  'vfx-body-coating': '3D VFX: coating source (mask pending)',
 };
+
+const VFX_COMPONENT_SKILLS: Record<string, string> = {
+  'charge-gather': 'attack.fireball', 'motion-trail': 'attack.fireball',
+  'contact-flash': 'attack.double_strike', 'shield-ripple': 'buff.iron_will', 'body-coating': 'buff.berserker',
+};
+
+export function showcaseVfxComponent(sample: string): string | undefined {
+  const id = sample.slice(4);
+  return sample.startsWith('vfx-') && VFX_COMPONENT_SKILLS[id] ? id : undefined;
+}
 
 export function isShowcaseSample(value: string | null): value is ShowcaseSampleId {
   return value !== null && (SHOWCASE_SAMPLES as readonly string[]).includes(value);
@@ -47,6 +63,8 @@ export function isShowcaseSample(value: string | null): value is ShowcaseSampleI
 
 /** Field samples change only the initial skill; the live arena owns rendering. */
 export function showcaseFieldSkill(sample: string): string | undefined {
+  const component = showcaseVfxComponent(sample);
+  if (component) return VFX_COMPONENT_SKILLS[component];
   if (sample === 'combat-field') return 'attack.fireball';
   if (sample === 'magic-aoe') return 'attack.meteor';
   return undefined;

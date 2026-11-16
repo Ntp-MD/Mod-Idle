@@ -1,16 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { SHOWCASE_SAMPLES, SHOWCASE_SAMPLE_LABELS, showcaseFieldSkill, showcaseView } from '../../src/app/showcase/samples';
+import { SHOWCASE_SAMPLES, SHOWCASE_SAMPLE_LABELS, showcaseFieldSkill, showcaseVfxComponent, showcaseView } from '../../src/app/showcase/samples';
 
 describe('showcase sample registry', () => {
   it('has one label per sample and no duplicate ids', () => {
-    expect(SHOWCASE_SAMPLES).toHaveLength(29);
-    expect(new Set(SHOWCASE_SAMPLES).size).toBe(29);
+    expect(SHOWCASE_SAMPLES).toHaveLength(34);
+    expect(new Set(SHOWCASE_SAMPLES).size).toBe(34);
     for (const id of SHOWCASE_SAMPLES) expect(SHOWCASE_SAMPLE_LABELS[id]).toBeTruthy();
   });
 
   it('keeps the field samples on their authored skill', () => {
     expect(showcaseFieldSkill('combat-field')).toBe('attack.fireball');
     expect(showcaseFieldSkill('magic-aoe')).toBe('attack.meteor');
+  });
+
+  it('routes the five procedural reviews through the existing field host', () => {
+    const expected = { 'charge-gather': 'attack.fireball', 'motion-trail': 'attack.fireball',
+      'contact-flash': 'attack.double_strike', 'shield-ripple': 'buff.iron_will', 'body-coating': 'buff.berserker' };
+    for (const [id, skill] of Object.entries(expected)) {
+      expect(showcaseVfxComponent(`vfx-${id}`)).toBe(id);
+      expect(showcaseView(`vfx-${id}`)).toEqual({ fieldSkill: skill });
+    }
+    expect(showcaseVfxComponent('vfx-unknown')).toBeUndefined();
   });
 
   it('keeps the panel samples on their existing hosts', () => {
