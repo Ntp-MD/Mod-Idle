@@ -27,4 +27,7 @@ archive/
 # Generated VFX review snapshots stay local; review live in playground.html
 docs/vfx-skill/component-vfx/evidence/captures/
 
+# Blender autosave backups
+*.blend1
+
 vibe_images/

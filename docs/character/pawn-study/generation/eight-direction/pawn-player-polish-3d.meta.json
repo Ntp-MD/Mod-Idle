@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "status": "review-candidate",
+  "pawnId": "player",
+  "name": "Player (polish 3D)",
+  "generator": "tools/pawn-player-polish-3d.py (Pillow procedural, no API key)",
+  "style": "smooth 3D-shaded colony pawn: directional key light, specular, rim light, ambient occlusion, soft ground shadow",
+  "directions": [
+    "south",
+    "south-east",
+    "east",
+    "north-east",
+    "north",
+    "north-west",
+    "west",
+    "south-west"
+  ],
+  "atlasLayout": "4x2 row-major: south, south-east, east, north-east, north, north-west, west, south-west",
+  "actualImage": {
+    "width": 1024,
+    "height": 512,
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "alpha": "transparent"
+  },
+  "anchor": {
+    "x": 128,
+    "y": 224
+  },
+  "animationKind": "static-8-view",
+  "note": "Review candidate only; game/ not modified. Install via build-study/integrate after sign-off."
+}
